@@ -1,0 +1,59 @@
+/* frontend/src/components/TransmogForm.css */
+.transmog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #3d3d3d; /* Темний фон форми */
+  border: 1px solid #555;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.transmog-form h2 {
+  text-align: center;
+  color: #ffcc00;
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.transmog-form input,
+.transmog-form select { /* Застосовуємо ці стилі до input та select */
+  padding: 12px;
+  border: 1px solid #666;
+  border-radius: 5px;
+  background-color: #2b2b2b; /* Темне поле вводу */
+  color: #e0e0e0;
+  font-size: 1em;
+  /* Додаткові стилі для select */
+  appearance: none; /* Прибираємо стандартні стрілки в браузерах */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23e0e0e0" d="M8 12L2 6h12z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+  cursor: pointer;
+}
+
+.transmog-form input::placeholder {
+  color: #888;
+}
+
+.transmog-form button {
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.transmog-form button:hover {
+  background-color: #0056b3;
+}

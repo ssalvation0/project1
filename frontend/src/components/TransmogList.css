@@ -1,0 +1,14 @@
+.transmog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding-top: 20px;
+}
+
+.transmog-list p {
+  font-size: 1.2em;
+  color: #ccc;
+}
