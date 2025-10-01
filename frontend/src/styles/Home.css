@@ -1,0 +1,49 @@
+.home-bg {
+  background: #181818;
+  min-height: 100vh;
+  color: #e5d3b3;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-header {
+  text-align: center;
+  padding: 80px 30px 60px 30px;
+}
+
+.home-header h1 {
+  font-size: 3rem;
+  letter-spacing: 0.18em;
+  color: #e5d3b3;
+  margin-bottom: 18px;
+  font-family: 'Cinzel', serif;
+}
+
+.home-header p {
+  font-size: 1.2rem;
+  color: #bba77a;
+  margin-bottom: 32px;
+  letter-spacing: 0.04em;
+}
+
+.home-btn {
+  display: inline-block;
+  background: #222;
+  color: #e5d3b3;
+  border: 2px solid #e5d3b3;
+  padding: 16px 44px;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  font-family: inherit;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  transition: background 0.2s;
+  margin-top: 10px;
+}
+
+.home-btn:hover {
+  background: #444;
+}
