@@ -24,7 +24,6 @@ const TransmogForm = ({ onAdd }) => {
         <form onSubmit={handleSubmit} className="transmog-form">
             <h2>Add New Transmog</h2>
             <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Item Name" required />
-            <input type="number" name="itemID" value={formData.itemID} onChange={handleChange} placeholder="Item ID" required />
 
             {}
             <select name="type" value={formData.type} onChange={handleChange} required>
