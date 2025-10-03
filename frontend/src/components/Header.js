@@ -1,19 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 
 const Header = () => {
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+      const handleScroll = () => {
+        if (window.scrollY > 100) {
+          setIsScrolled(true);
+        } else {
+          setIsScrolled(false);
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
-      <header className="header">
-        <h1>TransmogVault</h1>
-        <nav>
-          <ul className="nav-links">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/catalog">Catalog</Link></li>
-          </ul>
-        </nav>
-      </header>
+      <>
+        <div className={`title ${isScrolled ? 'scrolled' : ''}`}>
+          <h1>TransmogVault</h1>
+        </div>
+        {isScrolled && (
+        <header className="header">
+        </header>
+      )}
+      </>
     );
   };
     

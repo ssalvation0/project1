@@ -1,16 +1,20 @@
-.home-bg {
+body, .home-bg {
   background: #181818;
   min-height: 100vh;
-  color: #e5d3b3;
-  font-family: 'Cinzel', serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.home-header {
+.home-bg {
+  color: #e5d3b3;
+  font-family: 'Cinzel', serif;
+}
+
+.center-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
   text-align: center;
-  padding: 80px 30px 60px 30px;
 }
 
 .home-header h1 {
@@ -28,22 +32,82 @@
   letter-spacing: 0.04em;
 }
 
-.home-btn {
-  display: inline-block;
-  background: #222;
-  color: #e5d3b3;
-  border: 2px solid #e5d3b3;
-  padding: 16px 44px;
-  border-radius: 10px;
-  font-size: 1.15rem;
-  font-family: inherit;
-  text-decoration: none;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  transition: background 0.2s;
-  margin-top: 10px;
+.class-cards-grid.three-rows {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 1400px;
+  margin: 60px auto 40px auto;
+  justify-content: center;
 }
 
-.home-btn:hover {
-  background: #444;
+.class-card,
+.class-card.view-all,
+.class-card.random-card {
+  width: 260px;
+  height: 320px;
+  margin: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0;
+  box-shadow: 0 0 24px #000a;
+}
+
+.class-card {
+  border: 2.5px solid #e5d3b3;
+  background: #181818;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.class-card:hover {
+  background: #222;
+  transform: translateY(-6px) scale(1.04);
+}
+
+.class-card.view-all,
+.class-card.random-card {
+  border: 2.5px dashed #e5d3b3;
+  background: #222;
+  color: #bba77a;
+}
+
+.class-card.view-all a,
+.class-card.random-card button {
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: inherit;
+  background: none;
+  border: none;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+}
+
+.class-card-text {
+  width: 100%;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #e5d3b3;
+  letter-spacing: 0.08em;
+  margin-bottom: 18px;
+  background: rgba(24,24,24,0.7);
+  padding: 8px 0 0 0;
+  border-radius: 0;
 }

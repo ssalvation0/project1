@@ -1,0 +1,24 @@
+.site-footer {
+  width: 100%;
+  text-align: center;
+  padding: 24px 0 18px 0;
+  background: #181818;
+  color: #e5d3b3;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  border-top: 1px solid #222;
+}
+
+.site-footer a {
+  color: #e5d3b3;
+  text-decoration: underline;
+  margin: 0 8px;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-footer a:hover {
+  color: #bba77a;
+}
