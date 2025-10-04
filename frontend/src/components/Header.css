@@ -1,23 +1,26 @@
+:root {
+  --scroll-progress: 0;
+}
 
 .title {
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 50%;
+  top: calc(50% - var(--scroll-progress) * 50%);
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3rem;
+  font-size: calc(3rem - var(--scroll-progress) * 1.2rem);
   font-family: 'Cinzel', serif;
   color: #e5d3b3;
-  transition: all 0.3s ease-in-out;
+  
 }
 
 .title.scrolled {
   position: fixed;
   top: 0;
-  left: 635px;
-  transform: translateX(0);
+  left: 50%;
+  transform: translate(-50%, 0);
   font-size: 1.8rem;
   padding: 10px 20px;
   background: #181818;
@@ -27,10 +30,9 @@
 
 .header {
   position: fixed;
-  top: 50px;
+  top: calc(50px + var(--scroll-progress) * 50px);
   width: 100%;
   background: #181818;
   color: #fff;
   z-index: 999;
-  transition: all 0.3s ease-in-out;
 }

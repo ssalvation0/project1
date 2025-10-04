@@ -15,6 +15,7 @@ body, .home-bg {
   justify-content: center;
   min-height: 60vh;
   text-align: center;
+  position: relative; /* added: щоб page-arrow позиціювався відносно цього блоку */
 }
 
 .home-header h1 {
@@ -35,69 +36,130 @@ body, .home-bg {
 .class-cards-grid.three-rows {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 6px;
+  gap: 8px;
   max-width: 1400px;
-  margin: 60px auto 40px auto;
+  /* починаємо трохи нижче видимої частини екрану — підкоригуйте 120px при потребі */
+  margin: max(48px, calc(100vh - 120px)) auto 40px auto;
   justify-content: center;
 }
 
-.class-card,
-.class-card.view-all,
-.class-card.random-card {
+/* --- ОСНОВНІ СТИЛІ ДЛЯ ВСІХ КАРТОК --- */
+.class-card {
   width: 260px;
   height: 320px;
-  margin: 2px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  padding: 0;
   position: relative;
   background-size: cover;
   background-position: center;
   border-radius: 0;
   box-shadow: 0 0 24px #000a;
+  cursor: pointer;
+  transform-origin: center bottom;
+  transform: translateY(0) scale(1);
+  transition: transform 0.28s cubic-bezier(.22,.9,.37,1), box-shadow 0.28s cubic-bezier(.22,.9,.37,1);
+  will-change: transform, box-shadow;
+
+  /* допоміжні властивості для плавного та коректного масштабування */
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
+/* --- СТИЛІ ДЛЯ РІЗНИХ ТИПІВ КАРТОК --- */
 .class-card {
   border: 2.5px solid #e5d3b3;
-  background: #181818;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.class-card:hover {
-  background: #222;
-  transform: translateY(-6px) scale(1.04);
+  background-color: #181818;
 }
 
 .class-card.view-all,
 .class-card.random-card {
   border: 2.5px dashed #e5d3b3;
-  background: #222;
+  background-color: #222;
   color: #bba77a;
+  justify-content: flex-end;
+  align-items: stretch;
 }
 
-.class-card.view-all a,
-.class-card.random-card button {
-  font-family: 'Cinzel', serif;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: inherit;
-  background: none;
-  border: none;
+/* parent тепер відповідає тільки за підйом (translateY), масштаб виконує inner */
+.class-card {
+  /* прибираю scale з дефолтного hover (залишаю тільки підйом) */
+  transition: transform 0.28s cubic-bezier(.22,.9,.37,1), box-shadow 0.28s cubic-bezier(.22,.9,.37,1);
+}
+
+/* внутрішня обгортка — тут scale/анімація появи */
+.class-card-inner {
   width: 100%;
-  height: 60px;
+  height: 100%;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  text-decoration: none;
-  cursor: pointer;
-  letter-spacing: 0.08em;
-  margin-bottom: 18px;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  transform-origin: center center;
+  transition: transform 0.28s cubic-bezier(.22,.9,.37,1), opacity 0.28s ease;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
+/* hover: батько піднімається, inner масштабується */
+.class-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 12px 32px #000d;
+}
+.class-card:hover .class-card-inner {
+  transform: translateY(0); /* скидаємо будь-який scale */
+}
+
+/* --- АНІМАЦІЯ ПОЯВИ --- */
+/* Видаляємо transform-анімацію з батька — вона заважала hover-scale */
+.animated-card {
+  /* батько завжди видимий, а анімація появи працює тільки на inner */
+  opacity: 1;
+  will-change: opacity;
+}
+
+/* батько: лише opacity анімація (без transform) */
+.class-card.animated-card {
+  opacity: 0;
+  animation-name: cardFadeInParent;
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(.22,.9,.37,1);
+  animation-fill-mode: both;
+  will-change: opacity;
+}
+
+@keyframes cardFadeInParent {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* inner залишається з translateY + opacity анімацією (stagger через inline delay) */
+.animated-card .class-card-inner {
+  opacity: 0;
+  transform: translateY(24px);
+  animation-name: cardFadeInInner;
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(.22,.9,.37,1);
+  animation-fill-mode: both;
+}
+
+@keyframes cardFadeInInner {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* загальне hover-правило для трансформу/тіні */
+.class-card:hover {
+  transform: translateY(-8px) scale(1.05) !important;
+  box-shadow: 0 12px 32px #000d !important;
+  -webkit-transform: translateZ(0) translateY(-8px) scale(1.05) !important;
+  opacity: 1 !important;
+}
+
+/* --- ТЕКСТ НА КАРТЦІ --- */
 .class-card-text {
   width: 100%;
   text-align: center;
@@ -107,7 +169,111 @@ body, .home-bg {
   color: #e5d3b3;
   letter-spacing: 0.08em;
   margin-bottom: 18px;
-  background: rgba(24,24,24,0.7);
-  padding: 8px 0 0 0;
+  background: rgba(24, 24, 24, 0.7);
+  padding: 8px 0;
   border-radius: 0;
 }
+
+.class-card.view-all a,
+.class-card.random-card button {
+  display: block;
+  width: 100%;
+  padding: 16px 0 22px;
+  margin-top: auto;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: inherit;
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+}
+
+/* --- HEADER + СТРІЛКА ВНИЗ --- */
+.home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.home-header h1 {
+  margin: 0;
+}
+
+.home-header p {
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* індикатор скролу / стрілка */
+.home-header .scroll-indicator {
+  display: none;
+}
+
+/* page-arrow — фіксована під заголовком у центрі .center-logo */
+.page-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  z-index: 1100;
+  pointer-events: auto; /* тепер можна клікати */
+  cursor: pointer;
+}
+.page-arrow:focus { outline: 2px solid rgba(229,211,179,0.25); }
+
+/* візуал стрілки (залишаю без змін) */
+.page-arrow .scroll-indicator {
+  display: block;
+  width: 34px;
+  height: 48px;
+  position: relative;
+}
+
+.page-arrow .scroll-indicator::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-right: 3px solid #e5d3b3;
+  border-bottom: 3px solid #e5d3b3;
+  transform: translateX(-50%) rotate(45deg);
+  transform-origin: center;
+  opacity: 0;
+  animation: scrollArrow 1.4s cubic-bezier(.22,.9,.37,1) infinite;
+}
+
+@keyframes scrollArrow {
+  0%   { transform: translate(-50%, -2px) rotate(45deg); opacity: 0; }
+  12%  { opacity: 1; }
+  48%  { transform: translate(-50%, 12px) rotate(45deg); opacity: 1; }
+  70%  { opacity: 0; transform: translate(-50%, 18px) rotate(45deg); }
+  100% { opacity: 0; transform: translate(-50%, 18px) rotate(45deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-header .scroll-indicator::after {
+    animation: none;
+    opacity: 1;
+  }
+
+  .page-arrow .scroll-indicator::after {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* під час анімації виглушаємо hover/pointer, щоб елементи не реагували доки не з'являться */
+.class-cards-grid.animating .class-card {
+  pointer-events: none;
+  /* додатково можна приглушити візуальний фокус, якщо треба */
+  user-select: none;
+}
+
