@@ -1,38 +1,127 @@
 :root {
   --scroll-progress: 0;
+  --title-target: -1px;
+  --header-enter-multiplier: 0.9;
+  --title-top: calc(50vh - 24px); /* зменшити 24px → заголовок буде ще вище */
+
+  /* кінцева позиція хедера в vh — регулюйте (менше → вищий фінал) */
+  --header-center-vh: 6vh;
+  /* автоматичний зсув між центром viewport і центром хедера (в vh) */
+  --title-shift: calc(50vh - var(--header-center-vh));
 }
 
+/* титул фіксований і плавно змінює позицію/масштаб по --scroll-progress */
 .title {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: calc(50% - var(--scroll-progress) * 50%);
+  position: fixed;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: calc(3rem - var(--scroll-progress) * 1.2rem);
+  top: 50%;
+  /* translateY керується --scroll-progress: при 0 — центр, при 1 — піднято на --title-shift (враховує vh) */
+  transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(1.12 - var(--scroll-progress) * 0.92));
+  transform-origin: center center;
+  transition: transform 280ms cubic-bezier(.22,.9,.37,1);
+  will-change: transform;
+  z-index: 2000;
+
+  /* базовий розмір / рендер */
+  font-size: 2.6rem;
   font-family: 'Cinzel', serif;
   color: #e5d3b3;
-  
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  backface-visibility: hidden;
 }
 
+/* явне правило для лого — обмежуємо розмір і центр */
+.title img,
+.title .logo {
+  display: block;
+  width: auto;
+  max-width: 60vw; /* масштаб під екран */
+  /* збільшено стартовий розмір та адаптивність */
+  max-width: min(800px, 80vw);
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto; /* додаткове вирівнювання */
+  pointer-events: none;
+}
+
+/* трохи менше лого на вузьких екранах */
+@media (max-width: 900px) {
+  .title img,
+  .title .logo {
+    width: 160px;
+  }
+}
+
+/* h1 всередині — без змін layout при масштабі */
+.title h1 {
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* візуальні корекції при повному скролі (не змінюють позицію) */
 .title.scrolled {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  font-size: 1.8rem;
-  padding: 10px 20px;
-  background: #181818;
-  color: #fff;
-  z-index: 1000;
+  background: transparent;
+  padding: 0 12px;
+  color: #e5d3b3;
 }
 
 .header {
   position: fixed;
-  top: calc(50px + var(--scroll-progress) * 50px);
+  top: 44px;
   width: 100%;
-  background: #181818;
-  color: #fff;
-  z-index: 999;
+  background-color: #e5d3b3;
+  color: #121212;
+  z-index: 1099;
+  height: 44px;
+  transition: height 200ms ease, top 200ms ease;
+}
+
+/* смуга-хедер: рух і opacity керуються --scroll-progress */
+.header-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 110px;
+  background-color: #2c2c2c;
+  z-index: 1999;
+  will-change: transform, opacity;
+  transition: transform 320ms cubic-bezier(.22,.9,.37,1), opacity 240ms linear;
+  transform: translateY(clamp(-100%, calc(-100% + var(--scroll-progress) * 100% * var(--header-enter-multiplier)), 0%));
+  opacity: calc(min(1, var(--scroll-progress) * 1.05));
+}
+
+.logo {
+  width: auto; /* дозволяє масштабуванню через .title transform */
+  height: auto;
+  object-fit: contain;
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* логотип як фон всередині заголовка — рухається разом з .title */
+.logo-title {
+  /* більший початковий розмір логотипа */
+  width: 4000px;
+  height: auto;
+  aspect-ratio: 420 / 96;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  margin: 0;
+  text-indent: -9999px;
+  overflow: hidden;
+  display: block;
+  pointer-events: none;
+}
+
+/* адаптивно на маленьких екранах */
+@media (max-width: 900px) {
+  .logo-title { width: 240px; aspect-ratio: 240 / 55; }
 }

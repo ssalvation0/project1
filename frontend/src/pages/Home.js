@@ -121,37 +121,15 @@ function Home() {
     navigate(`/transmog/${randomId}`);
   };
 
-  const handleArrowClick = () => {
-    const el = centerRef.current;
-    if (!el) return;
-
-    // Спочатку відрендерити картки (щоб вони мали layout), потім прокрутити до контейнера карток
-    setShowCards(true);
-    setTimeout(() => {
-      const targetTop = cardsRef.current
-        ? cardsRef.current.offsetTop
-        : el.offsetTop + el.offsetHeight;
-      window.scrollTo({ top: targetTop, behavior: 'smooth' });
-      console.debug('Arrow clicked, scrolling to:', targetTop);
-    }, 60);
-  };
-
   return (
     <div className="home-bg">
       <div className="center-logo" ref={centerRef}>
         <div className="home-header">
-          {/* тут ваш заголовок/підзаголовок */}
-        </div>
-
-        {/* стрілка під заголовком (показується на головній сторінці) */}
-        <div className="page-arrow" aria-hidden="true" onClick={handleArrowClick} role="button" tabIndex={0}>
-          <span className="scroll-indicator"></span>
+          {/* заголовок */}
         </div>
       </div>
 
-      {/* spacer для коротких сторінок */}
-      {spacerHeight > 0 && <div style={{ height: spacerHeight }} aria-hidden="true" />}
-
+      {/* spacer removed to avoid extra empty space */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
           {warcraftClasses.map((cls, idx) => (

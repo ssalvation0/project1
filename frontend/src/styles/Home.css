@@ -13,33 +13,21 @@ body, .home-bg {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  /* менша висота, щоб грід опинився ближче до кінця екрану */
+  min-height: calc(100vh - 140px);
   text-align: center;
   position: relative; /* added: щоб page-arrow позиціювався відносно цього блоку */
 }
 
-.home-header h1 {
-  font-size: 3rem;
-  letter-spacing: 0.18em;
-  color: #e5d3b3;
-  margin-bottom: 18px;
-  font-family: 'Cinzel', serif;
-}
 
-.home-header p {
-  font-size: 1.2rem;
-  color: #bba77a;
-  margin-bottom: 32px;
-  letter-spacing: 0.04em;
-}
 
 .class-cards-grid.three-rows {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   max-width: 1400px;
-  /* починаємо трохи нижче видимої частини екрану — підкоригуйте 120px при потребі */
-  margin: max(48px, calc(100vh - 120px)) auto 40px auto;
+  /* починається ближче до кінця viewport, але не так далеко */
+  margin: calc(40vh) auto 40px auto; /* зменшити 60vh → 50vh/40vh щоб підняти ще більше */
   justify-content: center;
 }
 
@@ -192,88 +180,18 @@ body, .home-bg {
   letter-spacing: 0.08em;
 }
 
-/* --- HEADER + СТРІЛКА ВНИЗ --- */
-.home-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
 
-.home-header h1 {
-  margin: 0;
-}
-
-.home-header p {
-  margin: 0;
-  opacity: 0.85;
-}
-
-/* індикатор скролу / стрілка */
-.home-header .scroll-indicator {
-  display: none;
-}
-
-/* page-arrow — фіксована під заголовком у центрі .center-logo */
-.page-arrow {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 16px;
-  z-index: 1100;
-  pointer-events: auto; /* тепер можна клікати */
-  cursor: pointer;
-}
-.page-arrow:focus { outline: 2px solid rgba(229,211,179,0.25); }
-
-/* візуал стрілки (залишаю без змін) */
-.page-arrow .scroll-indicator {
-  display: block;
-  width: 34px;
-  height: 48px;
-  position: relative;
-}
-
-.page-arrow .scroll-indicator::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border-right: 3px solid #e5d3b3;
-  border-bottom: 3px solid #e5d3b3;
-  transform: translateX(-50%) rotate(45deg);
-  transform-origin: center;
-  opacity: 0;
-  animation: scrollArrow 1.4s cubic-bezier(.22,.9,.37,1) infinite;
-}
-
-@keyframes scrollArrow {
-  0%   { transform: translate(-50%, -2px) rotate(45deg); opacity: 0; }
-  12%  { opacity: 1; }
-  48%  { transform: translate(-50%, 12px) rotate(45deg); opacity: 1; }
-  70%  { opacity: 0; transform: translate(-50%, 18px) rotate(45deg); }
-  100% { opacity: 0; transform: translate(-50%, 18px) rotate(45deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-header .scroll-indicator::after {
-    animation: none;
-    opacity: 1;
-  }
-
-  .page-arrow .scroll-indicator::after {
-    animation: none;
-    opacity: 1;
-  }
-}
 
 /* під час анімації виглушаємо hover/pointer, щоб елементи не реагували доки не з'являться */
 .class-cards-grid.animating .class-card {
   pointer-events: none;
   /* додатково можна приглушити візуальний фокус, якщо треба */
   user-select: none;
+}
+
+/* невелика корекція для маленьких екранів */
+@media (max-height: 800px), (max-width: 900px) {
+  .center-logo { min-height: calc(100vh - 110px); }
+  .class-cards-grid.three-rows { margin: calc(100vh - 24px) auto 32px auto; }
 }
 
