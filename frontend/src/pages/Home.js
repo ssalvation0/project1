@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 
+// автоматично завантажуємо всі зображення з src/images
+const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
+const imagesMap = imagesContext.keys().reduce((map, filePath) => {
+  const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, ''); // наприклад "warrior"
+  map[name] = imagesContext(filePath).default || imagesContext(filePath);
+  return map;
+}, {});
+
 const warcraftClasses = [
   'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Death Knight', 'Shaman',
   'Mage', 'Warlock', 'Monk', 'Druid', 'Demon Hunter', 'Evoker'
@@ -72,50 +80,6 @@ function Home() {
     };
   }, [spacerHeight]);
 
-  // Блокуємо hover/pointer під час анімації появи карток
-  useEffect(() => {
-    if (!showCards) return;
-    const container = cardsRef.current;
-    if (!container) return;
-
-    container.classList.add('animating'); // додає CSS-клас, який вимикає pointer-events
-
-    const inners = Array.from(container.querySelectorAll('.class-card-inner'));
-    let remaining = inners.length;
-    const listeners = new Map();
-
-    const onEnd = (ev) => {
-      const el = ev.currentTarget;
-      el.removeEventListener('animationend', listeners.get(el));
-      listeners.delete(el);
-      remaining -= 1;
-      if (remaining <= 0) {
-        container.classList.remove('animating');
-        clearTimeout(fallback);
-      }
-    };
-
-    inners.forEach(el => {
-      const fn = onEnd.bind(null);
-      listeners.set(el, fn);
-      el.addEventListener('animationend', fn);
-    });
-
-    // fallback: якщо щось пішло не так, зняти блокування через 1.5s
-    const fallback = setTimeout(() => {
-      container.classList.remove('animating');
-      listeners.forEach((fn, el) => el.removeEventListener('animationend', fn));
-      listeners.clear();
-    }, 1500);
-
-    return () => {
-      container.classList.remove('animating');
-      listeners.forEach((fn, el) => el.removeEventListener('animationend', fn));
-      listeners.clear();
-      clearTimeout(fallback);
-    };
-  }, [showCards]);
-
   const handleRandomTransmog = () => {
     const randomId = Math.floor(Math.random() * 13) + 1;
     navigate(`/transmog/${randomId}`);
@@ -132,30 +96,41 @@ function Home() {
       {/* spacer removed to avoid extra empty space */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
-          {warcraftClasses.map((cls, idx) => (
-            <div
-              className="class-card animated-card"
-              key={cls}
-              style={{
-                backgroundImage: `url(/images/${cls.toLowerCase().replace(/ /g, '-')}.jpg)`,
-                animationDelay: `${idx * 0.12}s`
-              }}
-            >
-              <div className="class-card-inner" style={{ animationDelay: `${idx * 0.12}s` }}>
+          {warcraftClasses.map((cls, idx) => {
+            const slug = cls.toLowerCase().replace(/ /g, '-');
+            const src = cls === 'Warrior'
+              ? (imagesMap['warrior'] || `${process.env.PUBLIC_URL}/images/warrior.jpg`)
+              : (imagesMap[slug] || `${process.env.PUBLIC_URL}/images/${slug}.jpg`);
+            return (
+              <div
+                className="class-card animated-card"
+                key={cls}
+                style={{
+                  backgroundImage: `url(${src})`,
+                  animationDelay: `${idx * 0.12}s`
+                }}
+                onAnimationEnd={(e) => {
+                  // Після завершення анімації видаляємо клас, щоб не конфліктувати з :hover
+                  e.currentTarget.classList.remove('animated-card');
+                }}
+              >
                 <div className="class-card-text">{cls}</div>
               </div>
-            </div>
-          ))}
-          {/* також для view-all / random-card: */}
-          <div className="class-card view-all animated-card" style={{ animationDelay: `${warcraftClasses.length * 0.12}s` }}>
-            <div className="class-card-inner" style={{ animationDelay: `${warcraftClasses.length * 0.12}s` }}>
-              <a href="/catalog">Catalog</a>
-            </div>
+            );
+          })}
+          <div 
+            className="class-card view-all animated-card" 
+            style={{ animationDelay: `${warcraftClasses.length * 0.12}s` }}
+            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
+          >
+            <a href="/catalog">Catalog</a>
           </div>
-          <div className="class-card random-card animated-card" style={{ animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` }}>
-            <div className="class-card-inner" style={{ animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` }}>
-              <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>
-            </div>
+          <div 
+            className="class-card random-card animated-card" 
+            style={{ animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` }}
+            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
+          >
+            <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>
           </div>
         </div>
       )}

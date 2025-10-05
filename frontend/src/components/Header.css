@@ -71,7 +71,7 @@
 }
 
 .header {
-  position: fixed;
+  position: relative;
   top: 44px;
   width: 100%;
   background-color: #e5d3b3;
@@ -119,9 +119,40 @@
   overflow: hidden;
   display: block;
   pointer-events: none;
+  transform: translateY(50px);
 }
 
 /* адаптивно на маленьких екранах */
 @media (max-width: 900px) {
   .logo-title { width: 240px; aspect-ratio: 240 / 55; }
+}
+
+/* Для великих екранів */
+@media (min-width: 901px) {
+  .logo-title {
+    position: static;        /* прибрали absolute */
+    top: auto;
+    left: auto;
+    transform: none;         /* без translate, центрує flex із .title */
+    width: 4000px; /* стабільний розмір без стрибків */
+    max-width: 100%;
+    aspect-ratio: 420 / 96;
+    margin: 0 auto;
+  }
+}
+
+/* Adaptation for smaller screens */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.5rem; /* Adjust font size for smaller screens */
+    transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(1 - var(--scroll-progress) * 0.8));
+    transition: transform 200ms cubic-bezier(.22,.9,.37,1); /* Adjust transition duration */
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.2rem; /* Further adjust font size for very small screens */
+    transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(0.9 - var(--scroll-progress) * 0.7));
+  }
 }
