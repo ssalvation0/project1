@@ -22,12 +22,10 @@ body, .home-bg {
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   max-width: 1400px;
-  margin: 40vh auto 40px auto;
+  margin: 40vh auto 80px auto; /* Збільшили нижній відступ */
   justify-content: center;
-  /* Додаємо overflow, щоб обрізати все, що виходить за межі сітки */
-  overflow: hidden;
-  /* Невеликий паддінг, щоб збільшені картки не обрізались по краях */
-  padding: 10px;
+  overflow: visible;
+  padding: 50px 30px; /* Збільшили padding, щоб збільшені картки не обрізались */
 }
 
 /* --- ОСНОВНІ СТИЛІ ДЛЯ ВСІХ КАРТОК --- */
@@ -36,7 +34,7 @@ body, .home-bg {
   width: 260px;
   height: 320px;
   position: relative;
-  /* overflow: hidden; -- ВИДАЛЕНО, щоб дозволити картці збільшуватись */
+  overflow: hidden; /* Повертаємо, щоб текст/кнопки всередині не виходили за межі */
   background-size: cover;
   background-position: center;
   border: 2.5px solid #e5d3b3;
@@ -53,6 +51,8 @@ body, .home-bg {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column; /* Додаємо, щоб вміст був вертикально */
+  padding: 20px; /* Додаємо внутрішній відступ */
 }
 
 /* Затемнення як псевдо-елемент */
@@ -86,15 +86,32 @@ body, .home-bg {
   line-height: 1.2;
   text-align: center;
   z-index: 3;
-  /* pointer-events: none; -- ВИДАЛЕНО, щоб картка отримувала подію hover */
   /* Фон тепер безпосередньо на цьому елементі */
   background: rgba(15,15,15,0.78);
   border-top: 1px solid rgba(229,211,179,0.08);
 }
 
+/* Стилі для посилань та кнопок всередині .class-card-text */
+.class-card-text a,
+.class-card-text button {
+  all: unset; /* Скидаємо всі стилі браузера */
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
+.class-card-text a:hover,
+.class-card-text button:hover {
+  opacity: 0.8;
+}
+
 /* Повноширинна смуга як псевдо-елемент - БІЛЬШЕ НЕ ПОТРІБНА */
 .class-card-text::before {
-  /* Цей блок можна видалити або залишити порожнім */
   content: none;
 }
 

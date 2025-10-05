@@ -1,24 +1,81 @@
-.site-footer {
+.footer {
+  position: relative;
+  bottom: 0;
   width: 100%;
+  background: linear-gradient(180deg, rgba(24,24,24,0.95) 0%, rgba(15,15,15,1) 100%);
+  border-top: 1px solid rgba(229,211,179,0.15);
+  padding: 24px 20px;
   text-align: center;
-  padding: 24px 0 18px 0;
-  background: #181818;
-  color: #e5d3b3;
-  font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
-  border-top: 1px solid #222;
+  z-index: 1000;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
 }
 
-.site-footer a {
-  color: #e5d3b3;
-  text-decoration: underline;
-  margin: 0 8px;
-  transition: color 0.2s;
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.footer-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #bba77a;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: color 0.25s ease, transform 0.2s ease;
+  position: relative;
 }
 
-.site-footer a:hover {
-  color: #bba77a;
+.footer-link::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5d3b3;
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(.22,.9,.37,1);
+}
+
+.footer-link:hover {
+  color: #e5d3b3;
+  transform: translateY(-2px);
+}
+
+.footer-link:hover::before {
+  transform: scaleX(1);
+}
+
+/* Іконки соцмереж (якщо додасте SVG/FontAwesome) */
+.footer-link svg,
+.footer-link i {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.footer-link:hover svg,
+.footer-link:hover i {
+  opacity: 1;
+}
+
+/* Адаптив для мобілки */
+@media (max-width: 600px) {
+  .footer-content {
+    gap: 20px;
+  }
+  
+  .footer-link {
+    font-size: 0.9rem;
+  }
 }

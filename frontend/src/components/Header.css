@@ -2,31 +2,35 @@
   --scroll-progress: 0;
   --title-target: -1px;
   --header-enter-multiplier: 0.9;
-  --title-top: calc(50vh - 24px); /* зменшити 24px → заголовок буде ще вище */
 
-  /* кінцева позиція хедера в vh — регулюйте (менше → вищий фінал) */
-  --header-center-vh: 6vh;
-  /* автоматичний зсув між центром viewport і центром хедера (в vh) */
+  /* Висота хедера — базове значення для розрахунків */
+  --header-height-vh: clamp(8vh, 12vh, 14vh);
+  
+  /* Кінцева позиція — точно в центрі хедера (половина висоти) */
+  --header-center-vh: calc(var(--header-height-vh) / 2);
+  
+  /* Автоматичний зсув — однаковий на всіх екранах */
   --title-shift: calc(50vh - var(--header-center-vh));
 }
 
-/* титул фіксований і плавно змінює позицію/масштаб по --scroll-progress */
+/* Титул фіксований і плавно змінює позицію/масштаб */
 .title {
   display: flex;
   justify-content: center;
   align-items: center;
   position: fixed;
   left: 50%;
-  top: 50%;
-  /* translateY керується --scroll-progress: при 0 — центр, при 1 — піднято на --title-shift (враховує vh) */
-  transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(1.12 - var(--scroll-progress) * 0.92));
+  top: 50vh;
+  
+  /* Універсальна формула трансформації */
+  transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) 
+             scale(calc(1.1 - var(--scroll-progress) * 0.85));
   transform-origin: center center;
   transition: transform 280ms cubic-bezier(.22,.9,.37,1);
   will-change: transform;
   z-index: 2000;
 
-  /* базовий розмір / рендер */
-  font-size: 2.6rem;
+  font-size: clamp(1.2rem, 2.6vw, 2.6rem);
   font-family: 'Cinzel', serif;
   color: #e5d3b3;
   -webkit-font-smoothing: antialiased;
@@ -34,36 +38,66 @@
   backface-visibility: hidden;
 }
 
-/* явне правило для лого — обмежуємо розмір і центр */
-.title img,
-.title .logo {
-  display: block;
-  width: auto;
-  max-width: 60vw; /* масштаб під екран */
-  /* збільшено стартовий розмір та адаптивність */
-  max-width: min(800px, 80vw);
+/* Логотип — адаптивний розмір через vw */
+.logo-title {
+  width: clamp(280px, 50vw, 800px);
   height: auto;
-  object-fit: contain;
-  margin: 0 auto; /* додаткове вирівнювання */
+  aspect-ratio: 420 / 96;
+  margin: 0;
+  display: block;
   pointer-events: none;
 }
 
-/* трохи менше лого на вузьких екранах */
-@media (max-width: 900px) {
-  .title img,
-  .title .logo {
-    width: 160px;
-  }
+.logo-title img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-/* h1 всередині — без змін layout при масштабі */
+/* Явне правило для лого */
+.title img,
+.title .logo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto;
+  pointer-events: none;
+}
+
+/* Смуга-хедер — використовує ту ж змінну для висоти */
+.header-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height-vh); /* синхронізовано з --header-center-vh */
+  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(40, 30, 20, 0.45);
+  border-bottom: 1px solid rgba(255, 215, 160, 0.25);
+  z-index: 1999;
+  will-change: transform, opacity;
+  transition: transform 320ms cubic-bezier(.22,.9,.37,1), opacity 240ms linear;
+  transform: translateY(clamp(-100%, calc(-100% + var(--scroll-progress) * 100% * var(--header-enter-multiplier)), 0%));
+  opacity: calc(min(1, var(--scroll-progress) * 1.05));
+}
+
+.logo {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .title h1 {
   margin: 0;
   line-height: 1;
   white-space: nowrap;
 }
 
-/* візуальні корекції при повному скролі (не змінюють позицію) */
 .title.scrolled {
   background: transparent;
   padding: 0 12px;
@@ -81,78 +115,34 @@
   transition: height 200ms ease, top 200ms ease;
 }
 
-/* смуга-хедер: рух і opacity керуються --scroll-progress */
-.header-line {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 110px;
-  background-color: #2c2c2c;
-  z-index: 1999;
-  will-change: transform, opacity;
-  transition: transform 320ms cubic-bezier(.22,.9,.37,1), opacity 240ms linear;
-  transform: translateY(clamp(-100%, calc(-100% + var(--scroll-progress) * 100% * var(--header-enter-multiplier)), 0%));
-  opacity: calc(min(1, var(--scroll-progress) * 1.05));
-}
-
-.logo {
-  width: auto; /* дозволяє масштабуванню через .title transform */
-  height: auto;
-  object-fit: contain;
-  margin: 0;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* логотип як фон всередині заголовка — рухається разом з .title */
-.logo-title {
-  /* більший початковий розмір логотипа */
-  width: 4000px;
-  height: auto;
-  aspect-ratio: 420 / 96;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  margin: 0;
-  text-indent: -9999px;
-  overflow: hidden;
-  display: block;
-  pointer-events: none;
-  transform: translateY(50px);
-}
-
-/* адаптивно на маленьких екранах */
-@media (max-width: 900px) {
-  .logo-title { width: 240px; aspect-ratio: 240 / 55; }
-}
-
-/* Для великих екранів */
-@media (min-width: 901px) {
-  .logo-title {
-    position: static;        /* прибрали absolute */
-    top: auto;
-    left: auto;
-    transform: none;         /* без translate, центрує flex із .title */
-    width: 4000px; /* стабільний розмір без стрибків */
-    max-width: 100%;
-    aspect-ratio: 420 / 96;
-    margin: 0 auto;
-  }
-}
-
-/* Adaptation for smaller screens */
+/* Медіа-запити для точного налаштування */
 @media (max-width: 768px) {
-  .title {
-    font-size: 1.5rem; /* Adjust font size for smaller screens */
-    transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(1 - var(--scroll-progress) * 0.8));
-    transition: transform 200ms cubic-bezier(.22,.9,.37,1); /* Adjust transition duration */
+  :root {
+    --header-height-vh: clamp(7vh, 10vh, 12vh); /* менша висота хедера на планшетах */
+  }
+  
+  .logo-title {
+    width: clamp(240px, 60vw, 600px);
   }
 }
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 1.2rem; /* Further adjust font size for very small screens */
-    transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) scale(calc(0.9 - var(--scroll-progress) * 0.7));
+  :root {
+    --header-height-vh: clamp(6vh, 9vh, 11vh); /* ще менша висота на телефонах */
+  }
+  
+  .logo-title {
+    width: clamp(200px, 70vw, 400px);
+  }
+}
+
+/* Дуже великі екрани (4K+) */
+@media (min-width: 1920px) {
+  :root {
+    --header-height-vh: clamp(10vh, 14vh, 16vh); /* більша висота на великих екранах */
+  }
+  
+  .logo-title {
+    width: clamp(600px, 40vw, 1000px);
   }
 }

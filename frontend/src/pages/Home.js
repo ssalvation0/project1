@@ -120,17 +120,27 @@ function Home() {
           })}
           <div 
             className="class-card view-all animated-card" 
-            style={{ animationDelay: `${warcraftClasses.length * 0.12}s` }}
+            style={{ 
+             backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
+              animationDelay: `${warcraftClasses.length * 0.12}s` 
+            }}
             onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
           >
-            <a href="/catalog">Catalog</a>
+            <div className="class-card-text">
+              <a href="/catalog">Catalog</a>
+            </div>
           </div>
           <div 
             className="class-card random-card animated-card" 
-            style={{ animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` }}
+            style={{ 
+             backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
+              animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` 
+            }}
             onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
           >
-            <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>
+            <div className="class-card-text">
+              <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>
+            </div>
           </div>
         </div>
       )}
