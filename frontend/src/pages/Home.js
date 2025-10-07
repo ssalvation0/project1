@@ -2,87 +2,84 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 
-// автоматично завантажуємо всі зображення з src/images
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
-const imagesMap = imagesContext.keys().reduce((map, filePath) => {
-  const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, ''); // наприклад "warrior"
-  map[name] = imagesContext(filePath).default || imagesContext(filePath);
-  return map;
-}, {});
 
-const warcraftClasses = [
-  'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Death Knight', 'Shaman',
-  'Mage', 'Warlock', 'Monk', 'Druid', 'Demon Hunter', 'Evoker'
-];
+// Кольори класів WoW
+const classColors = {
+  'warrior': '#C79C6E',
+  'paladin': '#F58CBA',
+  'hunter': '#ABD473',
+  'rogue': '#FFF569',
+  'priest': '#FFFFFF',
+  'death-knight': '#C41F3B',
+  'shaman': '#0070DE',
+  'mage': '#69CCF0',
+  'warlock': '#9482C9',
+  'monk': '#00FF96',
+  'druid': '#FF7D0A',
+  'demon-hunter': '#A330C9',
+  'evoker': '#33937F'
+};
 
 function Home() {
   const [showCards, setShowCards] = useState(false);
-  const [spacerHeight, setSpacerHeight] = useState(0); // NEW
-  const navigate = useNavigate();
+  const [cardsVisible, setCardsVisible] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false); // новий стан
   const centerRef = useRef(null);
   const cardsRef = useRef(null);
+  const navigate = useNavigate();
+
+  const warcraftClasses = [
+    'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest',
+    'Death Knight', 'Shaman', 'Mage', 'Warlock', 'Monk',
+    'Druid', 'Demon Hunter', 'Evoker'
+  ];
+
+  const imagesMap = {};
+  imagesContext.keys().forEach((key) => {
+    const match = key.match(/\.\/(.+)\.(png|jpe?g|svg)$/);
+    if (match) {
+      const name = match[1].toLowerCase();
+      imagesMap[name] = imagesContext(key);
+    }
+  });
 
   useEffect(() => {
-    const el = centerRef.current;
-    if (!el) return;
+    const timer = setTimeout(() => {
+      setShowCards(true);
+    }, 100);
 
-    const buffer = 20; // px
-    const canScroll = () => document.body.scrollHeight > window.innerHeight;
-    const triggerAt = () => el.offsetTop + el.offsetHeight - buffer;
+    return () => clearTimeout(timer);
+  }, []);
 
-    const checkAndShow = () => {
-      if ((window.scrollY || window.pageYOffset) >= triggerAt()) {
-        setShowCards(true);
-        return true;
-      }
-      return false;
-    };
+  // Простий Intersection Observer
+  useEffect(() => {
+    if (!showCards || !cardsRef.current) return;
 
-    // якщо сторінка коротка — додаємо spacer один раз, щоб можна було проскролити під заголовок
-    if (!canScroll() && spacerHeight === 0) {
-      const extra = Math.round(window.innerHeight * 0.6);
-      setSpacerHeight(window.innerHeight + extra);
-      // не повертаємось — слухачі реєструються далі
-    }
-
-    // Використовуємо IntersectionObserver щоб показати картки при прокрутці під блок
-    let io = null;
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver(entries => {
-        const entry = entries[0];
-        if (!entry) return;
-        // коли низ centerRef опиняється під видимою зоною, показати картки
-        if (entry.boundingClientRect.bottom <= window.innerHeight - buffer) {
-          setShowCards(true);
-          if (io) io.disconnect();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setCardsVisible(true);
+          
+          // Дозволяємо hover після завершення всіх анімацій
+          setTimeout(() => {
+            setAnimationComplete(true);
+          }, 2000); // час на всі анімації (13 карток * 0.1s + 0.6s transition = ~2s)
+          
+          observer.disconnect();
         }
-      }, { threshold: [0, 0.01] });
-      io.observe(el);
-    }
+      },
+      { threshold: 0.1 }
+    );
 
-    const onScroll = () => {
-      if (checkAndShow()) {
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('resize', onScroll);
-      }
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-
-    // початкова перевірка (на випадок, якщо сторінка вже проскролена)
-    checkAndShow();
-
-    return () => {
-      if (io && io.disconnect) io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, [spacerHeight]);
+    observer.observe(cardsRef.current);
+    return () => observer.disconnect();
+  }, [showCards]);
 
   const handleRandomTransmog = () => {
-    const randomId = Math.floor(Math.random() * 13) + 1;
-    navigate(`/transmog/${randomId}`);
+    const randomClass = warcraftClasses[Math.floor(Math.random() * warcraftClasses.length)];
+    const slug = randomClass.toLowerCase().replace(/ /g, '-');
+    navigate(`/class/${slug}`);
   };
 
   return (
@@ -93,7 +90,6 @@ function Home() {
         </div>
       </div>
 
-      {/* spacer removed to avoid extra empty space */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
           {warcraftClasses.map((cls, idx) => {
@@ -103,40 +99,42 @@ function Home() {
               : (imagesMap[slug] || `${process.env.PUBLIC_URL}/images/${slug}.jpg`);
             return (
               <div
-                className="class-card animated-card"
+                className={`class-card ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
                 key={cls}
+                data-class={slug}
                 style={{
                   backgroundImage: `url(${src})`,
-                  animationDelay: `${idx * 0.12}s`
-                }}
-                onAnimationEnd={(e) => {
-                  // Після завершення анімації видаляємо клас, щоб не конфліктувати з :hover
-                  e.currentTarget.classList.remove('animated-card');
+                  '--class-color': classColors[slug] || '#e5d3b3',
+                  '--animation-delay': `${idx * 0.1}s`
                 }}
               >
                 <div className="class-card-text">{cls}</div>
               </div>
             );
           })}
+          
+          {/* Catalog картка */}
           <div 
-            className="class-card view-all animated-card" 
+            className={`class-card view-all ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
             style={{ 
-             backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
-              animationDelay: `${warcraftClasses.length * 0.12}s` 
+              backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
+              '--class-color': '#e5d3b3',
+              '--animation-delay': `${warcraftClasses.length * 0.1}s`
             }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
           >
             <div className="class-card-text">
               <a href="/catalog">Catalog</a>
             </div>
           </div>
+          
+          {/* Random картка */}
           <div 
-            className="class-card random-card animated-card" 
+            className={`class-card random-card ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
             style={{ 
-             backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
-              animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` 
+              backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
+              '--class-color': '#e5d3b3',
+              '--animation-delay': `${(warcraftClasses.length + 1) * 0.1}s`
             }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
           >
             <div className="class-card-text">
               <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>

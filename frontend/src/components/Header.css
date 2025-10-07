@@ -6,11 +6,20 @@
   /* Висота хедера — базове значення для розрахунків */
   --header-height-vh: clamp(8vh, 12vh, 14vh);
   
-  /* Кінцева позиція — точно в центрі хедера (половина висоти) */
-  --header-center-vh: calc(var(--header-height-vh) / 2);
+  /* Кінцева позиція — трохи вище центру хедера */
+  --header-center-vh: calc(var(--header-height-vh) / 2 - -4.3vh);
   
   /* Автоматичний зсув — однаковий на всіх екранах */
   --title-shift: calc(50vh - var(--header-center-vh));
+}
+
+body, html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 /* Титул фіксований і плавно змінює позицію/масштаб */
@@ -20,7 +29,7 @@
   align-items: center;
   position: fixed;
   left: 50%;
-  top: 50vh;
+  top: 45vh;
   
   /* Універсальна формула трансформації */
   transform: translate(-50%, calc(-50% - var(--scroll-progress) * var(--title-shift))) 
@@ -144,5 +153,56 @@
   
   .logo-title {
     width: clamp(600px, 40vw, 1000px);
+  }
+}
+
+.scroll-indicator {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.scroll-indicator.hiding {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+}
+
+.scroll-arrow {
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 215, 160, 0.9);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 160, 0.5));
+  animation: bounce 2s infinite, pulse 2s infinite;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
