@@ -1,9 +1,4 @@
-body, .home-bg {
-  background: #181818;
-  min-height: 100vh;
-  color: #e5d3b3;
-  font-family: 'Cinzel', serif;
-}
+
 
 .center-logo {
   display: flex;
@@ -13,8 +8,8 @@ body, .home-bg {
   min-height: calc(100vh - 140px);
   text-align: center;
   position: relative;
-  /* Додаємо z-index, щоб цей блок не перекривав картки */
-  z-index: -1;
+  /* Видаляємо негативний z-index */
+  z-index: 1;
 }
 
 .class-cards-grid.three-rows {
@@ -39,8 +34,12 @@ body, .home-bg {
   background-position: center;
   border: 2.5px solid #e5d3b3;
   background-color: #181818;
-  transition: transform 0.28s cubic-bezier(.22,.9,.37,1), box-shadow 0.28s cubic-bezier(.22,.9,.37,1);
+  transition: transform 0.28s cubic-bezier(.22,.9,.37,1), 
+              box-shadow 0.28s cubic-bezier(.22,.9,.37,1), 
+              border-color 0.28s cubic-bezier(.22,.9,.37,1),
+              z-index 0s;
   will-change: transform;
+  z-index: 1; /* Додаємо базовий z-index */
 }
 
 .class-card.view-all,
@@ -119,19 +118,150 @@ body, .home-bg {
 .class-card:hover,
 .class-card:focus-within {
   transform: translateY(-8px) scale(1.05);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-  /* Повертаємо z-index, щоб підняти картку над сусідами */
-  z-index: 10;
+  z-index: 100;
 }
 
 .class-card:hover::before,
 .class-card:focus-within::before {
-  opacity: 0; /* Прибираємо затемнення */
+  opacity: 0;
 }
 
 .class-card:focus {
   outline: 2px solid rgba(229,211,179,0.35);
   outline-offset: 4px;
+}
+
+/* --- КОЛЬОРИ ПІДСВІЧУВАННЯ ДЛЯ КОЖНОГО КЛАСУ --- */
+
+/* Warrior - червоний */
+.class-card[data-class="warrior"]:hover,
+.class-card[data-class="warrior"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(199, 156, 110, 0.6),
+              0 0 80px rgba(199, 156, 110, 0.3);
+  border-color: #c79c6e;
+}
+
+/* Paladin - рожевий */
+.class-card[data-class="paladin"]:hover,
+.class-card[data-class="paladin"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(245, 140, 186, 0.6),
+              0 0 80px rgba(245, 140, 186, 0.3);
+  border-color: #f58cba;
+}
+
+/* Hunter - зелений */
+.class-card[data-class="hunter"]:hover,
+.class-card[data-class="hunter"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(171, 212, 115, 0.6),
+              0 0 80px rgba(171, 212, 115, 0.3);
+  border-color: #abd473;
+}
+
+/* Rogue - жовтий */
+.class-card[data-class="rogue"]:hover,
+.class-card[data-class="rogue"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(255, 245, 105, 0.6),
+              0 0 80px rgba(255, 245, 105, 0.3);
+  border-color: #fff569;
+}
+
+/* Priest - білий */
+.class-card[data-class="priest"]:hover,
+.class-card[data-class="priest"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(255, 255, 255, 0.6),
+              0 0 80px rgba(255, 255, 255, 0.3);
+  border-color: #ffffff;
+}
+
+/* Death Knight - синьо-червоний */
+.class-card[data-class="deathknight"]:hover,
+.class-card[data-class="deathknight"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(196, 31, 59, 0.6),
+              0 0 80px rgba(196, 31, 59, 0.3);
+  border-color: #c41f3b;
+}
+
+/* Shaman - синій */
+.class-card[data-class="shaman"]:hover,
+.class-card[data-class="shaman"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(0, 112, 222, 0.6),
+              0 0 80px rgba(0, 112, 222, 0.3);
+  border-color: #0070de;
+}
+
+/* Mage - блакитний */
+.class-card[data-class="mage"]:hover,
+.class-card[data-class="mage"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(105, 204, 240, 0.6),
+              0 0 80px rgba(105, 204, 240, 0.3);
+  border-color: #69ccf0;
+}
+
+/* Warlock - фіолетовий */
+.class-card[data-class="warlock"]:hover,
+.class-card[data-class="warlock"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(148, 130, 201, 0.6),
+              0 0 80px rgba(148, 130, 201, 0.3);
+  border-color: #9482c9;
+}
+
+/* Monk - зелений */
+.class-card[data-class="monk"]:hover,
+.class-card[data-class="monk"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(0, 255, 150, 0.6),
+              0 0 80px rgba(0, 255, 150, 0.3);
+  border-color: #00ff96;
+}
+
+/* Druid - помаранчевий */
+.class-card[data-class="druid"]:hover,
+.class-card[data-class="druid"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(255, 125, 10, 0.6),
+              0 0 80px rgba(255, 125, 10, 0.3);
+  border-color: #ff7d0a;
+}
+
+/* Demon Hunter - фіолетово-зелений */
+.class-card[data-class="demonhunter"]:hover,
+.class-card[data-class="demonhunter"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(163, 53, 238, 0.6),
+              0 0 80px rgba(163, 53, 238, 0.3);
+  border-color: #a330ee;
+}
+
+/* Evoker - зелено-синій */
+.class-card[data-class="evoker"]:hover,
+.class-card[data-class="evoker"]:focus-within {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(51, 147, 127, 0.6),
+              0 0 80px rgba(51, 147, 127, 0.3);
+  border-color: #33937f;
+}
+
+/* View All / Random - золотистий */
+.class-card.view-all:hover,
+.class-card.random-card:hover {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
+              0 0 40px rgba(229, 211, 179, 0.6),
+              0 0 80px rgba(229, 211, 179, 0.3);
+  border-color: #f5e5c5;
+}
+
+/* Видаляємо старий ::after */
+.class-card::after {
+  content: none;
 }
 
 /* --- АНІМАЦІЯ ПОЯВИ --- */

@@ -17,10 +17,27 @@ const warcraftClasses = [
 
 function Home() {
   const [showCards, setShowCards] = useState(false);
-  const [spacerHeight, setSpacerHeight] = useState(0); // NEW
+  const [spacerHeight, setSpacerHeight] = useState(0);
   const navigate = useNavigate();
   const centerRef = useRef(null);
   const cardsRef = useRef(null);
+
+  // Маппінг назв класів до назв файлів зображень
+  const classImageMap = {
+    'warrior': 'warrior',
+    'paladin': 'paladin',
+    'hunter': 'hunter',
+    'rogue': 'rogue',
+    'priest': 'priest',
+    'deathknight': 'deathknight', // або 'death-knight' якщо файл так називається
+    'shaman': 'shaman',
+    'mage': 'mage',
+    'warlock': 'warlock',
+    'monk': 'monk',
+    'druid': 'druid',
+    'demonhunter': 'demonhunter', // або 'demon-hunter' якщо файл так називається
+    'evoker': 'evoker'
+  };
 
   useEffect(() => {
     const el = centerRef.current;
@@ -93,24 +110,23 @@ function Home() {
         </div>
       </div>
 
-      {/* spacer removed to avoid extra empty space */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
           {warcraftClasses.map((cls, idx) => {
-            const slug = cls.toLowerCase().replace(/ /g, '-');
-            const src = cls === 'Warrior'
-              ? (imagesMap['warrior'] || `${process.env.PUBLIC_URL}/images/warrior.jpg`)
-              : (imagesMap[slug] || `${process.env.PUBLIC_URL}/images/${slug}.jpg`);
+            const slug = cls.toLowerCase().replace(/ /g, '');
+            const imageKey = classImageMap[slug] || slug;
+            const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
+            
             return (
               <div
                 className="class-card animated-card"
                 key={cls}
+                data-class={slug}
                 style={{
                   backgroundImage: `url(${src})`,
                   animationDelay: `${idx * 0.12}s`
                 }}
                 onAnimationEnd={(e) => {
-                  // Після завершення анімації видаляємо клас, щоб не конфліктувати з :hover
                   e.currentTarget.classList.remove('animated-card');
                 }}
               >
@@ -125,10 +141,9 @@ function Home() {
               animationDelay: `${warcraftClasses.length * 0.12}s` 
             }}
             onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
+            onClick={() => navigate('/catalog')}
           >
-            <div className="class-card-text">
-              <a href="/catalog">Catalog</a>
-            </div>
+            <div className="class-card-text">Catalog</div>
           </div>
           <div 
             className="class-card random-card animated-card" 

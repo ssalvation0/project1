@@ -1,9 +1,11 @@
 .footer {
   position: relative;
   bottom: 0;
-  width: 100%;
-  background: linear-gradient(180deg, rgba(24,24,24,0.95) 0%, rgba(15,15,15,1) 100%);
-  border-top: 1px solid rgba(229,211,179,0.15);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(40, 30, 20, 0.45);
+  border-top: 1px solid rgba(255, 215, 160, 0.25);
   padding: 24px 20px;
   text-align: center;
   z-index: 1000;
