@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Particles from './components/Particles';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
 import './App.css';
@@ -25,25 +26,28 @@ function App() {
   }, []);
 
   return (
-    <div 
-      className="App" 
-      style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,${scrollOpacity}), rgba(0,0,0,${scrollOpacity})), url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        transition: 'background-image 0.3s ease'
-      }}
-    >
-      <Router>
+    <Router>
+      <div className="App">
+        <div 
+          className="background-image"
+          style={{ 
+            backgroundImage: `url(${backgroundImage})`,
+            opacity: 1 
+          }}
+        />
+        <div 
+          className="background-overlay"
+          style={{ opacity: scrollOpacity }}
+        />
+        <Particles />
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
         </Routes>
         <Footer />
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 }
 

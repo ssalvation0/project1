@@ -30,8 +30,9 @@
   background: rgba(40, 30, 20, 0.6);
   border: 2px solid #e5d3b3;
   color: #e5d3b3;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -100,18 +101,95 @@
 
 .class-badge {
   display: inline-block;
-  padding: 4px 12px;
-  background: rgba(0,0,0,0.7);
+  padding: 4px 10px;
   border: 1px solid;
   border-radius: 4px;
-  font-size: 0.85rem;
-  text-transform: capitalize;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0, 0, 0, 0.7);
 }
 
-.class-badge.warrior { border-color: #c79c6e; color: #c79c6e; }
-.class-badge.paladin { border-color: #f58cba; color: #f58cba; }
-.class-badge.hunter { border-color: #abd473; color: #abd473; }
-/* Додати інші класи */
+/* Кольори класів WoW */
+.class-badge.warrior { 
+  border-color: #c79c6e; 
+  color: #c79c6e; 
+}
+
+.class-badge.paladin { 
+  border-color: #f58cba; 
+  color: #f58cba; 
+}
+
+.class-badge.hunter { 
+  border-color: #abd473; 
+  color: #abd473; 
+}
+
+.class-badge.rogue { 
+  border-color: #fff569; 
+  color: #fff569; 
+}
+
+.class-badge.priest { 
+  border-color: #ffffff; 
+  color: #ffffff; 
+}
+
+.class-badge.deathknight { 
+  border-color: #c41f3b; 
+  color: #c41f3b; 
+}
+
+.class-badge.shaman { 
+  border-color: #0070de; 
+  color: #0070de; 
+}
+
+.class-badge.mage { 
+  border-color: #69ccf0; 
+  color: #69ccf0; 
+}
+
+.class-badge.warlock { 
+  border-color: #9482c9; 
+  color: #9482c9; 
+}
+
+.class-badge.monk { 
+  border-color: #00ff96; 
+  color: #00ff96; 
+}
+
+.class-badge.druid { 
+  border-color: #ff7d0a; 
+  color: #ff7d0a; 
+}
+
+.class-badge.demonhunter { 
+  border-color: #a330c9; 
+  color: #a330c9; 
+}
+
+.class-badge.evoker { 
+  border-color: #33937f; 
+  color: #33937f; 
+}
+
+.class-badge.all { 
+  border-color: #808080; 
+  color: #808080;
+  font-style: italic;
+}
+
+/* Ховер ефект для badges */
+.class-badge:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
 
 .catalog-loading {
   display: flex;
@@ -119,7 +197,7 @@
   justify-content: center;
   align-items: center;
   min-height: 80vh;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   color: #e5d3b3;
 }
 
@@ -144,7 +222,7 @@
   justify-content: center;
   align-items: center;
   min-height: 80vh;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
 }
 
 .catalog-error p {
@@ -160,8 +238,9 @@
   background: rgba(40, 30, 20, 0.6);
   border: 2px solid #e5d3b3;
   color: #e5d3b3;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -184,7 +263,9 @@
   padding: 4px 10px;
   border: 1px solid;
   border-radius: 4px;
+  font-family: 'Raleway', sans-serif;
   font-size: 0.75rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -193,6 +274,7 @@
 .item-count {
   display: block;
   margin-top: 8px;
+  font-family: 'Raleway', sans-serif;
   font-size: 0.85rem;
   opacity: 0.8;
   font-style: italic;
@@ -205,7 +287,7 @@
   align-items: center;
   gap: 20px;
   margin: 60px 0 40px;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   color: #e5d3b3;
 }
 
@@ -214,8 +296,9 @@
   background: rgba(40, 30, 20, 0.6);
   border: 2px solid #e5d3b3;
   color: #e5d3b3;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -235,6 +318,7 @@
 
 .pagination span {
   font-size: 1.1rem;
+  font-weight: 500;
 }
 
 /* Пошукова панель */
@@ -248,7 +332,7 @@
   width: 100%;
   padding: 14px 50px 14px 20px;
   font-size: 1rem;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   background: rgba(40, 30, 20, 0.6);
   border: 2px solid #e5d3b3;
   border-radius: 8px;
@@ -328,7 +412,7 @@
   background: rgba(40, 30, 20, 0.6);
   border: 2px solid #e5d3b3;
   color: #e5d3b3;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 1rem;
   cursor: pointer;
   border-radius: 6px;

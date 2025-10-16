@@ -5,7 +5,7 @@ import '../styles/Home.css';
 // автоматично завантажуємо всі зображення з src/images
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
 const imagesMap = imagesContext.keys().reduce((map, filePath) => {
-  const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, ''); // наприклад "warrior"
+  const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, '');
   map[name] = imagesContext(filePath).default || imagesContext(filePath);
   return map;
 }, {});
@@ -17,9 +17,8 @@ const warcraftClasses = [
 
 function Home() {
   const [showCards, setShowCards] = useState(false);
-  const [spacerHeight, setSpacerHeight] = useState(0);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const navigate = useNavigate();
-  const centerRef = useRef(null);
   const cardsRef = useRef(null);
 
   // Маппінг назв класів до назв файлів зображень
@@ -29,87 +28,77 @@ function Home() {
     'hunter': 'hunter',
     'rogue': 'rogue',
     'priest': 'priest',
-    'deathknight': 'deathknight', // або 'death-knight' якщо файл так називається
+    'deathknight': 'deathknight',
     'shaman': 'shaman',
     'mage': 'mage',
     'warlock': 'warlock',
     'monk': 'monk',
     'druid': 'druid',
-    'demonhunter': 'demonhunter', // або 'demon-hunter' якщо файл так називається
+    'demonhunter': 'demonhunter',
     'evoker': 'evoker'
   };
 
   useEffect(() => {
-    const el = centerRef.current;
-    if (!el) return;
+    const timer = setTimeout(() => {
+      setShowCards(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-    const buffer = 20; // px
-    const canScroll = () => document.body.scrollHeight > window.innerHeight;
-    const triggerAt = () => el.offsetTop + el.offsetHeight - buffer;
-
-    const checkAndShow = () => {
-      if ((window.scrollY || window.pageYOffset) >= triggerAt()) {
-        setShowCards(true);
-        return true;
-      }
-      return false;
-    };
-
-    // якщо сторінка коротка — додаємо spacer один раз, щоб можна було проскролити під заголовок
-    if (!canScroll() && spacerHeight === 0) {
-      const extra = Math.round(window.innerHeight * 0.6);
-      setSpacerHeight(window.innerHeight + extra);
-      // не повертаємось — слухачі реєструються далі
-    }
-
-    // Використовуємо IntersectionObserver щоб показати картки при прокрутці під блок
-    let io = null;
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver(entries => {
-        const entry = entries[0];
-        if (!entry) return;
-        // коли низ centerRef опиняється під видимою зоною, показати картки
-        if (entry.boundingClientRect.bottom <= window.innerHeight - buffer) {
-          setShowCards(true);
-          if (io) io.disconnect();
-        }
-      }, { threshold: [0, 0.01] });
-      io.observe(el);
-    }
-
-    const onScroll = () => {
-      if (checkAndShow()) {
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('resize', onScroll);
+  // Відстеження скролу для приховування індикатора
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowScrollIndicator(false);
+      } else {
+        setShowScrollIndicator(true);
       }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-
-    // початкова перевірка (на випадок, якщо сторінка вже проскролена)
-    checkAndShow();
-
-    return () => {
-      if (io && io.disconnect) io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, [spacerHeight]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleRandomTransmog = () => {
     const randomId = Math.floor(Math.random() * 13) + 1;
     navigate(`/transmog/${randomId}`);
   };
 
+  const scrollToCards = () => {
+    cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="home-bg">
-      <div className="center-logo" ref={centerRef}>
-        <div className="home-header">
-          {/* заголовок */}
+      {/* Привітальний блок */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Explore epic transmogs that
+            <br />
+            define your style
+          </h1>
+          <div className="hero-buttons">
+            <button className="hero-btn primary" onClick={scrollToCards}>
+              Get Started
+            </button>
+            <button className="hero-btn secondary" onClick={() => navigate('/catalog')}>
+              Browse Catalog
+            </button>
+          </div>
         </div>
-      </div>
+        <div 
+          className={`scroll-indicator ${!showScrollIndicator ? 'hidden' : ''}`}
+          onClick={scrollToCards}
+        >
+          <span>SCROLL TO EXPLORE</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </section>
 
+      {/* Картки класів */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
           {warcraftClasses.map((cls, idx) => {
@@ -126,6 +115,7 @@ function Home() {
                   backgroundImage: `url(${src})`,
                   animationDelay: `${idx * 0.12}s`
                 }}
+                onClick={() => navigate(`/catalog?class=${slug}`)}
                 onAnimationEnd={(e) => {
                   e.currentTarget.classList.remove('animated-card');
                 }}
@@ -137,7 +127,7 @@ function Home() {
           <div 
             className="class-card view-all animated-card" 
             style={{ 
-             backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
+              backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
               animationDelay: `${warcraftClasses.length * 0.12}s` 
             }}
             onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
@@ -148,7 +138,7 @@ function Home() {
           <div 
             className="class-card random-card animated-card" 
             style={{ 
-             backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
+              backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
               animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` 
             }}
             onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Catalog.css';
-import { getTransmogs } from '../services/api';
+
+const API_URL = 'http://localhost:5001/api/transmogs';
 
 function Catalog() {
   const [transmogs, setTransmogs] = useState([]);
@@ -11,6 +12,7 @@ function Catalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [imageErrors, setImageErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,69 +20,77 @@ function Catalog() {
   }, [currentPage, filter]);
 
   const fetchTransmogs = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
-      console.log('🔄 Fetching transmogs from API...');
-      const data = await getTransmogs(currentPage, 20, filter, searchQuery);
+      setLoading(true);
+      setError(null);
       
-      console.log('✅ Received data:', data);
-      setTransmogs(data.sets || []);
+      const url = `${API_URL}?page=${currentPage}&limit=20${filter !== 'all' ? `&class=${filter}` : ''}`;
+      console.log('Fetching:', url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Received data:', data);
+      
+      setTransmogs(data.transmogs || []);
       setTotalPages(data.totalPages || 0);
       setLoading(false);
     } catch (err) {
-      console.error('❌ Error fetching transmogs:', err);
-      setError('Failed to load transmogs. Make sure backend is running on http://localhost:5000');
+      console.error('Error fetching transmogs:', err);
+      setError(err.message);
       setLoading(false);
     }
   };
 
-  // Пошук з debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery !== '') {
-        setCurrentPage(0); // Reset to first page
-        fetchTransmogs();
-      } else if (searchQuery === '' && transmogs.length === 0) {
-        fetchTransmogs();
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const clearSearch = () => {
-    setSearchQuery('');
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
     setCurrentPage(0);
   };
 
-  // Отримати preview зображення з API
-  const getPreviewImage = (transmog) => {
-    // Спробуємо знайти preview appearance
-    if (transmog.appearance_set?.preview_appearance?.display_string) {
-      return transmog.appearance_set.preview_appearance.display_string;
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
     }
-    
-    // Fallback на перший предмет
-    if (transmog.appearance_set?.items?.[0]?.media?.assets?.[0]?.value) {
-      return transmog.appearance_set.items[0].media.assets[0].value;
-    }
-    
-    return null;
   };
 
-  // Отримати класи для бейджів
-  const getClassNames = (transmog) => {
-    if (!transmog.appearance_set?.class_restrictions) return [];
-    return transmog.appearance_set.class_restrictions.map(c => c.name);
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleTransmogClick = (id) => {
+    navigate(`/transmog/${id}`);
+  };
+
+  const handleImageError = (transmogId, iconName) => {
+    if (imageErrors[transmogId]) return; // Вже пробували fallback
+    
+    setImageErrors(prev => ({ ...prev, [transmogId]: true }));
+    
+    // Спробувати альтернативні джерела
+    const fallbacks = [
+      iconName ? `https://wow.zamimg.com/images/wow/icons/large/${iconName}.jpg` : null,
+      `https://render-eu.worldofwarcraft.com/icons/56/inv_misc_questionmark.jpg`
+    ].filter(Boolean);
+    
+    // Оновити URL зображення 
+    setTransmogs(prev => prev.map(t => 
+      t.id === transmogId 
+        ? { ...t, imageUrl: fallbacks[0] || fallbacks[1] } 
+        : t
+    ));
   };
 
   if (loading) {
     return (
       <div className="catalog-loading">
         <div className="loading-spinner"></div>
-        <p>Loading transmogs from Battle.net API...</p>
+        <p>Loading transmogs...</p>
       </div>
     );
   }
@@ -88,7 +98,7 @@ function Catalog() {
   if (error) {
     return (
       <div className="catalog-error">
-        <p>{error}</p>
+        <p>Error loading transmogs: {error}</p>
         <button onClick={fetchTransmogs}>Retry</button>
       </div>
     );
@@ -107,115 +117,142 @@ function Catalog() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {searchQuery && (
-            <button className="clear-search" onClick={clearSearch}>
-              ✕
-            </button>
-          )}
-          <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
         </div>
 
-        {/* Фільтр по класах */}
         <div className="catalog-filters">
           <button 
             className={filter === 'all' ? 'active' : ''} 
-            onClick={() => setFilter('all')}
+            onClick={() => handleFilterChange('all')}
           >
             All
           </button>
-          {['warrior', 'paladin', 'hunter', 'rogue', 'priest', 'deathknight', 'shaman', 'mage', 'warlock', 'monk', 'druid', 'demonhunter', 'evoker'].map(cls => (
-            <button 
-              key={cls}
-              className={filter === cls ? 'active' : ''} 
-              onClick={() => setFilter(cls)}
-            >
-              {cls === 'deathknight' ? 'Death Knight' : cls === 'demonhunter' ? 'Demon Hunter' : cls.charAt(0).toUpperCase() + cls.slice(1)}
-            </button>
-          ))}
+          <button 
+            className={filter === 'warrior' ? 'active' : ''} 
+            onClick={() => handleFilterChange('warrior')}
+          >
+            Warrior
+          </button>
+          <button 
+            className={filter === 'paladin' ? 'active' : ''} 
+            onClick={() => handleFilterChange('paladin')}
+          >
+            Paladin
+          </button>
+          <button 
+            className={filter === 'hunter' ? 'active' : ''} 
+            onClick={() => handleFilterChange('hunter')}
+          >
+            Hunter
+          </button>
+          <button 
+            className={filter === 'rogue' ? 'active' : ''} 
+            onClick={() => handleFilterChange('rogue')}
+          >
+            Rogue
+          </button>
+          <button 
+            className={filter === 'priest' ? 'active' : ''} 
+            onClick={() => handleFilterChange('priest')}
+          >
+            Priest
+          </button>
+          <button 
+            className={filter === 'deathknight' ? 'active' : ''} 
+            onClick={() => handleFilterChange('deathknight')}
+          >
+            Death Knight
+          </button>
+          <button 
+            className={filter === 'shaman' ? 'active' : ''} 
+            onClick={() => handleFilterChange('shaman')}
+          >
+            Shaman
+          </button>
+          <button 
+            className={filter === 'mage' ? 'active' : ''} 
+            onClick={() => handleFilterChange('mage')}
+          >
+            Mage
+          </button>
+          <button 
+            className={filter === 'warlock' ? 'active' : ''} 
+            onClick={() => handleFilterChange('warlock')}
+          >
+            Warlock
+          </button>
+          <button 
+            className={filter === 'monk' ? 'active' : ''} 
+            onClick={() => handleFilterChange('monk')}
+          >
+            Monk
+          </button>
+          <button 
+            className={filter === 'druid' ? 'active' : ''} 
+            onClick={() => handleFilterChange('druid')}
+          >
+            Druid
+          </button>
+          <button 
+            className={filter === 'demonhunter' ? 'active' : ''} 
+            onClick={() => handleFilterChange('demonhunter')}
+          >
+            Demon Hunter
+          </button>
+          <button 
+            className={filter === 'evoker' ? 'active' : ''} 
+            onClick={() => handleFilterChange('evoker')}
+          >
+            Evoker
+          </button>
         </div>
-
-        {/* Результати пошуку */}
-        {searchQuery && (
-          <div className="search-results-info">
-            Found {transmogs.length} result{transmogs.length !== 1 ? 's' : ''} for "{searchQuery}"
-          </div>
-        )}
       </div>
 
-      {/* Сітка трансмогів */}
-      <div className="catalog-grid">
-        {transmogs.length > 0 ? (
-          transmogs.map(transmog => {
-            const previewImage = getPreviewImage(transmog);
-            const classes = getClassNames(transmog);
-            
-            return (
-              <div 
+      {transmogs.length === 0 ? (
+        <div className="no-results">
+          <p>No transmogs found</p>
+        </div>
+      ) : (
+        <>
+          <div className="catalog-grid">
+            {transmogs.map((transmog) => (
+              <div
                 key={transmog.id}
                 className="catalog-item"
-                onClick={() => navigate(`/transmog/${transmog.id}`)}
+                onClick={() => handleTransmogClick(transmog.id)}
                 style={{ 
-                  backgroundImage: previewImage ? `url(${previewImage})` : 'none',
-                  backgroundColor: previewImage ? 'transparent' : '#2a2a2a'
+                  backgroundImage: `url(${transmog.imageUrl}), url(https://render-eu.worldofwarcraft.com/icons/56/inv_misc_questionmark.jpg)`
                 }}
               >
                 <div className="catalog-item-info">
                   <h3>{transmog.name}</h3>
                   <div className="class-badges">
-                    {classes.length > 0 ? (
-                      classes.map((className, idx) => (
-                        <span 
-                          key={idx} 
-                          className={`class-badge ${className.toLowerCase().replace(/\s+/g, '')}`}
-                        >
-                          {className}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="class-badge">All Classes</span>
-                    )}
+                    {transmog.classes.map((cls) => (
+                      <span key={cls} className={`class-badge ${cls}`}>
+                        {cls}
+                      </span>
+                    ))}
                   </div>
-                  {transmog.appearance_set?.items && (
-                    <span className="item-count">
-                      {transmog.appearance_set.items.length} items
-                    </span>
-                  )}
                 </div>
               </div>
-            );
-          })
-        ) : (
-          <div className="no-results">
-            <p>No transmogs found{searchQuery && ` for "${searchQuery}"`}</p>
-            {searchQuery && (
-              <button className="clear-search-btn" onClick={clearSearch}>
-                Clear search
-              </button>
-            )}
+            ))}
           </div>
-        )}
-      </div>
 
-      {/* Пагінація */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-          >
-            ← Previous
-          </button>
-          <span>Page {currentPage + 1} of {totalPages}</span>
-          <button 
-            onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-          >
-            Next →
-          </button>
-        </div>
+          <div className="pagination">
+            <button 
+              onClick={handlePrevPage} 
+              disabled={currentPage === 0}
+            >
+              ← Previous
+            </button>
+            <span>Page {currentPage + 1} of {totalPages}</span>
+            <button 
+              onClick={handleNextPage} 
+              disabled={currentPage >= totalPages - 1}
+            >
+              Next →
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

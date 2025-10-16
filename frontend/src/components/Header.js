@@ -2,37 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
+import AuthModal from './AuthModal';
 
 function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // стан авторизації
 
-  useEffect(() => {
-    const handleScroll = () => {
-      /* Коли користувач проскролив більше ніж 50px — вмикаємо стан хедера */
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      console.log("Перехід до профілю");
+      // тут буде перехід до сторінки профілю
+    } else {
+      setIsModalOpen(true); // якщо не залогінений - відкриваємо модальне вікно
+    }
+  };
 
   return (
     <>
-      <div className={`intro-logo ${isScrolled ? 'hidden' : ''}`}>
-        <img src={logo} alt="TransmogVault" className="big-logo" />
-      </div>
-
-      <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
+      <header className="header">
         <div className="header-content">
           <Link to="/" className="logo-link">
             <img src={logo} alt="TransmogVault" className="small-logo" />
           </Link>
+
+          <button 
+            className="profile-button" 
+            onClick={handleProfileClick}>
+            {isLoggedIn ? 'Profile' : 'Sign up'}
+          </button>
         </div>
       </header>
+      
+      <AuthModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </>
   );
 }

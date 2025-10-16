@@ -1,73 +1,78 @@
-/* ===== Початкове велике лого ===== */
-
-.intro-logo {
-  position: fixed;         /* фіксуємо, щоб воно не рухалось */
-  top: 53%;                /* центруємо вертикально */
-  left: 49%;               /* центруємо горизонтально */
-  transform: translate(-50%, -50%); /* точне центрування */
-  z-index: 1;              /* воно вище контенту, але нижче хедера */
-  transition: opacity 0.5s ease; /* плавне зникнення */
-}
-
-.big-logo {
-  width: 500px;            /*   регулюй розмір великого лого тут */
-  height: auto;
-}
-
-.intro-logo.hidden {
-  opacity: 0;              /* зникає при скролі */
-  pointer-events: none;    /* щоб не заважало іншим елементам */
-}
-
-/* ===== Хедер, який випливає згори ===== */
-
 .header {
   position: fixed;
-  top: -100px;              /*   початково ховаємо хедер за верхнім краєм екрана */
-  left: 0;
-  width: 100%;
-  height: 100px;            /*   висота хедера, яку ти можеш змінити */
-  background: rgba(20, 20, 20, 0.9);
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75%;
+  height: 90px;
+  background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(8px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: top 0.4s ease;  /*   плавне "випливання" */
-  z-index: 2;
-}
-
-.header.scrolled {
-  top: 0;                  /*   при скролі хедер плавно випливає згори */
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /*  розташування лого вліво */
-  width: 90%;
-  max-width: 1200px;
+  justify-content: space-between;  /* логотип ліворуч, кнопка праворуч */
+  width: 100%;
 }
-
-/* ===== Маленьке лого в хедері ===== */
 
 .small-logo {
-  width: 200px;            /*  розмір маленького лого */
-  height: auto;
-  opacity: 0;              /* початково невидиме */
-  transform: translateY(-20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  width: 200px;
+  height: auto; 
+  margin-left: 100px;
 }
 
-.header.scrolled .small-logo {
-  opacity: 1;              /* з’являється разом з хедером */
-  transform: translateY(0);
+.logo-link {
+  display: flex;
+  align-items: center;
 }
 
-/* Додатково — щоб уникнути горизонтальних зсувів */
 body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background: #121212;     /* просто фон для тестів */
+  background: #121212;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.profile-button {
+  width: 50px;                 /* кругла кнопка */
+  height: 50px;
+  border-radius: 50%;          /* робимо її круглою */
+  border: none;                /* без обвідки */
+  background-color: #ff8c00;   /* базовий колір */
+  cursor: pointer;             /* курсор при наведенні */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-right: 30px;
+}
+
+.profile-button:hover {
+  background-color: #ffa733;   /* підсвічування */
+  transform: scale(1.1);       /* легке збільшення */
+}
+
+.profile-button:active {
+  transform: scale(0.99);       /* кнопка трохи зменшується при натисканні */
+  background-color: #e57b00;    /* можна змінити колір під час натискання */
+}
+
+@media (max-width: 768px) {
+  .header {
+    width: 90%;
+    height: 70px;
+  }
+
+  .small-logo {
+    width: 150px;
+  }
 }

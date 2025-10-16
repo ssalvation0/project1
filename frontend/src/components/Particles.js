@@ -51,9 +51,9 @@ const Particles = () => {
                     ctx.shadowBlur = 4;
                     ctx.shadowColor = '#cfe2ff';
                 } else {
-                    ctx.fillStyle = '#ff6b35';
+                    ctx.fillStyle = '#fb1b1bff';
                     ctx.shadowBlur = 6;
-                    ctx.shadowColor = '#ff6b35';
+                    ctx.shadowColor = '#fb1b1bff';
                 }
 
                 ctx.beginPath();
@@ -65,7 +65,7 @@ const Particles = () => {
         }
 
         for (let i = 0; i < particlesCount; i++) {
-            const isLeftSide = i < particleCount / 2;
+            const isLeftSide = i < particlesCount / 2;
             const x = isLeftSide
                 ? Math.random() * (canvas.width / 2)
                 : Math.random() * (canvas.width / 2) + (canvas.width / 2);

@@ -1,26 +1,176 @@
+/* --- ПРИВІТАЛЬНИЙ БЛОК --- */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 120px 20px 80px;
+  text-align: center;
+}
 
+.hero-content {
+  max-width: 900px;
+  animation: fadeInUp 1s ease-out;
+}
 
-.center-logo {
+.hero-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(229, 211, 179, 0.2);
+  border-radius: 50px;
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+}
+
+.hero-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 400;
+  color: #f2e6c9;
+  line-height: 1.2;
+  margin: 0 0 40px 0;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  padding: 16px 40px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  letter-spacing: 0.03em;
+}
+
+.hero-btn.primary {
+  background: linear-gradient(135deg, #e5d3b3 0%, #c9b897 100%);
+  color: #1a1f2e;
+  border-color: #e5d3b3;
+}
+
+.hero-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(229, 211, 179, 0.4);
+}
+
+.hero-btn.secondary {
+  background: transparent;
+  color: #e5d3b3;
+  border-color: rgba(229, 211, 179, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.hero-btn.secondary:hover {
+  background: rgba(229, 211, 179, 0.1);
+  border-color: #e5d3b3;
+  transform: translateY(-2px);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px);
-  text-align: center;
-  position: relative;
-  /* Видаляємо негативний z-index */
-  z-index: 1;
+  gap: 10px;
+  color: rgba(229, 211, 179, 0.7);
+  cursor: pointer;
+  animation: bounce 2s infinite;
+  transition: all 0.4s ease;
+  opacity: 1;
+  visibility: visible;
 }
 
+.scroll-indicator.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(20px);
+}
+
+.scroll-indicator:hover {
+  color: #e5d3b3;
+  text-shadow: 0 0 20px rgba(229, 211, 179, 0.8);
+}
+
+.scroll-indicator span {
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(229, 211, 179, 0.5);
+}
+
+.scroll-indicator svg {
+  filter: drop-shadow(0 0 8px rgba(229, 211, 179, 0.5));
+  transition: transform 0.3s ease;
+}
+
+.scroll-indicator:hover svg {
+  transform: translateY(4px);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+@keyframes glow-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* --- КАРТКИ КЛАСІВ --- */
 .class-cards-grid.three-rows {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   max-width: 1400px;
-  margin: 40vh auto 80px auto; /* Збільшили нижній відступ */
+  margin: 0 auto 80px auto;
   justify-content: center;
   overflow: visible;
-  padding: 50px 30px; /* Збільшили padding, щоб збільшені картки не обрізались */
+  padding: 50px 30px;
 }
 
 /* --- ОСНОВНІ СТИЛІ ДЛЯ ВСІХ КАРТОК --- */
@@ -29,7 +179,7 @@
   width: 260px;
   height: 320px;
   position: relative;
-  overflow: hidden; /* Повертаємо, щоб текст/кнопки всередині не виходили за межі */
+  overflow: hidden;
   background-size: cover;
   background-position: center;
   border: 2.5px solid #e5d3b3;
@@ -39,7 +189,8 @@
               border-color 0.28s cubic-bezier(.22,.9,.37,1),
               z-index 0s;
   will-change: transform;
-  z-index: 1; /* Додаємо базовий z-index */
+  z-index: 1;
+  cursor: pointer;
 }
 
 .class-card.view-all,
@@ -50,11 +201,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column; /* Додаємо, щоб вміст був вертикально */
-  padding: 20px; /* Додаємо внутрішній відступ */
+  flex-direction: column;
+  padding: 20px;
 }
 
-/* Затемнення як псевдо-елемент */
 .class-card::before {
   content: "";
   position: absolute;
@@ -65,7 +215,6 @@
   z-index: 1;
 }
 
-/* --- ТЕКСТ НА КАРТЦІ --- */
 .class-card-text {
   position: absolute;
   left: 0;
@@ -77,7 +226,7 @@
   padding: 12px 16px;
   margin: 0;
   box-sizing: border-box;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: #f2e6c9;
@@ -85,15 +234,13 @@
   line-height: 1.2;
   text-align: center;
   z-index: 3;
-  /* Фон тепер безпосередньо на цьому елементі */
   background: rgba(15,15,15,0.78);
   border-top: 1px solid rgba(229,211,179,0.08);
 }
 
-/* Стилі для посилань та кнопок всередині .class-card-text */
 .class-card-text a,
 .class-card-text button {
-  all: unset; /* Скидаємо всі стилі браузера */
+  all: unset;
   cursor: pointer;
   color: inherit;
   font-family: inherit;
@@ -109,12 +256,6 @@
   opacity: 0.8;
 }
 
-/* Повноширинна смуга як псевдо-елемент - БІЛЬШЕ НЕ ПОТРІБНА */
-.class-card-text::before {
-  content: none;
-}
-
-/* --- ЕФЕКТИ НАВЕДЕННЯ --- */
 .class-card:hover,
 .class-card:focus-within {
   transform: translateY(-8px) scale(1.05);
@@ -131,9 +272,7 @@
   outline-offset: 4px;
 }
 
-/* --- КОЛЬОРИ ПІДСВІЧУВАННЯ ДЛЯ КОЖНОГО КЛАСУ --- */
-
-/* Warrior - червоний */
+/* --- КОЛЬОРИ КЛАСІВ --- */
 .class-card[data-class="warrior"]:hover,
 .class-card[data-class="warrior"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -142,7 +281,6 @@
   border-color: #c79c6e;
 }
 
-/* Paladin - рожевий */
 .class-card[data-class="paladin"]:hover,
 .class-card[data-class="paladin"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -151,7 +289,6 @@
   border-color: #f58cba;
 }
 
-/* Hunter - зелений */
 .class-card[data-class="hunter"]:hover,
 .class-card[data-class="hunter"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -160,7 +297,7 @@
   border-color: #abd473;
 }
 
-/* Rogue - жовтий */
+
 .class-card[data-class="rogue"]:hover,
 .class-card[data-class="rogue"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -169,7 +306,6 @@
   border-color: #fff569;
 }
 
-/* Priest - білий */
 .class-card[data-class="priest"]:hover,
 .class-card[data-class="priest"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -178,7 +314,6 @@
   border-color: #ffffff;
 }
 
-/* Death Knight - синьо-червоний */
 .class-card[data-class="deathknight"]:hover,
 .class-card[data-class="deathknight"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -187,7 +322,6 @@
   border-color: #c41f3b;
 }
 
-/* Shaman - синій */
 .class-card[data-class="shaman"]:hover,
 .class-card[data-class="shaman"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -196,7 +330,6 @@
   border-color: #0070de;
 }
 
-/* Mage - блакитний */
 .class-card[data-class="mage"]:hover,
 .class-card[data-class="mage"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -205,7 +338,6 @@
   border-color: #69ccf0;
 }
 
-/* Warlock - фіолетовий */
 .class-card[data-class="warlock"]:hover,
 .class-card[data-class="warlock"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -214,7 +346,6 @@
   border-color: #9482c9;
 }
 
-/* Monk - зелений */
 .class-card[data-class="monk"]:hover,
 .class-card[data-class="monk"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -223,7 +354,6 @@
   border-color: #00ff96;
 }
 
-/* Druid - помаранчевий */
 .class-card[data-class="druid"]:hover,
 .class-card[data-class="druid"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -232,7 +362,6 @@
   border-color: #ff7d0a;
 }
 
-/* Demon Hunter - фіолетово-зелений */
 .class-card[data-class="demonhunter"]:hover,
 .class-card[data-class="demonhunter"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -241,7 +370,6 @@
   border-color: #a330ee;
 }
 
-/* Evoker - зелено-синій */
 .class-card[data-class="evoker"]:hover,
 .class-card[data-class="evoker"]:focus-within {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -250,7 +378,6 @@
   border-color: #33937f;
 }
 
-/* View All / Random - золотистий */
 .class-card.view-all:hover,
 .class-card.random-card:hover {
   box-shadow: 0 12px 32px rgba(0,0,0,0.5),
@@ -259,12 +386,6 @@
   border-color: #f5e5c5;
 }
 
-/* Видаляємо старий ::after */
-.class-card::after {
-  content: none;
-}
-
-/* --- АНІМАЦІЯ ПОЯВИ --- */
 .class-card.animated-card {
   opacity: 0;
   transform: translateY(24px);
@@ -278,18 +399,51 @@
   }
 }
 
-/* 
-   ВИДАЛІТЬ АБО ЗАКОМЕНТУЙТЕ ЦЕЙ БЛОК 
-*/
-/* Під час анімації вимикаємо hover */
-/*
-.class-cards-grid.animating .class-card {
-  pointer-events: none;
-}
-*/
-
 /* --- АДАПТИВНІСТЬ --- */
-@media (max-height: 800px), (max-width: 900px) {
-  .center-logo { min-height: calc(100vh - 110px); }
-  .class-cards-grid.three-rows { margin: 10vh auto 32px auto; }
+@media (max-width: 1400px) {
+  .class-cards-grid.three-rows {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .class-cards-grid.three-rows {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 100px 20px 60px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .hero-btn {
+    width: 100%;
+  }
+
+  .class-cards-grid.three-rows {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .class-cards-grid.three-rows {
+    grid-template-columns: 1fr;
+  }
 }
