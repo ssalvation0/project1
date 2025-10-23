@@ -1,0 +1,17 @@
+{
+  "name": "transmogvault",
+  "version": "1.0.0",
+  "description": "WoW Transmog Catalog",
+  "scripts": {
+    "server": "cd backend && node server.js",
+    "client": "cd frontend && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
