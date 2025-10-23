@@ -2,146 +2,139 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Home.css';
 
-// автоматично завантажуємо всі зображення з src/images
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
-const imagesMap = imagesContext.keys().reduce((map, filePath) => {
-  const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, '');
-  map[name] = imagesContext(filePath).default || imagesContext(filePath);
-  return map;
-}, {});
 
-const warcraftClasses = [
-  'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Death Knight', 'Shaman',
-  'Mage', 'Warlock', 'Monk', 'Druid', 'Demon Hunter', 'Evoker'
-];
+// Кольори класів WoW
+const classColors = {
+  'warrior': '#C79C6E',
+  'paladin': '#F58CBA',
+  'hunter': '#ABD473',
+  'rogue': '#FFF569',
+  'priest': '#FFFFFF',
+  'death-knight': '#C41F3B',
+  'shaman': '#0070DE',
+  'mage': '#69CCF0',
+  'warlock': '#9482C9',
+  'monk': '#00FF96',
+  'druid': '#FF7D0A',
+  'demon-hunter': '#A330C9',
+  'evoker': '#33937F'
+};
 
 function Home() {
   const [showCards, setShowCards] = useState(false);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
-  const navigate = useNavigate();
+  const [cardsVisible, setCardsVisible] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false); // новий стан
+  const centerRef = useRef(null);
   const cardsRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Маппінг назв класів до назв файлів зображень
-  const classImageMap = {
-    'warrior': 'warrior',
-    'paladin': 'paladin',
-    'hunter': 'hunter',
-    'rogue': 'rogue',
-    'priest': 'priest',
-    'deathknight': 'deathknight',
-    'shaman': 'shaman',
-    'mage': 'mage',
-    'warlock': 'warlock',
-    'monk': 'monk',
-    'druid': 'druid',
-    'demonhunter': 'demonhunter',
-    'evoker': 'evoker'
-  };
+  const warcraftClasses = [
+    'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest',
+    'Death Knight', 'Shaman', 'Mage', 'Warlock', 'Monk',
+    'Druid', 'Demon Hunter', 'Evoker'
+  ];
+
+  const imagesMap = {};
+  imagesContext.keys().forEach((key) => {
+    const match = key.match(/\.\/(.+)\.(png|jpe?g|svg)$/);
+    if (match) {
+      const name = match[1].toLowerCase();
+      imagesMap[name] = imagesContext(key);
+    }
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowCards(true);
     }, 100);
+
     return () => clearTimeout(timer);
   }, []);
 
-  // Відстеження скролу для приховування індикатора
+  // Простий Intersection Observer
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowScrollIndicator(false);
-      } else {
-        setShowScrollIndicator(true);
-      }
-    };
+    if (!showCards || !cardsRef.current) return;
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setCardsVisible(true);
+          
+          // Дозволяємо hover після завершення всіх анімацій
+          setTimeout(() => {
+            setAnimationComplete(true);
+          }, 2000); // час на всі анімації (13 карток * 0.1s + 0.6s transition = ~2s)
+          
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(cardsRef.current);
+    return () => observer.disconnect();
+  }, [showCards]);
 
   const handleRandomTransmog = () => {
-    const randomId = Math.floor(Math.random() * 13) + 1;
-    navigate(`/transmog/${randomId}`);
-  };
-
-  const scrollToCards = () => {
-    cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const randomClass = warcraftClasses[Math.floor(Math.random() * warcraftClasses.length)];
+    const slug = randomClass.toLowerCase().replace(/ /g, '-');
+    navigate(`/class/${slug}`);
   };
 
   return (
     <div className="home-bg">
-      {/* Привітальний блок */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">
-            Explore epic transmogs that
-            <br />
-            define your style
-          </h1>
-          <div className="hero-buttons">
-            <button className="hero-btn primary" onClick={scrollToCards}>
-              Get Started
-            </button>
-            <button className="hero-btn secondary" onClick={() => navigate('/catalog')}>
-              Browse Catalog
-            </button>
-          </div>
+      <div className="center-logo" ref={centerRef}>
+        <div className="home-header">
+          {/* заголовок */}
         </div>
-        <div 
-          className={`scroll-indicator ${!showScrollIndicator ? 'hidden' : ''}`}
-          onClick={scrollToCards}
-        >
-          <span>SCROLL TO EXPLORE</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </section>
+      </div>
 
-      {/* Картки класів */}
       {showCards && (
         <div className="class-cards-grid three-rows" ref={cardsRef}>
           {warcraftClasses.map((cls, idx) => {
-            const slug = cls.toLowerCase().replace(/ /g, '');
-            const imageKey = classImageMap[slug] || slug;
-            const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
-            
+            const slug = cls.toLowerCase().replace(/ /g, '-');
+            const src = cls === 'Warrior'
+              ? (imagesMap['warrior'] || `${process.env.PUBLIC_URL}/images/warrior.jpg`)
+              : (imagesMap[slug] || `${process.env.PUBLIC_URL}/images/${slug}.jpg`);
             return (
               <div
-                className="class-card animated-card"
+                className={`class-card ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
                 key={cls}
                 data-class={slug}
                 style={{
                   backgroundImage: `url(${src})`,
-                  animationDelay: `${idx * 0.12}s`
-                }}
-                onClick={() => navigate(`/catalog?class=${slug}`)}
-                onAnimationEnd={(e) => {
-                  e.currentTarget.classList.remove('animated-card');
+                  '--class-color': classColors[slug] || '#e5d3b3',
+                  '--animation-delay': `${idx * 0.1}s`
                 }}
               >
                 <div className="class-card-text">{cls}</div>
               </div>
             );
           })}
+          
+          {/* Catalog картка */}
           <div 
-            className="class-card view-all animated-card" 
+            className={`class-card view-all ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
             style={{ 
               backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
-              animationDelay: `${warcraftClasses.length * 0.12}s` 
+              '--class-color': '#e5d3b3',
+              '--animation-delay': `${warcraftClasses.length * 0.1}s`
             }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
-            onClick={() => navigate('/catalog')}
           >
-            <div className="class-card-text">Catalog</div>
+            <div className="class-card-text">
+              <a href="/catalog">Catalog</a>
+            </div>
           </div>
+          
+          {/* Random картка */}
           <div 
-            className="class-card random-card animated-card" 
+            className={`class-card random-card ${cardsVisible ? 'visible' : 'hidden'} ${animationComplete ? 'hover-enabled' : ''}`}
             style={{ 
               backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
-              animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` 
+              '--class-color': '#e5d3b3',
+              '--animation-delay': `${(warcraftClasses.length + 1) * 0.1}s`
             }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
           >
             <div className="class-card-text">
               <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>

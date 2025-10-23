@@ -1,8 +1,7 @@
 .footer {
   position: relative;
   bottom: 0;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
+  width: 100%;
   backdrop-filter: blur(20px) saturate(180%);
   background: rgba(40, 30, 20, 0.45);
   border-top: 1px solid rgba(255, 215, 160, 0.25);
