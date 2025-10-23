@@ -27,7 +27,11 @@ function Catalog() {
       const url = `${API_URL}?page=${currentPage}&limit=20${filter !== 'all' ? `&class=${filter}` : ''}`;
       console.log('Fetching:', url);
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

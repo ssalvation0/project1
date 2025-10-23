@@ -109,3 +109,19 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
+
+.auth-switch {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.auth-link {
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-link:hover {
+    color: #0056b3;
+}

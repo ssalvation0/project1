@@ -1,0 +1,107 @@
+.outer-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.step-circle-container {
+  border-radius: 12px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.step-indicator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.step-indicator {
+  cursor: pointer;
+}
+
+.step-indicator-inner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.active-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: #222;
+  margin: 0 8px;
+  overflow: hidden;
+}
+
+.step-connector-inner {
+  height: 100%;
+}
+
+.footer-container {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #333;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-nav.spread {
+  justify-content: space-between;
+}
+
+.footer-nav.end {
+  justify-content: flex-end;
+}
+
+.back-button,
+.next-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-button {
+  background: transparent;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+.next-button {
+  background: #5227FF;
+  border: none;
+  color: white;
+}
+
+.next-button:hover {
+  background: #6B3FFF;
+}
+
+.step-default {
+  padding: 20px 0;
+}
+
+.step-content-default {
+  min-height: 200px;
+}
