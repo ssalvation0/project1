@@ -1,0 +1,424 @@
+:root {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --card-opacity: 0;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --background-x: 50%;
+  --background-y: 50%;
+  --grain: none;
+  --icon: none;
+  --behind-gradient: none;
+  --inner-gradient: none;
+  --card-radius: 16px;
+}
+
+.pc-card-wrapper {
+  perspective: 1000px;
+  transform: translate3d(0, 0, 0.1px);
+  position: relative;
+  touch-action: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 280px;
+}
+
+.pc-card-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: inherit;
+  background-position: inherit;
+  border-radius: inherit;
+  transition: all 0.4s ease;
+  filter: blur(20px) opacity(0);
+  transform: scale(0.95) translate3d(0, 0, 0.1px);
+  background-size: 100% 100%;
+  background-image: var(--behind-gradient);
+}
+
+.pc-card-wrapper:hover,
+.pc-card-wrapper.active {
+  --card-opacity: 1;
+}
+
+.pc-card-wrapper:hover::before,
+.pc-card-wrapper.active::before {
+  filter: blur(25px) opacity(0.8);
+  transform: scale(1) translate3d(0, 0, 0.1px);
+}
+
+.pc-card {
+  height: 380px;
+  display: grid;
+  aspect-ratio: 0.7;
+  border-radius: var(--card-radius);
+  position: relative;
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  background-color: transparent;
+  backdrop-filter: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translate3d(0, 0, 0.1px) rotateX(0deg) rotateY(0deg);
+  overflow: hidden;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(229, 211, 179, 0.1);
+}
+
+.pc-card:hover,
+.pc-card.active {
+  transition: transform 0.1s ease;
+  transform: translate3d(0, 0, 0.1px) rotateX(var(--rotate-y)) rotateY(var(--rotate-x));
+  border-color: rgba(229, 211, 179, 0.6);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 0 30px var(--class-glow, rgba(229, 211, 179, 0.3)),
+    inset 0 0 0 1px rgba(229, 211, 179, 0.2);
+}
+
+.pc-card * {
+  display: grid;
+  grid-area: 1/-1;
+  border-radius: var(--card-radius);
+  transform: translate3d(0, 0, 0.1px);
+  pointer-events: none;
+}
+
+.pc-inside {
+  inset: 0;
+  position: absolute;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  transform: translate3d(0, 0, 0.01px);
+}
+
+.pc-shine {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: overlay;
+  filter: brightness(1.2);
+  background: radial-gradient(
+    circle at var(--pointer-x) var(--pointer-y),
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 30%,
+    transparent 60%
+  );
+}
+
+.pc-card:hover .pc-shine,
+.pc-card.active .pc-shine {
+  opacity: 1;
+}
+
+.pc-glare {
+  transform: translate3d(0, 0, 1.1px);
+  overflow: hidden;
+  background-image: radial-gradient(
+    circle at var(--pointer-x) var(--pointer-y),
+    rgba(229, 211, 179, 0.15) 0%,
+    transparent 60%
+  );
+  mix-blend-mode: soft-light;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pc-card:hover .pc-glare,
+.pc-card.active .pc-glare {
+  opacity: 1;
+}
+
+.pc-avatar-content {
+  mix-blend-mode: normal;
+  overflow: hidden;
+  position: relative;
+}
+
+.pc-avatar-content .avatar {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  object-fit: cover;
+  transform: scale(1.05) translate3d(0, 0, 0);
+  filter: brightness(0.85) contrast(1.1);
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.pc-card:hover .pc-avatar-content .avatar,
+.pc-card.active .pc-avatar-content .avatar {
+  transform: scale(1.1) translate3d(0, 0, 0);
+  filter: brightness(1) contrast(1.15);
+}
+
+.pc-avatar-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  pointer-events: none;
+}
+
+.pc-user-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pc-user-details {
+  display: none;
+}
+
+.pc-user-text {
+  display: none;
+}
+
+.pc-handle {
+  display: none;
+}
+
+.pc-status {
+  display: none;
+}
+
+.pc-contact-btn {
+  position: relative;
+  border: 2px solid rgba(229, 211, 179, 0.4);
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f2e6c9;
+  cursor: pointer;
+  background: transparent;
+  font-family: 'Raleway', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: center;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: all;
+  width: 100%;
+  display: block;
+}
+
+.pc-contact-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(229, 211, 179, 0.3),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.pc-contact-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(229, 211, 179, 0.15) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.pc-contact-btn:hover {
+  border-color: rgba(229, 211, 179, 0.8);
+  background: rgba(229, 211, 179, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(229, 211, 179, 0.3),
+    inset 0 0 20px rgba(229, 211, 179, 0.1);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(229, 211, 179, 0.8);
+}
+
+.pc-contact-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.pc-contact-btn:hover::after {
+  opacity: 1;
+}
+
+.pc-contact-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(229, 211, 179, 0.2);
+}
+
+.pc-content {
+  max-height: 100%;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pc-details {
+  width: 100%;
+  position: absolute;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.pc-details h3 {
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.8rem;
+  font-family: 'Cinzel', serif;
+  color: #f2e6c9;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(229, 211, 179, 0.3);
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.pc-details p {
+  font-weight: 500;
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: rgba(229, 211, 179, 0.8);
+  font-family: 'Raleway', sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.03em;
+}
+
+/* Class-specific glow colors */
+.class-warrior { --class-glow: rgba(199, 156, 110, 0.5); }
+.class-paladin { --class-glow: rgba(245, 140, 186, 0.5); }
+.class-hunter { --class-glow: rgba(171, 212, 115, 0.5); }
+.class-rogue { --class-glow: rgba(255, 245, 105, 0.5); }
+.class-priest { --class-glow: rgba(255, 255, 255, 0.5); }
+.class-deathknight { --class-glow: rgba(196, 31, 59, 0.5); }
+.class-shaman { --class-glow: rgba(0, 112, 222, 0.5); }
+.class-mage { --class-glow: rgba(105, 204, 240, 0.5); }
+.class-warlock { --class-glow: rgba(148, 130, 201, 0.5); }
+.class-monk { --class-glow: rgba(0, 255, 150, 0.5); }
+.class-druid { --class-glow: rgba(255, 125, 10, 0.5); }
+.class-demonhunter { --class-glow: rgba(163, 48, 201, 0.5); }
+.class-evoker { --class-glow: rgba(51, 147, 127, 0.5); }
+
+/* Special cards */
+.special-card.catalog-card {
+  --class-glow: rgba(218, 165, 32, 0.5);
+}
+
+.special-card.random-card {
+  --class-glow: rgba(255, 0, 102, 0.5);
+}
+
+.special-card.catalog-card .pc-details h3 {
+  color: #DAA520;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(218, 165, 32, 0.4);
+}
+
+.special-card.random-card .pc-details h3 {
+  color: #FF3399;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(255, 0, 102, 0.4);
+}
+
+@media (max-width: 1024px) {
+  .pc-card {
+    height: 350px;
+  }
+  
+  .pc-details h3 {
+    font-size: 1.6rem;
+  }
+  
+  .pc-contact-btn {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pc-card {
+    height: 320px;
+  }
+  
+  .pc-details {
+    top: 15px;
+  }
+  
+  .pc-details h3 {
+    font-size: 1.4rem;
+  }
+  
+  .pc-details p {
+    font-size: 12px;
+  }
+  
+  .pc-user-info {
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+  }
+  
+  .pc-contact-btn {
+    padding: 10px 18px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pc-card {
+    height: 400px;
+  }
+  
+  .pc-user-info {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  
+  .pc-contact-btn {
+    padding: 9px 16px;
+    font-size: 10px;
+  }
+}

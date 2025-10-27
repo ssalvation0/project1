@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ProfileCard from '../components/ProfileCard';
 import '../styles/Home.css';
 
-// автоматично завантажуємо всі зображення з src/images
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
 const imagesMap = imagesContext.keys().reduce((map, filePath) => {
   const name = filePath.replace('./', '').replace(/\.(png|jpe?g|svg)$/, '');
@@ -11,17 +11,28 @@ const imagesMap = imagesContext.keys().reduce((map, filePath) => {
 }, {});
 
 const warcraftClasses = [
-  'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Death Knight', 'Shaman',
-  'Mage', 'Warlock', 'Monk', 'Druid', 'Demon Hunter', 'Evoker'
+  { name: 'Warrior', role: 'Tank / DPS' },
+  { name: 'Paladin', role: 'Tank / Healer / DPS' },
+  { name: 'Hunter', role: 'Ranged DPS' },
+  { name: 'Rogue', role: 'Melee DPS' },
+  { name: 'Priest', role: 'Healer / DPS' },
+  { name: 'Death Knight', role: 'Tank / DPS' },
+  { name: 'Shaman', role: 'Healer / DPS' },
+  { name: 'Mage', role: 'Ranged DPS' },
+  { name: 'Warlock', role: 'Ranged DPS' },
+  { name: 'Monk', role: 'Tank / Healer / DPS' },
+  { name: 'Druid', role: 'Tank / Healer / DPS' },
+  { name: 'Demon Hunter', role: 'Tank / DPS' },
+  { name: 'Evoker', role: 'Healer / DPS' }
 ];
 
 function Home() {
   const [showCards, setShowCards] = useState(false);
+  const [animateCards, setAnimateCards] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
 
-  // Маппінг назв класів до назв файлів зображень
   const classImageMap = {
     'warrior': 'warrior',
     'paladin': 'paladin',
@@ -39,13 +50,9 @@ function Home() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowCards(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    setShowCards(true);
   }, []);
 
-  // Відстеження скролу для приховування індикатора
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 100) {
@@ -53,11 +60,23 @@ function Home() {
       } else {
         setShowScrollIndicator(true);
       }
+
+      // Анімація карток при скролі
+      if (cardsRef.current && !animateCards) {
+        const rect = cardsRef.current.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight * 0.75;
+        
+        if (isVisible) {
+          setAnimateCards(true);
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Перевірка при завантаженні сторінки
+    
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [animateCards]);
 
   const handleRandomTransmog = () => {
     const randomId = Math.floor(Math.random() * 13) + 1;
@@ -70,7 +89,6 @@ function Home() {
 
   return (
     <div className="home-bg">
-      {/* Привітальний блок */}
       <section className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
@@ -98,53 +116,73 @@ function Home() {
         </div>
       </section>
 
-      {/* Картки класів */}
       {showCards && (
-        <div className="class-cards-grid three-rows" ref={cardsRef}>
-          {warcraftClasses.map((cls, idx) => {
-            const slug = cls.toLowerCase().replace(/ /g, '');
-            const imageKey = classImageMap[slug] || slug;
-            const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
+        <div className="profile-cards-container" ref={cardsRef}>
+          <div className={`cards-grid ${animateCards ? 'animate' : ''}`}>
+            {warcraftClasses.map((cls, idx) => {
+              const slug = cls.name.toLowerCase().replace(/ /g, '');
+              const imageKey = classImageMap[slug] || slug;
+              const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
+              
+              return (
+                <div 
+                  key={cls.name}
+                  className="card-item"
+                  style={{ '--card-index': idx }}
+                >
+                  <ProfileCard
+                    avatarUrl={src}
+                    name={cls.name}
+                    title={cls.role}
+                    contactText="View Sets"
+                    showUserInfo={true}
+                    enableTilt={true}
+                    enableMobileTilt={false}
+                    className={`class-${slug}`}
+                    onClick={() => navigate(`/catalog?class=${slug}`)}
+                    onContactClick={() => navigate(`/catalog?class=${slug}`)}
+                    behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${cls.color}66 4%, ${cls.color}44 10%, ${cls.color}22 50%, transparent 100%)`}
+                  />
+                </div>
+              );
+            })}
             
-            return (
-              <div
-                className="class-card animated-card"
-                key={cls}
-                data-class={slug}
-                style={{
-                  backgroundImage: `url(${src})`,
-                  animationDelay: `${idx * 0.12}s`
-                }}
-                onClick={() => navigate(`/catalog?class=${slug}`)}
-                onAnimationEnd={(e) => {
-                  e.currentTarget.classList.remove('animated-card');
-                }}
-              >
-                <div className="class-card-text">{cls}</div>
-              </div>
-            );
-          })}
-          <div 
-            className="class-card view-all animated-card" 
-            style={{ 
-              backgroundImage: `url(${imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`})`,
-              animationDelay: `${warcraftClasses.length * 0.12}s` 
-            }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
-            onClick={() => navigate('/catalog')}
-          >
-            <div className="class-card-text">Catalog</div>
-          </div>
-          <div 
-            className="class-card random-card animated-card" 
-            style={{ 
-              backgroundImage: `url(${imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`})`,
-              animationDelay: `${(warcraftClasses.length + 1) * 0.12}s` 
-            }}
-            onAnimationEnd={(e) => e.currentTarget.classList.remove('animated-card')}
-          >
-            <div className="class-card-text">
-              <button className="random-btn" onClick={handleRandomTransmog}>Random Transmog</button>
+            {/* Catalog Card */}
+            <div 
+              className="card-item"
+              style={{ '--card-index': warcraftClasses.length }}
+            >
+              <ProfileCard
+                avatarUrl={imagesMap['catalog'] || `${process.env.PUBLIC_URL}/images/catalog.jpg`}
+                name="Full Catalog"
+                title="All Collections"
+                contactText="Explore"
+                showUserInfo={true}
+                enableTilt={true}
+                className="special-card catalog-card"
+                onClick={() => navigate('/catalog')}
+                onContactClick={() => navigate('/catalog')}
+                behindGradient="radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), #DAA52066 4%, #DAA52044 10%, #DAA52022 50%, transparent 100%)"
+              />
+            </div>
+
+            {/* Random Card */}
+            <div 
+              className="card-item"
+              style={{ '--card-index': warcraftClasses.length + 1 }}
+            >
+              <ProfileCard
+                avatarUrl={imagesMap['random'] || `${process.env.PUBLIC_URL}/images/random.jpg`}
+                name="Feeling Lucky?"
+                title="Random Discovery"
+                contactText="Randomize"
+                showUserInfo={true}
+                enableTilt={true}
+                className="special-card random-card"
+                onClick={handleRandomTransmog}
+                onContactClick={handleRandomTransmog}
+                behindGradient="radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), #FF006666 4%, #FF006644 10%, #FF006622 50%, transparent 100%)"
+              />
             </div>
           </div>
         </div>
