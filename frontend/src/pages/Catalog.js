@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Catalog.css';
 
-const API_URL = 'http://localhost:5001/api/transmogs';
+const API_URL = 'http://localhost:5001/api/transmogs'; // Змінити на 5001
 
 function Catalog() {
   const [transmogs, setTransmogs] = useState([]);
@@ -12,7 +12,6 @@ function Catalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [imageErrors, setImageErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,14 +23,10 @@ function Catalog() {
       setLoading(true);
       setError(null);
       
-      const url = `${API_URL}?page=${currentPage}&limit=20${filter !== 'all' ? `&class=${filter}` : ''}`;
+      const url = `${API_URL}?page=${currentPage}&limit=20`;
       console.log('Fetching:', url);
       
-      const response = await fetch(url, {
-        headers: {
-          'ngrok-skip-browser-warning': '69420'
-        }
-      });
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -40,8 +35,16 @@ function Catalog() {
       const data = await response.json();
       console.log('Received data:', data);
       
-      setTransmogs(data.transmogs || []);
-      setTotalPages(data.totalPages || 0);
+      // Фільтрація на клієнті якщо потрібно
+      let filteredTransmogs = data.transmogs || [];
+      if (filter !== 'all') {
+        filteredTransmogs = filteredTransmogs.filter(t => 
+          t.class.toLowerCase() === filter.toLowerCase()
+        );
+      }
+      
+      setTransmogs(filteredTransmogs);
+      setTotalPages(data.pagination?.totalPages || 0);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching transmogs:', err);
@@ -69,25 +72,6 @@ function Catalog() {
 
   const handleTransmogClick = (id) => {
     navigate(`/transmog/${id}`);
-  };
-
-  const handleImageError = (transmogId, iconName) => {
-    if (imageErrors[transmogId]) return; // Вже пробували fallback
-    
-    setImageErrors(prev => ({ ...prev, [transmogId]: true }));
-    
-    // Спробувати альтернативні джерела
-    const fallbacks = [
-      iconName ? `https://wow.zamimg.com/images/wow/icons/large/${iconName}.jpg` : null,
-      `https://render-eu.worldofwarcraft.com/icons/56/inv_misc_questionmark.jpg`
-    ].filter(Boolean);
-    
-    // Оновити URL зображення 
-    setTransmogs(prev => prev.map(t => 
-      t.id === transmogId 
-        ? { ...t, imageUrl: fallbacks[0] || fallbacks[1] } 
-        : t
-    ));
   };
 
   if (loading) {
@@ -224,18 +208,17 @@ function Catalog() {
                 className="catalog-item"
                 onClick={() => handleTransmogClick(transmog.id)}
                 style={{ 
-                  backgroundImage: `url(${transmog.imageUrl}), url(https://render-eu.worldofwarcraft.com/icons/56/inv_misc_questionmark.jpg)`
+                  backgroundImage: transmog.iconUrl 
+                    ? `url(${transmog.iconUrl})` 
+                    : 'none',
+                  backgroundColor: !transmog.iconUrl ? 'rgba(40, 30, 20, 0.8)' : 'transparent'
                 }}
               >
                 <div className="catalog-item-info">
                   <h3>{transmog.name}</h3>
-                  <div className="class-badges">
-                    {transmog.classes.map((cls) => (
-                      <span key={cls} className={`class-badge ${cls}`}>
-                        {cls}
-                      </span>
-                    ))}
-                  </div>
+                  <span className={`class-badge ${transmog.class?.toLowerCase().replace(' ', '')}`}>
+                    {transmog.class}
+                  </span>
                 </div>
               </div>
             ))}

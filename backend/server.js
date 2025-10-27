@@ -4,14 +4,25 @@ const cors = require('cors');
 const transmogsRouter = require('./routes/transmogs');
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = 5001; // Залишити 5001 як у вас
 
-// CORS - дозволити всі origins для тестування
+// CORS - дозволити запити з усіх джерел (для розробки)
 app.use(cors({
-  origin: '*',
+  origin: '*', // Дозволити всі origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: false // Вимкнути credentials коли origin: '*'
 }));
+
+// Альтернативно, якщо потрібні credentials:
+// app.use(cors({
+//   origin: [
+//     'http://localhost:3000', 
+//     'http://localhost:5001',
+//     'https://wickless-actively-nora.ngrok-free.dev'
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true
+// }));
 
 app.use(express.json());
 
