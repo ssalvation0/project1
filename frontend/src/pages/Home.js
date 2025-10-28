@@ -54,28 +54,38 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    let rafId;
+    
     const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowScrollIndicator(false);
-      } else {
-        setShowScrollIndicator(true);
-      }
-
-      // Анімація карток при скролі
-      if (cardsRef.current && !animateCards) {
-        const rect = cardsRef.current.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight * 0.75;
-        
-        if (isVisible) {
-          setAnimateCards(true);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (window.scrollY > 100) {
+          setShowScrollIndicator(false);
+        } else {
+          setShowScrollIndicator(true);
         }
-      }
+
+        // Анімація карток при скролі
+        if (cardsRef.current && !animateCards) {
+          const rect = cardsRef.current.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight * 0.75;
+          
+          if (isVisible) {
+            setAnimateCards(true);
+          }
+        }
+      });
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Перевірка при завантаженні сторінки
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
   }, [animateCards]);
 
   const handleRandomTransmog = () => {

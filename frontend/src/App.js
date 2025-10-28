@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Particles from './components/Particles';
 import Home from './pages/Home';
 import Catalog from './pages/Catalog';
+import TransmogDetail from './pages/TransmogDetail';
 import './App.css';
 import backgroundImage from './images/background.jpg';
 
@@ -44,6 +45,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
+          <Route path="/transmog/:id" element={<TransmogDetail />} />
         </Routes>
         <Footer />
       </div>

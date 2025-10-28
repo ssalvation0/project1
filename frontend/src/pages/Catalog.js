@@ -1,8 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Catalog.css';
 
-const API_URL = 'http://localhost:5001/api/transmogs'; // Змінити на 5001
+const API_URL = 'http://localhost:5001/api/transmogs';
+
+const WARCRAFT_CLASSES = [
+  { value: 'all', label: 'All' },
+  { value: 'warrior', label: 'Warrior' },
+  { value: 'paladin', label: 'Paladin' },
+  { value: 'hunter', label: 'Hunter' },
+  { value: 'rogue', label: 'Rogue' },
+  { value: 'priest', label: 'Priest' },
+  { value: 'deathknight', label: 'Death Knight' },
+  { value: 'shaman', label: 'Shaman' },
+  { value: 'mage', label: 'Mage' },
+  { value: 'warlock', label: 'Warlock' },
+  { value: 'monk', label: 'Monk' },
+  { value: 'druid', label: 'Druid' },
+  { value: 'demonhunter', label: 'Demon Hunter' },
+  { value: 'evoker', label: 'Evoker' }
+];
 
 function Catalog() {
   const [transmogs, setTransmogs] = useState([]);
@@ -12,19 +29,21 @@ function Catalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
+  // Завантаження улюблених з localStorage
   useEffect(() => {
-    fetchTransmogs();
-  }, [currentPage, filter]);
+    const savedFavorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
+    setFavorites(savedFavorites);
+  }, []);
 
-  const fetchTransmogs = async () => {
+  const fetchTransmogs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
       const url = `${API_URL}?page=${currentPage}&limit=20`;
-      console.log('Fetching:', url);
       
       const response = await fetch(url);
       
@@ -33,13 +52,12 @@ function Catalog() {
       }
       
       const data = await response.json();
-      console.log('Received data:', data);
       
-      // Фільтрація на клієнті якщо потрібно
+      // Фільтрація на клієнті
       let filteredTransmogs = data.transmogs || [];
       if (filter !== 'all') {
         filteredTransmogs = filteredTransmogs.filter(t => 
-          t.class.toLowerCase() === filter.toLowerCase()
+          t.class?.toLowerCase() === filter.toLowerCase()
         );
       }
       
@@ -51,28 +69,65 @@ function Catalog() {
       setError(err.message);
       setLoading(false);
     }
-  };
+  }, [currentPage, filter]);
 
-  const handleFilterChange = (newFilter) => {
+  useEffect(() => {
+    fetchTransmogs();
+  }, [fetchTransmogs]);
+
+  // Debounce для пошуку
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Фільтрація по пошуковому запиту
+      if (searchQuery) {
+        setCurrentPage(0);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Фільтрація пошуку
+  const filteredTransmogs = useMemo(() => {
+    if (!searchQuery) return transmogs;
+    
+    const query = searchQuery.toLowerCase();
+    return transmogs.filter(transmog =>
+      transmog.name?.toLowerCase().includes(query) ||
+      transmog.class?.toLowerCase().includes(query) ||
+      transmog.expansion?.toLowerCase().includes(query)
+    );
+  }, [transmogs, searchQuery]);
+
+  const handleFilterChange = useCallback((newFilter) => {
     setFilter(newFilter);
     setCurrentPage(0);
-  };
+  }, []);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage(prev => prev + 1);
     }
-  };
+  }, [currentPage, totalPages]);
 
-  const handlePrevPage = () => {
+  const handlePrevPage = useCallback(() => {
     if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(prev => prev - 1);
     }
-  };
+  }, [currentPage]);
 
-  const handleTransmogClick = (id) => {
+  const handleTransmogClick = useCallback((id) => {
     navigate(`/transmog/${id}`);
-  };
+  }, [navigate]);
+
+  const toggleFavorite = useCallback((transmogId) => {
+    const newFavorites = favorites.includes(transmogId)
+      ? favorites.filter(favId => favId !== transmogId)
+      : [...favorites, transmogId];
+    
+    setFavorites(newFavorites);
+    localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
+  }, [favorites]);
 
   if (loading) {
     return (
@@ -108,105 +163,29 @@ function Catalog() {
         </div>
 
         <div className="catalog-filters">
-          <button 
-            className={filter === 'all' ? 'active' : ''} 
-            onClick={() => handleFilterChange('all')}
-          >
-            All
-          </button>
-          <button 
-            className={filter === 'warrior' ? 'active' : ''} 
-            onClick={() => handleFilterChange('warrior')}
-          >
-            Warrior
-          </button>
-          <button 
-            className={filter === 'paladin' ? 'active' : ''} 
-            onClick={() => handleFilterChange('paladin')}
-          >
-            Paladin
-          </button>
-          <button 
-            className={filter === 'hunter' ? 'active' : ''} 
-            onClick={() => handleFilterChange('hunter')}
-          >
-            Hunter
-          </button>
-          <button 
-            className={filter === 'rogue' ? 'active' : ''} 
-            onClick={() => handleFilterChange('rogue')}
-          >
-            Rogue
-          </button>
-          <button 
-            className={filter === 'priest' ? 'active' : ''} 
-            onClick={() => handleFilterChange('priest')}
-          >
-            Priest
-          </button>
-          <button 
-            className={filter === 'deathknight' ? 'active' : ''} 
-            onClick={() => handleFilterChange('deathknight')}
-          >
-            Death Knight
-          </button>
-          <button 
-            className={filter === 'shaman' ? 'active' : ''} 
-            onClick={() => handleFilterChange('shaman')}
-          >
-            Shaman
-          </button>
-          <button 
-            className={filter === 'mage' ? 'active' : ''} 
-            onClick={() => handleFilterChange('mage')}
-          >
-            Mage
-          </button>
-          <button 
-            className={filter === 'warlock' ? 'active' : ''} 
-            onClick={() => handleFilterChange('warlock')}
-          >
-            Warlock
-          </button>
-          <button 
-            className={filter === 'monk' ? 'active' : ''} 
-            onClick={() => handleFilterChange('monk')}
-          >
-            Monk
-          </button>
-          <button 
-            className={filter === 'druid' ? 'active' : ''} 
-            onClick={() => handleFilterChange('druid')}
-          >
-            Druid
-          </button>
-          <button 
-            className={filter === 'demonhunter' ? 'active' : ''} 
-            onClick={() => handleFilterChange('demonhunter')}
-          >
-            Demon Hunter
-          </button>
-          <button 
-            className={filter === 'evoker' ? 'active' : ''} 
-            onClick={() => handleFilterChange('evoker')}
-          >
-            Evoker
-          </button>
+          {WARCRAFT_CLASSES.map((cls) => (
+            <button
+              key={cls.value}
+              className={filter === cls.value ? 'active' : ''}
+              onClick={() => handleFilterChange(cls.value)}
+            >
+              {cls.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {transmogs.length === 0 ? (
+      {filteredTransmogs.length === 0 ? (
         <div className="no-results">
-          <p>No transmogs found</p>
+          <p>No transmogs found{searchQuery && ` matching "${searchQuery}"`}</p>
         </div>
       ) : (
         <>
           <div className="catalog-grid">
-            {transmogs.map((transmog) => (
+            {filteredTransmogs.map((transmog) => (
               <div
                 key={transmog.id}
                 className="catalog-item"
-                onClick={() => handleTransmogClick(transmog.id)}
                 style={{ 
                   backgroundImage: transmog.iconUrl 
                     ? `url(${transmog.iconUrl})` 
@@ -214,12 +193,28 @@ function Catalog() {
                   backgroundColor: !transmog.iconUrl ? 'rgba(40, 30, 20, 0.8)' : 'transparent'
                 }}
               >
-                <div className="catalog-item-info">
-                  <h3>{transmog.name}</h3>
-                  <span className={`class-badge ${transmog.class?.toLowerCase().replace(' ', '')}`}>
-                    {transmog.class}
-                  </span>
+                <div 
+                  className="catalog-item-content"
+                  onClick={() => handleTransmogClick(transmog.id)}
+                >
+                  <div className="catalog-item-info">
+                    <h3>{transmog.name}</h3>
+                    <span className={`class-badge ${transmog.class?.toLowerCase().replace(' ', '')}`}>
+                      {transmog.class}
+                    </span>
+                  </div>
                 </div>
+                
+                <button
+                  className={`favorite-button ${favorites.includes(transmog.id) ? 'favorited' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(transmog.id);
+                  }}
+                  title={favorites.includes(transmog.id) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  {favorites.includes(transmog.id) ? '❤️' : '🤍'}
+                </button>
               </div>
             ))}
           </div>

@@ -6,23 +6,25 @@ const transmogsRouter = require('./routes/transmogs');
 const app = express();
 const PORT = 5001; // Залишити 5001 як у вас
 
-// CORS - дозволити запити з усіх джерел (для розробки)
-app.use(cors({
-  origin: '*', // Дозволити всі origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: false // Вимкнути credentials коли origin: '*'
-}));
+// CORS - дозволити конкретні origins для безпеки
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+];
 
-// Альтернативно, якщо потрібні credentials:
-// app.use(cors({
-//   origin: [
-//     'http://localhost:3000', 
-//     'http://localhost:5001',
-//     'https://wickless-actively-nora.ngrok-free.dev'
-//   ],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   credentials: true
-// }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Дозволити requests без origin (наприклад, мобільні додатки або Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 app.use(express.json());
 

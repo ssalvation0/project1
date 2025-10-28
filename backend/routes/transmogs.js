@@ -91,11 +91,25 @@ const mockTransmogData = [
   { id: 20, name: "Vestments of Faith (Priest)", class: "Priest", expansion: "Classic" }
 ];
 
+// Функція для генерації mock предметів сету
+function generateMockItems(className, expansion) {
+  const itemSlots = [
+    'Helm', 'Shoulders', 'Chest', 'Waist', 'Legs', 
+    'Feet', 'Wrist', 'Hands', 'Back', 'Neck'
+  ];
+  
+  return itemSlots.map((slot, index) => ({
+    id: index + 1,
+    name: `${className} ${slot}`,
+    slot: slot,
+    iconUrl: classIcons[className] || null,
+    itemLevel: 60 + Math.floor(Math.random() * 20),
+    rarity: 'Epic'
+  }));
+}
+
 router.get('/', async (req, res) => {
   try {
-    console.log('\n📥 New request received');
-    console.log('Query params:', req.query);
-    
     const { page = 0, limit = 20 } = req.query;
     const offset = parseInt(page) * parseInt(limit);
 
@@ -119,15 +133,62 @@ router.get('/', async (req, res) => {
       }
     };
 
-    console.log('✓ Response sent successfully with mock data\n');
     res.json(result);
 
   } catch (error) {
-    console.error('\n❌ ERROR in /api/transmogs:');
-    console.error('Message:', error.message);
+    console.error('Error in /api/transmogs:', error.message);
     
     res.status(500).json({ 
       error: 'Failed to fetch transmogs',
+      message: error.message
+    });
+  }
+});
+
+// GET конкретний transmog за ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transmogId = parseInt(id);
+    
+    // Знаходимо transmog в mock даних
+    const transmog = mockTransmogData.find(item => item.id === transmogId);
+    
+    if (!transmog) {
+      return res.status(404).json({ 
+        error: 'Transmog not found',
+        message: `No transmog found with ID ${transmogId}`
+      });
+    }
+    
+    // Розширюємо дані для детальної сторінки
+    const detailedTransmog = {
+      id: transmog.id,
+      name: transmog.name,
+      iconUrl: classIcons[transmog.class] || null,
+      class: transmog.class,
+      expansion: transmog.expansion,
+      description: `Epic transmog set from ${transmog.expansion} expansion. This set provides unique visual appearance for ${transmog.class} characters.`,
+      items: generateMockItems(transmog.class, transmog.expansion),
+      stats: {
+        itemLevel: 60 + Math.floor(Math.random() * 40),
+        requiredLevel: 60,
+        durability: 100
+      },
+      source: {
+        type: 'Raid',
+        location: `${transmog.expansion} Raid`,
+        difficulty: 'Normal'
+      }
+    };
+    
+    res.json(detailedTransmog);
+
+  } catch (error) {
+    console.error('Error fetching transmog details:', error.message);
+    
+    res.status(500).json({ 
+      error: 'Failed to fetch transmog details',
       message: error.message
     });
   }

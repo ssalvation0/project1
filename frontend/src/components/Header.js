@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
@@ -6,7 +6,7 @@ import AuthModal from './AuthModal';
 
 function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // стан авторизації
+  const [isLoggedIn] = useState(false); // стан авторизації
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
