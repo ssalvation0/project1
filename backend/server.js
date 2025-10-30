@@ -10,6 +10,7 @@ const PORT = 5001; // Залишити 5001 як у вас
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'https://wickless-actively-nora.ngrok-free.dev', // додано явно
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
 ];
 
@@ -35,7 +36,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'WoW Transmog API Server' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, 'localhost', () => {
   console.log(`✓ Server running on port ${PORT}`);
   console.log(`✓ API available at http://localhost:${PORT}/api/transmogs`);
   console.log(`✓ CORS enabled for all origins`);

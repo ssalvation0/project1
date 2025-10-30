@@ -10,29 +10,26 @@ function Header() {
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
-      console.log("Перехід до профілю");
-      // тут буде перехід до сторінки профілю
+      // // TODO: Profile navigation
     } else {
-      setIsModalOpen(true); // якщо не залогінений - відкриваємо модальне вікно
+      setIsModalOpen(true);
     }
   };
 
   return (
     <>
-      <header className="header">
-        <div className="header-content">
+      <header className="header wide-capsule">
+        <div className="header-content" style={{width: '100%'}}>
           <Link to="/" className="logo-link">
             <img src={logo} alt="TransmogVault" className="small-logo" />
           </Link>
-
           <button 
-            className="profile-button" 
+            className="login-btn" 
             onClick={handleProfileClick}>
-            {isLoggedIn ? 'Profile' : 'Sign up'}
+            {isLoggedIn ? 'Profile' : 'Sign up / Login'}
           </button>
         </div>
       </header>
-      
       <AuthModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
