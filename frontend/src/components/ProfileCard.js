@@ -20,6 +20,24 @@ const adjust = (value, fromMin, fromMax, toMin, toMax) =>
   round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
 const easeInOutCubic = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
+function isLocalImage(url) {
+  if (!url) return false;
+  try {
+    // Treat relative paths as local
+    const isAbsolute = /^(https?:)?\/\//.test(url);
+    if (!isAbsolute) return true;
+    const u = new URL(url, window.location.origin);
+    return u.origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function toFormat(url, ext) {
+  if (!url) return url;
+  return url.replace(/\.(png|jpe?g|svg)$/i, `.${ext}`);
+}
+
 const ProfileCardComponent = ({
   avatarUrl,
   iconUrl,
@@ -38,7 +56,10 @@ const ProfileCardComponent = ({
   contactText = 'View Sets',
   showUserInfo = true,
   onContactClick,
-  onClick
+  onClick,
+  imageLoading = 'lazy',
+  imageFetchPriority = 'low',
+  imageSizes = '(max-width: 768px) 50vw, 25vw'
 }) => {
   const wrapRef = useRef(null);
   const cardRef = useRef(null);
@@ -199,6 +220,10 @@ const ProfileCardComponent = ({
     onClick?.();
   }, [onClick]);
 
+  const local = isLocalImage(avatarUrl);
+  const avif = local ? toFormat(avatarUrl, 'avif') : null;
+  const webp = local ? toFormat(avatarUrl, 'webp') : null;
+
   return (
     <div 
       ref={wrapRef} 
@@ -215,7 +240,10 @@ const ProfileCardComponent = ({
               className="avatar"
               src={avatarUrl}
               alt={`${name || 'Class'} avatar`}
-              loading="lazy"
+              loading={imageLoading}
+              decoding="async"
+              fetchpriority={imageFetchPriority}
+              sizes={imageSizes}
               onError={e => {
                 e.target.style.display = 'none';
               }}

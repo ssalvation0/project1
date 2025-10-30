@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './AuthModal.css';
 import Stepper, { Step } from './Stepper.jsx';
 
@@ -9,14 +9,60 @@ function AuthModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKey = (e) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                onClose?.();
+            }
+            if (e.key === 'Tab') {
+                // focus trap
+                const focusables = modalRef.current?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (!focusables || focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            }
+        };
+        document.addEventListener('keydown', handleKey);
+        // move focus inside modal on open
+        setTimeout(() => {
+            const firstInput = modalRef.current?.querySelector('input, button');
+            firstInput?.focus();
+        }, 0);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div
+                className="modal-content"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="auth-modal-title"
+                ref={modalRef}
+            >
+                <button className="modal-close" aria-label="Close" onClick={onClose}>×</button>
 
                 {isLogin ? (
                     <form className="auth-form">
+                        <h2 id="auth-modal-title" style={{marginBottom: 10}}>Login</h2>
                         <input type="email" placeholder="Email" />
                         <input type="password" placeholder="Password" />
                         <button type="submit">Login</button>
@@ -25,13 +71,16 @@ function AuthModal({ isOpen, onClose }) {
                             <span 
                                 className="auth-link" 
                                 onClick={() => setIsLogin(false)}
+                                role="button"
+                                tabIndex={0}
                             >
                                 Register
                             </span>
                         </p>
                     </form>
                 ) : (
-                    <div className = "auth-form">
+                    <div className = "auth-form" aria-labelledby="auth-modal-title">
+                        <h2 id="auth-modal-title" style={{marginBottom: 10}}>Register</h2>
                         <Stepper
                             initialStep={1}
                             onStepChange={(step) => {
@@ -84,6 +133,8 @@ function AuthModal({ isOpen, onClose }) {
                             <span
                                 className="auth-link"
                                 onClick={() => setIsLogin(true)}
+                                role="button"
+                                tabIndex={0}
                             >
                                 Login
                             </span>

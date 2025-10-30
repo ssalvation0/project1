@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '../components/ToastProvider';
 import '../styles/Catalog.css';
 
 const API_URL = '/api/transmogs';
@@ -21,83 +23,63 @@ const WARCRAFT_CLASSES = [
   { value: 'evoker', label: 'Evoker' }
 ];
 
+async function fetchTransmogsRequest(page) {
+  const url = `${API_URL}?page=${page}&limit=20`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 function Catalog() {
-  const [transmogs, setTransmogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  // Завантаження улюблених з localStorage
   useEffect(() => {
     const savedFavorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     setFavorites(savedFavorites);
   }, []);
 
-  const fetchTransmogs = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const url = `${API_URL}?page=${currentPage}&limit=20`;
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Фільтрація на клієнті
-      let filteredTransmogs = data.transmogs || [];
-      if (filter !== 'all') {
-        filteredTransmogs = filteredTransmogs.filter(t => 
-          t.class?.toLowerCase() === filter.toLowerCase()
-        );
-      }
-      
-      setTransmogs(filteredTransmogs);
-      setTotalPages(data.pagination?.totalPages || 0);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching transmogs:', err);
-      setError(err.message);
-      setLoading(false);
-    }
-  }, [currentPage, filter]);
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
+    queryKey: ['transmogs', currentPage],
+    queryFn: () => fetchTransmogsRequest(currentPage),
+    staleTime: 60_000,
+    keepPreviousData: true
+  });
 
   useEffect(() => {
-    fetchTransmogs();
-  }, [fetchTransmogs]);
+    if (error) {
+      showToast('Failed to load catalog. Please retry.', { type: 'error', duration: 3000 });
+    }
+  }, [error, showToast]);
 
   // Debounce для пошуку
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      // Фільтрація по пошуковому запиту
-      if (searchQuery) {
-        setCurrentPage(0);
-      }
+      if (searchQuery) setCurrentPage(0);
     }, 500);
-
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Фільтрація пошуку
+  const transmogsRaw = data?.transmogs || [];
+  const totalPages = data?.pagination?.totalPages || 0;
+
   const filteredTransmogs = useMemo(() => {
-    if (!searchQuery) return transmogs;
-    
-    const query = searchQuery.toLowerCase();
-    return transmogs.filter(transmog =>
-      transmog.name?.toLowerCase().includes(query) ||
-      transmog.class?.toLowerCase().includes(query) ||
-      transmog.expansion?.toLowerCase().includes(query)
+    let arr = transmogsRaw;
+    if (filter !== 'all') {
+      arr = arr.filter(t => t.class?.toLowerCase() === filter.toLowerCase());
+    }
+    if (!searchQuery) return arr;
+    const q = searchQuery.toLowerCase();
+    return arr.filter(transmog =>
+      transmog.name?.toLowerCase().includes(q) ||
+      transmog.class?.toLowerCase().includes(q) ||
+      transmog.expansion?.toLowerCase().includes(q)
     );
-  }, [transmogs, searchQuery]);
+  }, [transmogsRaw, filter, searchQuery]);
 
   const handleFilterChange = useCallback((newFilter) => {
     setFilter(newFilter);
@@ -105,15 +87,11 @@ function Catalog() {
   }, []);
 
   const handleNextPage = useCallback(() => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage(prev => prev + 1);
-    }
+    if (currentPage < totalPages - 1) setCurrentPage(prev => prev + 1);
   }, [currentPage, totalPages]);
 
   const handlePrevPage = useCallback(() => {
-    if (currentPage > 0) {
-      setCurrentPage(prev => prev - 1);
-    }
+    if (currentPage > 0) setCurrentPage(prev => prev - 1);
   }, [currentPage]);
 
   const handleTransmogClick = useCallback((id) => {
@@ -121,19 +99,35 @@ function Catalog() {
   }, [navigate]);
 
   const toggleFavorite = useCallback((transmogId) => {
-    const newFavorites = favorites.includes(transmogId)
+    const already = favorites.includes(transmogId);
+    const newFavorites = already
       ? favorites.filter(favId => favId !== transmogId)
       : [...favorites, transmogId];
-    
     setFavorites(newFavorites);
     localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
-  }, [favorites]);
+    showToast(already ? 'Removed from favorites' : 'Added to favorites', { type: already ? 'info' : 'success' });
+  }, [favorites, showToast]);
 
-  if (loading) {
+  if (isLoading || isFetching) {
     return (
-      <div className="catalog-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading transmogs...</p>
+      <div className="catalog-page">
+        <div className="catalog-header">
+          <h1>Transmog Catalog</h1>
+          <div className="search-container">
+            <input type="text" className="search-input" placeholder="Search transmogs..." disabled />
+          </div>
+        </div>
+        <div className="catalog-skeleton-grid">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="skeleton-card">
+              <div className="skeleton-shimmer" />
+              <div className="skeleton-footer">
+                <div className="skeleton-title" />
+                <div className="skeleton-badge" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -141,8 +135,8 @@ function Catalog() {
   if (error) {
     return (
       <div className="catalog-error">
-        <p>Error loading transmogs: {error}</p>
-        <button onClick={fetchTransmogs}>Retry</button>
+        <p>Error loading transmogs: {error.message}</p>
+        <button onClick={() => refetch()}>Retry</button>
       </div>
     );
   }
@@ -187,9 +181,7 @@ function Catalog() {
                 key={transmog.id}
                 className="catalog-item"
                 style={{ 
-                  backgroundImage: transmog.iconUrl 
-                    ? `url(${transmog.iconUrl})` 
-                    : 'none',
+                  backgroundImage: transmog.iconUrl ? `url(${transmog.iconUrl})` : 'none',
                   backgroundColor: !transmog.iconUrl ? 'rgba(40, 30, 20, 0.8)' : 'transparent'
                 }}
               >

@@ -7,6 +7,13 @@
 .catalog-header {
   text-align: center;
   margin-bottom: 60px;
+  position: sticky;
+  top: 90px; /* below header */
+  z-index: 900;
+  background: rgba(20, 15, 10, 0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(229, 211, 179, 0.18);
+  padding-top: 10px;
 }
 
 .catalog-header h1 {
@@ -63,6 +70,7 @@
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  aspect-ratio: 4 / 5;
 }
 
 .catalog-item-content {
@@ -193,8 +201,8 @@
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,6 +210,7 @@
   transition: all 0.3s ease;
   font-size: 1.2rem;
   z-index: 3;
+  touch-action: manipulation;
 }
 
 .favorite-button:hover {
@@ -466,4 +475,56 @@
   border-color: #f5e5c5;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(229, 211, 179, 0.3);
+}
+
+/* Skeleton grid while loading */
+.catalog-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+.skeleton-card {
+  position: relative;
+  height: 350px;
+  border: 2.5px solid #e5d3b3;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(40, 30, 20, 0.6);
+}
+
+.skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(229,211,179,0.06) 0%, rgba(229,211,179,0.18) 50%, rgba(229,211,179,0.06) 100%);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-footer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 18px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%);
+}
+
+.skeleton-title, .skeleton-badge {
+  height: 16px;
+  background: rgba(229,211,179,0.18);
+  border-radius: 3px;
+}
+
+.skeleton-title { width: 70%; margin-bottom: 10px; }
+.skeleton-badge { width: 35%; }
+
+/* Respect reduced motion: stop shimmer */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none !important; }
 }

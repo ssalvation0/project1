@@ -1,68 +1,56 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '../components/ToastProvider';
 import '../styles/TransmogDetail.css';
 
 const API_URL = '/api/transmogs';
 
+async function fetchTransmogById(id) {
+  const res = await fetch(`${API_URL}/${id}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 function TransmogDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [transmog, setTransmog] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Завантаження улюблених з localStorage
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     setIsFavorite(favorites.includes(parseInt(id)));
   }, [id]);
 
-  // Завантаження деталей transmog
+  const { data: transmog, isLoading, error, refetch } = useQuery({
+    queryKey: ['transmog', id],
+    queryFn: () => fetchTransmogById(id),
+    enabled: Boolean(id)
+  });
+
   useEffect(() => {
-    const fetchTransmogDetails = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch(`${API_URL}/${id}`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setTransmog(data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching transmog details:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchTransmogDetails();
+    if (error) {
+      showToast('Failed to load set details. Please retry.', { type: 'error', duration: 3000 });
     }
-  }, [id]);
+  }, [error, showToast]);
 
-  // Додавання/видалення з улюблених
   const toggleFavorite = useCallback(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     const transmogId = parseInt(id);
-    
     if (isFavorite) {
       const newFavorites = favorites.filter(favId => favId !== transmogId);
       localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
+      showToast('Removed from favorites', { type: 'info' });
     } else {
       const newFavorites = [...favorites, transmogId];
       localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
+      showToast('Added to favorites', { type: 'success' });
     }
-    
     setIsFavorite(!isFavorite);
-  }, [id, isFavorite]);
+  }, [id, isFavorite, showToast]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="transmog-detail-loading">
         <div className="loading-spinner"></div>
@@ -74,8 +62,9 @@ function TransmogDetail() {
   if (error) {
     return (
       <div className="transmog-detail-error">
-        <p>Error loading transmog: {error}</p>
+        <p>Error loading transmog: {error.message}</p>
         <button onClick={() => navigate('/catalog')}>Back to Catalog</button>
+        <button onClick={() => refetch()}>Retry</button>
       </div>
     );
   }
@@ -91,6 +80,10 @@ function TransmogDetail() {
 
   return (
     <div className="transmog-detail-page">
+      <nav style={{padding: '16px 20px', maxWidth: 1400, margin: '0 auto'}} aria-label="Breadcrumb">
+        <Link to="/" style={{color:'#e5d3b3'}}>Home</Link> <span style={{opacity:.6}}>/</span> <Link to="/catalog" style={{color:'#e5d3b3'}}>Catalog</Link> <span style={{opacity:.6}}>/</span> <span aria-current="page">{transmog.name}</span>
+      </nav>
+
       <div className="transmog-detail-header">
         <button 
           className="back-button"
@@ -118,6 +111,10 @@ function TransmogDetail() {
                 src={transmog.iconUrl} 
                 alt={transmog.name}
                 className="transmog-icon"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+                sizes="(max-width: 768px) 90vw, 600px"
               />
             ) : (
               <div className="transmog-icon-placeholder">
@@ -167,7 +164,7 @@ function TransmogDetail() {
                 <div key={index} className="item-card">
                   <div className="item-icon">
                     {item.iconUrl ? (
-                      <img src={item.iconUrl} alt={item.name} />
+                      <img src={item.iconUrl} alt={item.name} loading="lazy" decoding="async" fetchpriority="low" />
                     ) : (
                       <div className="item-icon-placeholder">?</div>
                     )}

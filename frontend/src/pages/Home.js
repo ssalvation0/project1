@@ -32,6 +32,7 @@ function Home() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
+  const heroRef = useRef(null);
 
   const classImageMap = {
     'warrior': 'warrior',
@@ -55,7 +56,13 @@ function Home() {
 
   useEffect(() => {
     let rafId;
-    
+    const updateParallax = () => {
+      if (heroRef.current) {
+        const y = window.scrollY || 0;
+        heroRef.current.style.setProperty('--hero-parallax', `${y}`);
+      }
+    };
+
     const handleScroll = () => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
@@ -65,26 +72,22 @@ function Home() {
           setShowScrollIndicator(true);
         }
 
-        // Анімація карток при скролі
+        updateParallax();
+
         if (cardsRef.current && !animateCards) {
           const rect = cardsRef.current.getBoundingClientRect();
           const isVisible = rect.top < window.innerHeight * 0.75;
-          
-          if (isVisible) {
-            setAnimateCards(true);
-          }
+          if (isVisible) setAnimateCards(true);
         }
       });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Перевірка при завантаженні сторінки
-    
+    handleScroll();
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-      }
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [animateCards]);
 
@@ -99,7 +102,7 @@ function Home() {
 
   return (
     <div className="home-bg">
-      <section className="hero-section">
+      <section className="hero-section" ref={heroRef}>
         <div className="hero-content">
           <h1 className="hero-title">
             Explore epic transmogs that
