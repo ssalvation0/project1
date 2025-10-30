@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Catalog.css';
 
-const API_URL = 'http://localhost:5001/api/transmogs';
+const API_URL = '/api/transmogs';
 
 const WARCRAFT_CLASSES = [
   { value: 'all', label: 'All' },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/TransmogDetail.css';
 
-const API_URL = 'http://localhost:5001/api/transmogs';
+const API_URL = '/api/transmogs';
 
 function TransmogDetail() {
   const { id } = useParams();
