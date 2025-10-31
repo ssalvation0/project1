@@ -130,12 +130,13 @@ function Home() {
       </section>
 
       {showCards && (
-        <div className="profile-cards-container" ref={cardsRef}>
+        <main className="profile-cards-container" ref={cardsRef}>
           <div className={`cards-grid ${animateCards ? 'animate' : ''}`}>
             {warcraftClasses.map((cls, idx) => {
               const slug = cls.name.toLowerCase().replace(/ /g, '');
               const imageKey = classImageMap[slug] || slug;
               const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
+              const isAboveFold = idx < 4;
               
               return (
                 <div 
@@ -155,6 +156,9 @@ function Home() {
                     onClick={() => navigate(`/catalog?class=${slug}`)}
                     onContactClick={() => navigate(`/catalog?class=${slug}`)}
                     behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${cls.color}66 4%, ${cls.color}44 10%, ${cls.color}22 50%, transparent 100%)`}
+                    imageLoading={isAboveFold ? 'eager' : 'lazy'}
+                    imageFetchPriority={isAboveFold ? 'high' : 'low'}
+                    imageSizes="(max-width: 768px) 50vw, 25vw"
                   />
                 </div>
               );
@@ -198,7 +202,7 @@ function Home() {
               />
             </div>
           </div>
-        </div>
+        </main>
       )}
     </div>
   );

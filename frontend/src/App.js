@@ -26,20 +26,43 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // JSON-LD Structured Data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "TransmogVault",
+    "description": "Browse and explore epic World of Warcraft transmog sets. Find inspiration for your character's style.",
+    "url": "https://wickless-actively-nora.ngrok-free.dev",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://wickless-actively-nora.ngrok-free.dev/catalog?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <Router>
       <ToastProvider>
         <div className="App">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
           <div 
             className="background-image"
             style={{ 
               backgroundImage: `url(${backgroundImage})`,
               opacity: 1 
             }}
+            aria-hidden="true"
           />
           <div 
             className="background-overlay"
             style={{ opacity: scrollOpacity }}
+            aria-hidden="true"
           />
           <Particles />
           <Header />

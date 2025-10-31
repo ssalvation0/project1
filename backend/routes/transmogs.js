@@ -2,12 +2,19 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const NodeCache = require('node-cache');
+const fs = require('fs').promises;
+const path = require('path');
+const { getAllItemSets, getItemSetDetails } = require('../utils/blizzardAPI');
+const { getWowheadSetImage } = require('../utils/wowheadParser');
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
 const CLIENT_ID = process.env.BLIZZARD_CLIENT_ID;
 const CLIENT_SECRET = process.env.BLIZZARD_CLIENT_SECRET;
 const REGION = process.env.BLIZZARD_REGION || 'us';
+
+// Шлях до файлу з кешованими сетами
+const TRANSMOGS_DATA_FILE = path.join(__dirname, '../data/transmogs.json');
 
 if (!CLIENT_ID || !CLIENT_SECRET) {
   console.error('❌ ERROR: BLIZZARD_CLIENT_ID or BLIZZARD_CLIENT_SECRET is missing in .env file!');
@@ -52,44 +59,45 @@ async function getAccessToken() {
 }
 
 // Class icons/colors
+// Використовуємо Wowhead для іконок класів (більш надійні, великі зображення)
 const classIcons = {
-  'Warrior': 'https://render.worldofwarcraft.com/us/icons/56/classicon_warrior.jpg',
-  'Paladin': 'https://render.worldofwarcraft.com/us/icons/56/classicon_paladin.jpg',
-  'Hunter': 'https://render.worldofwarcraft.com/us/icons/56/classicon_hunter.jpg',
-  'Rogue': 'https://render.worldofwarcraft.com/us/icons/56/classicon_rogue.jpg',
-  'Priest': 'https://render.worldofwarcraft.com/us/icons/56/classicon_priest.jpg',
-  'Shaman': 'https://render.worldofwarcraft.com/us/icons/56/classicon_shaman.jpg',
-  'Mage': 'https://render.worldofwarcraft.com/us/icons/56/classicon_mage.jpg',
-  'Warlock': 'https://render.worldofwarcraft.com/us/icons/56/classicon_warlock.jpg',
-  'Druid': 'https://render.worldofwarcraft.com/us/icons/56/classicon_druid.jpg',
-  'Death Knight': 'https://render.worldofwarcraft.com/us/icons/56/classicon_deathknight.jpg',
-  'Monk': 'https://render.worldofwarcraft.com/us/icons/56/classicon_monk.jpg',
-  'Demon Hunter': 'https://render.worldofwarcraft.com/us/icons/56/classicon_demonhunter.jpg'
+  'Warrior': 'https://wow.zamimg.com/images/wow/icons/large/classicon_warrior.jpg',
+  'Paladin': 'https://wow.zamimg.com/images/wow/icons/large/classicon_paladin.jpg',
+  'Hunter': 'https://wow.zamimg.com/images/wow/icons/large/classicon_hunter.jpg',
+  'Rogue': 'https://wow.zamimg.com/images/wow/icons/large/classicon_rogue.jpg',
+  'Priest': 'https://wow.zamimg.com/images/wow/icons/large/classicon_priest.jpg',
+  'Shaman': 'https://wow.zamimg.com/images/wow/icons/large/classicon_shaman.jpg',
+  'Mage': 'https://wow.zamimg.com/images/wow/icons/large/classicon_mage.jpg',
+  'Warlock': 'https://wow.zamimg.com/images/wow/icons/large/classicon_warlock.jpg',
+  'Druid': 'https://wow.zamimg.com/images/wow/icons/large/classicon_druid.jpg',
+  'Death Knight': 'https://wow.zamimg.com/images/wow/icons/large/classicon_deathknight.jpg',
+  'Monk': 'https://wow.zamimg.com/images/wow/icons/large/classicon_monk.jpg',
+  'Demon Hunter': 'https://wow.zamimg.com/images/wow/icons/large/classicon_demonhunter.jpg',
+  'Evoker': 'https://wow.zamimg.com/images/wow/icons/large/classicon_evoker.jpg'
 };
 
-// Тимчасові дані для тестування
-const mockTransmogData = [
-  { id: 1, name: "Tier 1 - Might (Warrior)", class: "Warrior", expansion: "Classic" },
-  { id: 2, name: "Tier 1 - Wrath (Rogue)", class: "Rogue", expansion: "Classic" },
-  { id: 3, name: "Tier 1 - Vestments of Prophecy (Priest)", class: "Priest", expansion: "Classic" },
-  { id: 4, name: "Tier 1 - Cenarion Raiment (Druid)", class: "Druid", expansion: "Classic" },
-  { id: 5, name: "Tier 2 - Judgment (Paladin)", class: "Paladin", expansion: "Classic" },
-  { id: 6, name: "Tier 2 - Nemesis (Warlock)", class: "Warlock", expansion: "Classic" },
-  { id: 7, name: "Tier 2 - Netherwind (Mage)", class: "Mage", expansion: "Classic" },
-  { id: 8, name: "Tier 2 - Dragonstalker (Hunter)", class: "Hunter", expansion: "Classic" },
-  { id: 9, name: "Tier 3 - Dreadnaught (Warrior)", class: "Warrior", expansion: "Classic" },
-  { id: 10, name: "Tier 3 - Bonescythe (Rogue)", class: "Rogue", expansion: "Classic" },
-  { id: 11, name: "Tier 4 - Justicar (Paladin)", class: "Paladin", expansion: "TBC" },
-  { id: 12, name: "Tier 4 - Demon Stalker (Hunter)", class: "Hunter", expansion: "TBC" },
-  { id: 13, name: "Tier 5 - Crystalforge (Paladin)", class: "Paladin", expansion: "TBC" },
-  { id: 14, name: "Tier 6 - Lightbringer (Paladin)", class: "Paladin", expansion: "TBC" },
-  { id: 15, name: "Tier 7 - Heroes' Dreadnaught (Warrior)", class: "Warrior", expansion: "WotLK" },
-  { id: 16, name: "Tier 8 - Conqueror's Siegebreaker (Warrior)", class: "Warrior", expansion: "WotLK" },
-  { id: 17, name: "Tier 9 - Wrynn's Battlegear (Warrior)", class: "Warrior", expansion: "WotLK" },
-  { id: 18, name: "Tier 10 - Sanctified Ymirjar Lord's Battlegear", class: "Warrior", expansion: "WotLK" },
-  { id: 19, name: "Bloodfang Armor (Rogue)", class: "Rogue", expansion: "Classic" },
-  { id: 20, name: "Vestments of Faith (Priest)", class: "Priest", expansion: "Classic" }
-];
+// Функція для завантаження трансмогів з файлу
+async function loadTransmogsFromFile() {
+  try {
+    const data = await fs.readFile(TRANSMOGS_DATA_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.warn('⚠️ Файл з трансмогами не знайдено, використовуються mock дані');
+    // Fallback до mock даних
+    return [
+      { id: 1, name: "Tier 1 - Might (Warrior)", class: "Warrior", expansion: "Classic", iconUrl: classIcons['Warrior'] },
+      { id: 2, name: "Tier 1 - Wrath (Rogue)", class: "Rogue", expansion: "Classic", iconUrl: classIcons['Rogue'] },
+      { id: 3, name: "Tier 1 - Vestments of Prophecy (Priest)", class: "Priest", expansion: "Classic", iconUrl: classIcons['Priest'] },
+      { id: 4, name: "Tier 1 - Cenarion Raiment (Druid)", class: "Druid", expansion: "Classic", iconUrl: classIcons['Druid'] },
+      { id: 5, name: "Tier 2 - Judgment (Paladin)", class: "Paladin", expansion: "Classic", iconUrl: classIcons['Paladin'] },
+      { id: 6, name: "Tier 2 - Nemesis (Warlock)", class: "Warlock", expansion: "Classic", iconUrl: classIcons['Warlock'] },
+      { id: 7, name: "Tier 2 - Netherwind (Mage)", class: "Mage", expansion: "Classic", iconUrl: classIcons['Mage'] },
+      { id: 8, name: "Tier 2 - Dragonstalker (Hunter)", class: "Hunter", expansion: "Classic", iconUrl: classIcons['Hunter'] },
+      { id: 9, name: "Tier 3 - Dreadnaught (Warrior)", class: "Warrior", expansion: "Classic", iconUrl: classIcons['Warrior'] },
+      { id: 10, name: "Tier 3 - Bonescythe (Rogue)", class: "Rogue", expansion: "Classic", iconUrl: classIcons['Rogue'] }
+    ];
+  }
+}
 
 // Функція для генерації mock предметів сету
 function generateMockItems(className, expansion) {
@@ -110,26 +118,92 @@ function generateMockItems(className, expansion) {
 
 router.get('/', async (req, res) => {
   try {
-    const { page = 0, limit = 20 } = req.query;
+    const { page = 0, limit = 20, class: classFilter } = req.query;
     const offset = parseInt(page) * parseInt(limit);
 
-    // Використовуємо mock дані з іконками класів
-    const paginatedData = mockTransmogData.slice(offset, offset + parseInt(limit));
+    // Завантажуємо трансмоги з файлу або fallback до mock
+    let transmogsData = await loadTransmogsFromFile();
+
+    // Фільтрація за класом якщо вказано
+    if (classFilter && classFilter !== 'all') {
+      transmogsData = transmogsData.filter(item => {
+        const itemClass = (item.class || '').toLowerCase().replace(/\s+/g, '');
+        const filterClass = classFilter.toLowerCase();
+        return itemClass === filterClass || itemClass.includes(filterClass);
+      });
+    }
+
+    // Пагінація
+    const totalItems = transmogsData.length;
+    const paginatedData = transmogsData.slice(offset, offset + parseInt(limit));
     
     const result = {
-      transmogs: paginatedData.map(item => ({
-        id: item.id,
-        name: item.name,
-        iconUrl: classIcons[item.class] || null,
-        items: [],
-        class: item.class,
-        expansion: item.expansion
+      transmogs: await Promise.all(paginatedData.map(async (item) => {
+        // Пріоритет: imageUrl (велике зображення 512x512) -> iconUrl (56x56) -> іконка класу
+        let imageUrl = item.imageUrl || item.iconUrl;
+        
+        // Якщо iconUrl це placeholder або не існує, але є setId - спробуємо отримати з API
+        if ((!imageUrl || imageUrl.includes('questionmark')) && item.setId) {
+          try {
+            const { getItemSetDetails } = require('../utils/blizzardAPI');
+            const details = await getItemSetDetails(item.setId);
+            if (details && details.imageUrl && !details.imageUrl.includes('questionmark')) {
+              imageUrl = details.imageUrl; // Це вже велике зображення (512x512)
+            } else {
+              // Якщо Blizzard API не має зображення, спробуємо Wowhead
+              const wowheadImage = await getWowheadSetImage(item.setId);
+              if (wowheadImage) {
+                imageUrl = wowheadImage;
+              }
+            }
+          } catch (error) {
+            // Якщо Blizzard API не спрацював, спробуємо Wowhead
+            if (item.setId) {
+              try {
+                const wowheadImage = await getWowheadSetImage(item.setId);
+                if (wowheadImage) {
+                  imageUrl = wowheadImage;
+                }
+              } catch (wowheadError) {
+                // Ігноруємо помилку Wowhead
+              }
+            }
+          }
+        }
+        
+        // Якщо є iconUrl (не placeholder), конвертуємо в велике зображення
+        if (imageUrl && !imageUrl.includes('questionmark') && imageUrl.includes('/icons/56/')) {
+          // Конвертуємо з 56x56 на 512x512
+          imageUrl = imageUrl.replace(/\/icons\/\d+\//, '/icons/512/');
+        }
+        
+        // Якщо все ще немає зображення або це placeholder, використовуємо іконку класу
+        if (!imageUrl || imageUrl.includes('questionmark')) {
+          // Використовуємо іконку класу з Wowhead (вже велика)
+          imageUrl = classIcons[item.class] || classIcons['Warrior'] || classIcons['Warrior'];
+        }
+        
+        // Гарантуємо, що imageUrl завжди має значення
+        if (!imageUrl) {
+          imageUrl = classIcons['Warrior'];
+        }
+        
+        return {
+          id: item.id,
+          name: item.name,
+          iconUrl: imageUrl, // Для картки використовуємо зображення сету
+          imageUrl: imageUrl, // Зберігаємо також як imageUrl
+          items: item.items || [],
+          class: item.class || 'All',
+          expansion: item.expansion || 'Unknown',
+          setId: item.setId // Зберігаємо setId для можливості створення Wowhead URL
+        };
       })),
       pagination: {
         currentPage: parseInt(page),
-        totalItems: mockTransmogData.length,
+        totalItems: totalItems,
         itemsPerPage: parseInt(limit),
-        totalPages: Math.ceil(mockTransmogData.length / parseInt(limit))
+        totalPages: Math.ceil(totalItems / parseInt(limit))
       }
     };
 
@@ -151,8 +225,32 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     const transmogId = parseInt(id);
     
-    // Знаходимо transmog в mock даних
-    const transmog = mockTransmogData.find(item => item.id === transmogId);
+    // Завантажуємо трансмоги
+    const transmogsData = await loadTransmogsFromFile();
+    let transmog = transmogsData.find(item => item.id === transmogId);
+    
+    // Якщо не знайдено в файлі, намагаємось отримати з Blizzard API по setId
+    if (!transmog && transmogId > 0 && transmogId < 1000) {
+      // Спробуємо завантажити деталі з API
+      try {
+        const details = await getItemSetDetails(transmogId);
+        if (details) {
+          transmog = {
+            id: transmogId,
+            setId: transmogId,
+            name: details.name,
+            iconUrl: details.imageUrl,
+            class: details.classes && details.classes.length > 0 
+              ? details.classes[0].charAt(0).toUpperCase() + details.classes[0].slice(1)
+              : 'All',
+            expansion: 'Unknown',
+            description: details.description
+          };
+        }
+      } catch (apiError) {
+        console.warn('Не вдалося завантажити з API:', apiError.message);
+      }
+    }
     
     if (!transmog) {
       return res.status(404).json({ 
@@ -165,19 +263,21 @@ router.get('/:id', async (req, res) => {
     const detailedTransmog = {
       id: transmog.id,
       name: transmog.name,
-      iconUrl: classIcons[transmog.class] || null,
-      class: transmog.class,
-      expansion: transmog.expansion,
-      description: `Epic transmog set from ${transmog.expansion} expansion. This set provides unique visual appearance for ${transmog.class} characters.`,
-      items: generateMockItems(transmog.class, transmog.expansion),
-      stats: {
+      iconUrl: transmog.iconUrl || classIcons[transmog.class] || null,
+      class: transmog.class || 'All',
+      expansion: transmog.expansion || 'Unknown',
+      description: transmog.description || `Epic transmog set from ${transmog.expansion || 'World of Warcraft'}. This set provides unique visual appearance for ${transmog.class || 'all'} characters.`,
+      items: transmog.items && transmog.items.length > 0 
+        ? transmog.items 
+        : generateMockItems(transmog.class || 'All', transmog.expansion || 'Unknown'),
+      stats: transmog.stats || {
         itemLevel: 60 + Math.floor(Math.random() * 40),
         requiredLevel: 60,
         durability: 100
       },
-      source: {
+      source: transmog.source || {
         type: 'Raid',
-        location: `${transmog.expansion} Raid`,
+        location: `${transmog.expansion || 'Unknown'} Raid`,
         difficulty: 'Normal'
       }
     };

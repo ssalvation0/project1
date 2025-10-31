@@ -18,18 +18,20 @@ function Header() {
 
   return (
     <>
-      <header className="header wide-capsule">
+      <nav className="header wide-capsule" role="navigation" aria-label="Main navigation">
         <div className="header-content" style={{width: '100%'}}>
-          <Link to="/" className="logo-link">
+          <Link to="/" className="logo-link" aria-label="TransmogVault Home">
             <img src={logo} alt="TransmogVault" className="small-logo" />
           </Link>
           <button 
             className="login-btn" 
-            onClick={handleProfileClick}>
+            onClick={handleProfileClick}
+            aria-label={isLoggedIn ? 'Open profile' : 'Sign up or login'}
+          >
             {isLoggedIn ? 'Profile' : 'Sign up / Login'}
           </button>
         </div>
-      </header>
+      </nav>
       <AuthModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

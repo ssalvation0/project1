@@ -1,55 +1,158 @@
 .catalog-page {
   min-height: 100vh;
   background: none;
-  padding: 120px 20px 60px;
+  padding: 140px 20px 60px; /* Збільшено padding-top для більшого відступу від верху */
 }
 
 .catalog-header {
   text-align: center;
   margin-bottom: 60px;
   position: sticky;
-  top: 90px; /* below header */
+  top: 110px; /* Більше відступу від верху, щоб не обрізалось */
   z-index: 900;
-  background: rgba(20, 15, 10, 0.75);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(229, 211, 179, 0.18);
-  padding-top: 10px;
+  background: rgba(20, 15, 10, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(229, 211, 179, 0.25);
+  padding: 40px 20px 40px; /* Збільшено padding-bottom для dropdown */
+  border-radius: 20px; /* Повністю заокруглені кути */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  margin-top: 20px; /* Додатковий відступ зверху */
+  overflow: visible; /* Дозволяємо dropdown виходити за межі */
 }
 
 .catalog-header h1 {
   font-family: 'Cinzel', serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
-  color: #e5d3b3;
+  color: #f2e6c9;
   margin-bottom: 30px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
 }
 
 /* Фільтри */
 .catalog-filters {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 20px;
   margin-top: 30px;
+  max-width: 100%;
+  overflow: visible; /* Дозволяємо overflow для dropdown */
 }
 
-.catalog-filters button {
-  padding: 10px 20px;
-  background: rgba(40, 30, 20, 0.6);
-  border: 2px solid #e5d3b3;
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  position: relative; /* Для правильного позиціонування dropdown */
+}
+
+.filter-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  color: #e5d3b3;
+  font-weight: 600;
+  margin-right: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.sort-select {
+  padding: 10px 40px 10px 16px; /* Додано padding-right для стрілки */
+  background: rgba(40, 30, 20, 0.7);
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  border-radius: 25px;
   color: #e5d3b3;
   font-family: 'Raleway', sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  appearance: none; /* Прибираємо стандартну стрілку */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5d3b3' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px;
+  min-width: 140px; /* Мінімальна ширина для вміщення тексту */
+  position: relative;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+  border-color: rgba(229, 211, 179, 0.6);
+  background-color: rgba(229, 211, 179, 0.15);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f2e6c9' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.sort-select option {
+  background: rgba(20, 15, 10, 0.95);
+  color: #e5d3b3;
+  padding: 10px;
+}
+
+.sort-order-btn {
+  padding: 10px 16px;
+  min-width: 50px;
+  height: 44px; /* Висота як у select для вирівнювання */
+  background: rgba(40, 30, 20, 0.7);
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  border-radius: 25px;
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
-.catalog-filters button:hover,
-.catalog-filters button.active {
-  background: rgba(229, 211, 179, 0.2);
-  border-color: #f5e5c5;
+.sort-order-btn:hover {
+  background: rgba(229, 211, 179, 0.15);
+  border-color: rgba(229, 211, 179, 0.6);
+}
+
+.sort-order-btn.active {
+  background: rgba(229, 211, 179, 0.25);
+  border-color: #e5d3b3;
+}
+
+.catalog-filters button {
+  padding: 12px 24px;
+  background: rgba(40, 30, 20, 0.7);
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  letter-spacing: 0.02em;
+}
+
+.catalog-filters button:hover {
+  background: rgba(229, 211, 179, 0.15);
+  border-color: rgba(229, 211, 179, 0.6);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(229, 211, 179, 0.3);
+  box-shadow: 0 6px 16px rgba(229, 211, 179, 0.25);
+}
+
+.catalog-filters button.active {
+  background: linear-gradient(135deg, rgba(229, 211, 179, 0.25) 0%, rgba(201, 184, 151, 0.25) 100%);
+  border-color: #e5d3b3;
+  color: #f2e6c9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 211, 179, 0.4),
+              inset 0 0 20px rgba(229, 211, 179, 0.1);
 }
 
 /* Сітка трансмогів */
@@ -64,13 +167,25 @@
 .catalog-item {
   position: relative;
   height: 350px;
-  background-size: cover;
-  background-position: center;
-  border: 2.5px solid #e5d3b3;
+  border: 2px solid rgba(229, 211, 179, 0.4);
   cursor: pointer;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   aspect-ratio: 4 / 5;
+  background-color: rgba(20, 25, 35, 0.95);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.catalog-bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 0;
 }
 
 .catalog-item-content {
@@ -78,24 +193,56 @@
   height: 100%;
   display: flex;
   align-items: flex-end;
+  position: relative;
+  z-index: 1;
 }
 
 .catalog-item::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%);
-  transition: opacity 0.3s ease;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.catalog-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .catalog-item:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.5),
-              0 0 40px rgba(229, 211, 179, 0.4);
+  transform: translateY(-10px) scale(1.03);
+  z-index: 100;
+  border-color: rgba(229, 211, 179, 0.8);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(229, 211, 179, 0.4),
+    inset 0 0 80px rgba(229, 211, 179, 0.05);
 }
 
 .catalog-item:hover::before {
-  opacity: 0.5;
+  opacity: 0.3;
+}
+
+.catalog-item:hover::after {
+  opacity: 1;
 }
 
 .catalog-item-info {
@@ -105,26 +252,77 @@
   right: 0;
   padding: 20px;
   z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(10, 15, 25, 0.95) 0%,
+    rgba(10, 15, 25, 0.85) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(229, 211, 179, 0.15);
+  transition: all 0.3s ease;
 }
 
 .catalog-item-info h3 {
   font-family: 'Cinzel', serif;
   font-size: 1.3rem;
-  color: #e5d3b3;
+  font-weight: 600;
+  color: #f2e6c9;
   margin: 0 0 8px 0;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+}
+
+.catalog-item:hover .catalog-item-info {
+  background: linear-gradient(
+    to top,
+    rgba(10, 15, 25, 0.98) 0%,
+    rgba(10, 15, 25, 0.9) 50%,
+    transparent 100%
+  );
+  border-top-color: rgba(229, 211, 179, 0.3);
+}
+
+.catalog-item:hover .catalog-item-info h3 {
+  text-shadow: 0 0 20px currentColor;
+  color: #fff;
+}
+
+.catalog-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .class-badge {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border: 1px solid;
-  border-radius: 4px;
+  border-radius: 8px;
   font-family: 'Raleway', sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.expansion-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid rgba(229, 211, 179, 0.4);
+  border-radius: 8px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e5d3b3;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
 }
 
 /* Кольори класів WoW */
@@ -310,17 +508,6 @@
   margin-top: 8px;
 }
 
-.class-badge {
-  padding: 4px 10px;
-  border: 1px solid;
-  border-radius: 4px;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 /* Item count */
 .item-count {
   display: block;
@@ -343,23 +530,25 @@
 }
 
 .pagination button {
-  padding: 10px 24px;
-  background: rgba(40, 30, 20, 0.6);
-  border: 2px solid #e5d3b3;
+  padding: 12px 28px;
+  background: rgba(40, 30, 20, 0.7);
+  border: 2px solid rgba(229, 211, 179, 0.3);
   color: #e5d3b3;
   font-family: 'Raleway', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  border-radius: 25px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  letter-spacing: 0.02em;
 }
 
 .pagination button:hover:not(:disabled) {
-  background: rgba(229, 211, 179, 0.2);
-  border-color: #f5e5c5;
+  background: rgba(229, 211, 179, 0.15);
+  border-color: rgba(229, 211, 179, 0.6);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(229, 211, 179, 0.3);
+  box-shadow: 0 6px 20px rgba(229, 211, 179, 0.35);
 }
 
 .pagination button:disabled {
@@ -370,6 +559,13 @@
 .pagination span {
   font-size: 1.1rem;
   font-weight: 500;
+}
+
+.results-count {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-left: 8px;
+  font-style: italic;
 }
 
 /* Пошукова панель */
@@ -384,12 +580,13 @@
   padding: 14px 50px 14px 20px;
   font-size: 1rem;
   font-family: 'Raleway', sans-serif;
-  background: rgba(40, 30, 20, 0.6);
-  border: 2px solid #e5d3b3;
-  border-radius: 8px;
+  background: rgba(40, 30, 20, 0.7);
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  border-radius: 25px;
   color: #e5d3b3;
   transition: all 0.3s ease;
   outline: none;
+  backdrop-filter: blur(10px);
 }
 
 .search-input::placeholder {
@@ -397,9 +594,11 @@
 }
 
 .search-input:focus {
-  border-color: #f5e5c5;
-  background: rgba(40, 30, 20, 0.8);
-  box-shadow: 0 0 20px rgba(229, 211, 179, 0.3);
+  border-color: #e5d3b3;
+  background: rgba(40, 30, 20, 0.85);
+  box-shadow: 0 0 25px rgba(229, 211, 179, 0.4),
+              inset 0 0 15px rgba(229, 211, 179, 0.1);
+  transform: translateY(-1px);
 }
 
 .search-icon {
@@ -447,15 +646,23 @@
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 80px 20px;
-  color: #e5d3b3;
+  padding: 100px 20px;
+  color: #f2e6c9;
   font-family: 'Cinzel', serif;
+  background: rgba(20, 15, 10, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(229, 211, 179, 0.2);
+  margin: 40px auto;
+  max-width: 600px;
 }
 
 .no-results p {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin-bottom: 20px;
-  opacity: 0.7;
+  opacity: 0.8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
 }
 
 .clear-search-btn {
@@ -523,6 +730,37 @@
 
 .skeleton-title { width: 70%; margin-bottom: 10px; }
 .skeleton-badge { width: 35%; }
+
+/* Placeholder для карток без іконок */
+.catalog-item-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(40, 30, 20, 0.9) 0%, rgba(20, 15, 10, 0.95) 100%);
+  z-index: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+
+.placeholder-text {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  color: #e5d3b3;
+  opacity: 0.8;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  line-height: 1.3;
+  max-width: 100%;
+  word-wrap: break-word;
+}
 
 /* Respect reduced motion: stop shimmer */
 @media (prefers-reduced-motion: reduce) {
