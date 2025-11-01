@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { getAllItemSets, getItemSetDetails } = require('../utils/blizzardAPI');
 const { getWowheadSetImage } = require('../utils/wowheadParser');
+const { parseWowheadSetItems } = require('../utils/wowheadItemsParser');
 
 const cache = new NodeCache({ stdTTL: 3600 });
 
@@ -99,22 +100,6 @@ async function loadTransmogsFromFile() {
   }
 }
 
-// Функція для генерації mock предметів сету
-function generateMockItems(className, expansion) {
-  const itemSlots = [
-    'Helm', 'Shoulders', 'Chest', 'Waist', 'Legs', 
-    'Feet', 'Wrist', 'Hands', 'Back', 'Neck'
-  ];
-  
-  return itemSlots.map((slot, index) => ({
-    id: index + 1,
-    name: `${className} ${slot}`,
-    slot: slot,
-    iconUrl: classIcons[className] || null,
-    itemLevel: 60 + Math.floor(Math.random() * 20),
-    rarity: 'Epic'
-  }));
-}
 
 router.get('/', async (req, res) => {
   try {
@@ -259,17 +244,39 @@ router.get('/:id', async (req, res) => {
       });
     }
     
+    // Отримуємо предмети з файлу
+    let items = transmog.items && transmog.items.length > 0 ? transmog.items : [];
+    
+    // Якщо немає предметів, але є setId - спробуємо парсити Wowhead
+    if (items.length === 0 && transmog.setId) {
+      console.log(`📦 Завантажуємо предмети з Wowhead для сету ${transmog.setId}...`);
+      try {
+        items = await parseWowheadSetItems(transmog.setId);
+        
+        // Якщо отримали предмети з Wowhead, зберігаємо їх
+        if (items.length > 0) {
+          console.log(`  ✅ Знайдено ${items.length} предметів`);
+          // Оновлюємо локальні дані
+          transmog.items = items;
+        } else {
+          console.log(`  ℹ️ Wowhead не повернув предметів`);
+        }
+      } catch (wowheadError) {
+        console.error(`  ❌ Помилка Wowhead: ${wowheadError.message}`);
+      }
+    }
+    
     // Розширюємо дані для детальної сторінки
     const detailedTransmog = {
       id: transmog.id,
       name: transmog.name,
       iconUrl: transmog.iconUrl || classIcons[transmog.class] || null,
+      imageUrl: transmog.imageUrl || transmog.iconUrl || classIcons[transmog.class] || null,
       class: transmog.class || 'All',
       expansion: transmog.expansion || 'Unknown',
+      setId: transmog.setId,
       description: transmog.description || `Epic transmog set from ${transmog.expansion || 'World of Warcraft'}. This set provides unique visual appearance for ${transmog.class || 'all'} characters.`,
-      items: transmog.items && transmog.items.length > 0 
-        ? transmog.items 
-        : generateMockItems(transmog.class || 'All', transmog.expansion || 'Unknown'),
+      items: items,
       stats: transmog.stats || {
         itemLevel: 60 + Math.floor(Math.random() * 40),
         requiredLevel: 60,
