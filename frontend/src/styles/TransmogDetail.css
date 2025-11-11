@@ -40,16 +40,17 @@
   padding: 0 0 1rem 0;
   border-bottom: 1px solid rgba(229, 211, 179, 0.25);
   min-height: 50px;
+  gap: 1rem;
 }
 
-.back-button {
+.back-button,
+.transmog-detail-header .favorite-button {
   background: rgba(40, 30, 20, 0.7);
   border: 2px solid rgba(229, 211, 179, 0.3);
   color: #e5d3b3;
-  padding: 0.75rem 1.5rem;
+  padding: 0 1.5rem;
   border-radius: 25px;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-size: 1rem;
   font-family: 'Raleway', sans-serif;
   font-weight: 600;
@@ -61,7 +62,16 @@
   box-sizing: border-box;
   line-height: 1;
   height: 44px;
+  min-height: 44px;
+  max-height: 44px;
   margin: 0;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.back-button {
+  transition: all 0.3s ease;
+  gap: 0;
 }
 
 .back-button:hover {
@@ -71,67 +81,115 @@
   transform: translateY(-2px);
 }
 
-.favorite-button {
-  background: rgba(40, 30, 20, 0.7);
-  border: 2px solid rgba(229, 211, 179, 0.3);
-  color: #e5d3b3;
-  padding: 0.75rem 1.5rem 0.75rem 1.75rem;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), gap 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-  font-size: 1rem;
+.transmog-detail-header .favorite-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  width: auto;
+  min-width: max-content;
+  max-width: 100%;
+}
+
+.transmog-detail-header .favorite-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  font-family: 'Raleway', sans-serif;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-  white-space: nowrap;
-  box-sizing: border-box;
-  line-height: 1;
-  height: 44px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
   margin: 0;
-  overflow: hidden;
-  min-width: fit-content;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+  line-height: 1;
+  vertical-align: middle;
 }
 
-.favorite-button svg {
+.transmog-detail-header .favorite-icon svg {
+  display: block;
   width: 20px;
   height: 18px;
-  display: block;
-  flex-shrink: 0;
-  transition: opacity 0.2s ease;
+  overflow: visible;
+  vertical-align: middle;
 }
 
-.favorite-button-text {
-  transition: opacity 0.2s ease;
+.transmog-detail-header .favorite-button-text {
   display: inline-block;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  vertical-align: middle;
 }
 
-.favorite-button-text.visible {
-  opacity: 1;
-}
-
-.favorite-button-text.hidden {
-  opacity: 0;
-}
-
-
-.favorite-button:hover {
+.transmog-detail-header .favorite-button:hover:not(.animating) {
   background: rgba(229, 211, 179, 0.15);
   border-color: rgba(229, 211, 179, 0.6);
+  color: #e5d3b3;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(229, 211, 179, 0.2);
 }
 
-.favorite-button.favorited {
+.transmog-detail-header .favorite-button:active:not(.animating) {
+  transform: translateY(0) scale(0.98);
+}
+
+.transmog-detail-header .favorite-button.favorited {
   border-color: rgba(255, 99, 99, 0.4);
   color: #ff9a9a;
 }
 
-.favorite-button.favorited:hover {
+.transmog-detail-header .favorite-button.favorited:hover:not(.animating) {
   background: rgba(255, 99, 99, 0.15);
   border-color: rgba(255, 99, 99, 0.6);
+  box-shadow: 0 4px 12px rgba(255, 99, 99, 0.3);
+  transform: translateY(-2px);
+}
+
+.transmog-detail-header .favorite-button:not(.favorited):hover:not(.animating) .favorite-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.transmog-detail-header .favorite-button.favorited .favorite-icon {
+  position: relative;
+}
+
+.transmog-detail-header .favorite-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 99, 99, 0.7) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 25px;
+  opacity: 0;
+}
+
+.transmog-detail-header .favorite-button.animating::before {
+  animation: gradientSweep 0.5s ease-out;
+}
+
+@keyframes gradientSweep {
+  0% {
+    left: -100%;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
 }
 
 .transmog-detail-content {
@@ -457,10 +515,23 @@
     align-items: stretch;
   }
   
-  .back-button,
-  .favorite-button {
+  .back-button {
     width: 100%;
     justify-content: center;
+  }
+  
+  .transmog-detail-header .favorite-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .transmog-detail-header .favorite-button-text {
+    font-size: 1rem;
+  }
+  
+  .transmog-detail-header .favorite-icon {
+    width: 24px;
+    height: 24px;
   }
   
   .transmog-detail-actions-bottom {

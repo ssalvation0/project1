@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../components/ToastProvider';
@@ -17,8 +17,7 @@ function TransmogDetail() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isTextVisible, setIsTextVisible] = useState(true);
-  const favoriteButtonRef = useRef(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
@@ -43,65 +42,21 @@ function TransmogDetail() {
     const transmogId = parseInt(id);
     const newIsFavorite = !isFavorite;
     
-    if (favoriteButtonRef.current) {
-      // Фіксуємо поточну ширину перед зміною тексту
-      const currentWidth = favoriteButtonRef.current.offsetWidth;
-      favoriteButtonRef.current.style.width = `${currentWidth}px`;
+    // Запускаємо анімацію
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 500);
+    
+    // Оновлюємо стан безпечно
+    if (newIsFavorite) {
+      const newFavorites = [...favorites, transmogId];
+      localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
+      showToast('Added to favorites', { type: 'success' });
+    } else {
+      const newFavorites = favorites.filter(favId => favId !== transmogId);
+      localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
+      showToast('Removed from favorites', { type: 'info' });
     }
-    
-    // Спочатку ховаємо текст (fade out)
-    setIsTextVisible(false);
-    
-    // Після завершення fade out оновлюємо стан і показуємо новий текст
-    setTimeout(() => {
-      // Оновлюємо стан
-      if (newIsFavorite) {
-        const newFavorites = [...favorites, transmogId];
-        localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
-        showToast('Added to favorites', { type: 'success' });
-      } else {
-        const newFavorites = favorites.filter(favId => favId !== transmogId);
-        localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
-        showToast('Removed from favorites', { type: 'info' });
-      }
-      setIsFavorite(newIsFavorite);
-      
-      // Вимірюємо нову ширину після повного оновлення DOM
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (favoriteButtonRef.current && favoriteButtonRef.current.style.width) {
-              const button = favoriteButtonRef.current;
-              
-              // Тимчасово знімаємо обмеження ширини для точного виміру
-              const tempWidth = button.style.width;
-              button.style.width = 'auto';
-              
-              // Чекаємо один кадр для оновлення розмірів
-              requestAnimationFrame(() => {
-                const newWidth = button.offsetWidth;
-                // Повертаємо стару ширину перед встановленням нової
-                button.style.width = tempWidth;
-                
-                // Встановлюємо нову ширину з transition у наступному кадрі
-                requestAnimationFrame(() => {
-                  if (button && button.style.width) {
-                    // Переконаємося, що transition активний
-                    button.style.transition = 'width 0.45s cubic-bezier(0.4, 0, 0.2, 1)';
-                    button.style.width = `${newWidth}px`;
-                    
-                    // Показуємо новий текст (fade in) після початку анімації ширини
-                    setTimeout(() => {
-                      setIsTextVisible(true);
-                    }, 50);
-                  }
-                });
-              });
-            }
-          });
-        });
-      });
-    }, 200); // Чекаємо завершення fade out
+    setIsFavorite(newIsFavorite);
   }, [id, isFavorite, showToast]);
 
   if (isLoading) {
@@ -143,20 +98,22 @@ function TransmogDetail() {
         </button>
         
         <button 
-          ref={favoriteButtonRef}
-          className={`favorite-button ${isFavorite ? 'favorited' : ''}`}
+          className={`favorite-button ${isFavorite ? 'favorited' : ''} ${isAnimating ? 'animating' : ''}`}
           onClick={toggleFavorite}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          {isFavorite ? (
-            <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, overflow: 'visible' }}>
-              <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" fill="currentColor"/>
-            </svg>
-          ) : (
-            <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, overflow: 'visible' }}>
-              <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" stroke="currentColor" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke"/>
-            </svg>
-          )}
-          <span className={`favorite-button-text ${isTextVisible ? 'visible' : 'hidden'}`}>
+          <span className="favorite-icon">
+            {isFavorite ? (
+              <svg viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" fill="currentColor"/>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" stroke="currentColor" strokeWidth="2" fill="none"/>
+              </svg>
+            )}
+          </span>
+          <span className="favorite-button-text">
             {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
           </span>
         </button>

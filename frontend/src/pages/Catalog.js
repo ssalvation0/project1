@@ -386,7 +386,15 @@ function Catalog() {
                   title={favorites.includes(transmog.id) ? 'Remove from favorites' : 'Add to favorites'}
                   aria-label={favorites.includes(transmog.id) ? 'Remove from favorites' : 'Add to favorites'}
                 >
-                  {favorites.includes(transmog.id) ? '❤️' : '🤍'}
+                  {favorites.includes(transmog.id) ? (
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" fill="currentColor"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" stroke="currentColor" strokeWidth="2" fill="none"/>
+                    </svg>
+                  )}
                 </button>
               </div>
             ))}
