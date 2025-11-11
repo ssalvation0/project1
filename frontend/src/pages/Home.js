@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
+import RecentlyViewed from '../components/RecentlyViewed';
 import '../styles/Home.css';
 
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);

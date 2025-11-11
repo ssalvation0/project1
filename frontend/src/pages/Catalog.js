@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../components/ToastProvider';
+import RecentlyViewed from '../components/RecentlyViewed';
 import '../styles/Catalog.css';
 
 const API_URL = '/api/transmogs';
@@ -238,6 +239,8 @@ function Catalog() {
 
   return (
     <div className="catalog-page">
+      <RecentlyViewed limit={5} />
+      
       <div className="catalog-header">
         <h1>Transmog Catalog</h1>
         

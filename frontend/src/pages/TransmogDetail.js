@@ -22,6 +22,21 @@ function TransmogDetail() {
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     setIsFavorite(favorites.includes(parseInt(id)));
+    
+    // Додаємо до історії переглядів
+    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewedTransmogs') || '[]');
+    const transmogId = parseInt(id);
+    
+    // Видаляємо якщо вже є в історії
+    const filtered = recentlyViewed.filter(item => item.id !== transmogId);
+    
+    // Додаємо на початок з timestamp
+    const newHistory = [
+      { id: transmogId, timestamp: Date.now() },
+      ...filtered
+    ].slice(0, 10); // Зберігаємо тільки останні 10
+    
+    localStorage.setItem('recentlyViewedTransmogs', JSON.stringify(newHistory));
   }, [id]);
 
   const { data: transmog, isLoading, error, refetch } = useQuery({
