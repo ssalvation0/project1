@@ -2,207 +2,176 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
+const blizzardService = require('../utils/blizzardService');
 
-// Шлях до файлу з обробленими даними Kaggle
-const TRANSMOGS_DATA_FILE = path.join(__dirname, '../data/transmog_sets.json');
-const IMAGES_PATH = '/images/items'; // Шлях до статичних зображень
+const CACHE_FILE = path.join(__dirname, '../data/blizzard_transmogs_cache.json');
 
-// Функція для завантаження трансмогів з файлу
-async function loadTransmogsFromFile() {
+// In-memory storage
+let cachedSets = [];
+let isHydrating = false;
+
+// Load cache from disk
+async function loadCache() {
   try {
-    const data = await fs.readFile(TRANSMOGS_DATA_FILE, 'utf-8');
-    const sets = JSON.parse(data);
-    
-    console.log(`✅ Завантажено ${sets.length} трансмог-сетів з Kaggle датасету`);
-    return sets;
+    const data = await fs.readFile(CACHE_FILE, 'utf-8');
+    cachedSets = JSON.parse(data);
+    console.log(`📦 Loaded ${cachedSets.length} sets from Blizzard cache`);
   } catch (error) {
-    console.warn('⚠️ Файл transmog_sets.json не знайдено!');
-    console.warn('💡 Запусти: node scripts/processKaggleData.js');
-    
-    // Fallback до порожнього масиву
-    return [];
+    console.log('📦 No Blizzard cache found, starting fresh');
+    cachedSets = [];
   }
 }
 
-
-router.get('/', async (req, res) => {
+// Save cache to disk
+async function saveCache() {
   try {
-    // Приймаємо page / limit / pageSize (аліас) і нормалізуємо
-    let { page = 0, limit, pageSize, class: classFilter } = req.query;
+    await fs.writeFile(CACHE_FILE, JSON.stringify(cachedSets, null, 2));
+    console.log(`💾 Saved ${cachedSets.length} sets to disk`);
+  } catch (error) {
+    console.error('❌ Error saving cache:', error);
+  }
+}
 
-    const pageNum = Math.max(0, parseInt(page, 10) || 0);
-    const sizeNum = Math.max(1, parseInt(limit || pageSize || 20, 10));
-    const offset = pageNum * sizeNum;
+// Background process to fetch all set details
+async function hydrateCache() {
+  if (isHydrating) return;
+  isHydrating = true;
 
-    // Завантажуємо трансмоги з Kaggle датасету
-    let transmogsData = await loadTransmogsFromFile();
+  try {
+    console.log('🔄 Starting Blizzard data hydration...');
 
-    // Фільтрація за класом
-    if (classFilter && classFilter !== 'all') {
-      transmogsData = transmogsData.filter(set => {
-        const setClasses = set.classes || [];
-        const filterClass = classFilter.toLowerCase();
-        
-        // Універсальні сети (All) показуємо для всіх фільтрів
-        if (setClasses.includes('All')) {
-          return true;
+    // 1. Get Index
+    const index = await blizzardService.getItemSetsIndex();
+    const allSets = index.item_sets;
+    console.log(`📋 Found ${allSets.length} sets in Blizzard index`);
+
+    // 2. Filter out sets we already have details for
+    const existingIds = new Set(cachedSets.map(s => s.id));
+    const newSets = allSets.filter(s => !existingIds.has(s.id));
+
+    console.log(`⚡ Need to fetch details for ${newSets.length} new sets`);
+
+    // 3. Fetch details in batches
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < newSets.length; i += BATCH_SIZE) {
+      const batch = newSets.slice(i, i + BATCH_SIZE);
+
+      await Promise.all(batch.map(async (setMeta) => {
+        try {
+          const details = await blizzardService.getItemSet(setMeta.id);
+
+          // Transform to our format
+          const transformedSet = {
+            id: details.id,
+            name: details.name,
+            classes: [], // Will need to extract from items or effects
+            expansion: 'Unknown', // Blizzard API doesn't always give this directly
+            quality: 'Unknown',
+            items: details.items ? details.items.map(item => ({
+              id: item.id,
+              name: item.name
+            })) : []
+          };
+
+          // Try to infer class from effects or description if possible
+          // For now, we'll leave it generic or try to fetch more info later
+
+          cachedSets.push(transformedSet);
+        } catch (err) {
+          console.error(`⚠️ Failed to fetch set ${setMeta.id}:`, err.message);
         }
-        
-        // Перевіряємо чи є потрібний клас у списку
-        return setClasses.some(cls => 
-          cls.toLowerCase().replace(/\s+/g, '') === filterClass ||
-          cls.toLowerCase().includes(filterClass)
-        );
-      });
+      }));
+
+      // Save periodically
+      if (i % 20 === 0) await saveCache();
+
+      // Rate limiting pause
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    // Пагінація
-    const totalItems = transmogsData.length;
-    const paginatedData = transmogsData.slice(offset, offset + sizeNum);
-    
-    const result = {
-      transmogs: await Promise.all(paginatedData.map(async set => {
-        // Використовуємо перший предмет для превʼю зображення
-        const previewItem = set.items && set.items[0];
-        let previewImageUrl = null;
-        
-        if (previewItem) {
-          // Шукаємо файл зображення (може бути .jpg, .svg, або .json)
-          const imageBasePath = path.join(__dirname, '../public/images/items');
-          const safeName = previewItem.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-          
-          const possibleExtensions = ['.jpg', '.svg', '.json'];
-          for (const ext of possibleExtensions) {
-            const fileName = `${previewItem.id}_${safeName}${ext}`;
-            try {
-              await fs.access(path.join(imageBasePath, fileName));
-              previewImageUrl = `${IMAGES_PATH}/${fileName}`;
-              break;
-            } catch {
-              // Файл не існує, пробуємо наступний
-            }
-          }
-        }
-        
-        return {
-          id: set.id,
-          name: set.name,
-          iconUrl: previewImageUrl,
-          imageUrl: previewImageUrl,
-          items: set.items.map(item => {
-            const safeName = item.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-            return {
-              ...item,
-              iconUrl: `${IMAGES_PATH}/${item.id}_${safeName}.jpg` // Спробуємо знайти
-            };
-          }),
-          class: set.classes && set.classes.length > 0 ? set.classes.join(', ') : 'All',
-          classes: set.classes || ['All'],
-          expansion: set.expansion || 'Unknown',
-          quality: set.quality || 'Common',
-          itemCount: set.itemCount || 0,
-          minLevel: set.minLevel || 0,
-          maxLevel: set.maxLevel || 0,
-        };
-      })),
-      pagination: {
-        currentPage: pageNum,
-        totalItems,
-        itemsPerPage: sizeNum,
-        totalPages: Math.ceil(totalItems / sizeNum)
-      }
-    };
-
-    res.json(result);
+    await saveCache();
+    console.log('✅ Blizzard hydration complete!');
 
   } catch (error) {
-    console.error('Error in /api/transmogs:', error.message);
-    
-    res.status(500).json({ 
-      error: 'Failed to fetch transmogs',
-      message: error.message
-    });
+    console.error('❌ Hydration failed:', error);
+  } finally {
+    isHydrating = false;
   }
+}
+
+// Initialize
+loadCache().then(() => {
+  hydrateCache();
 });
 
-// GET конкретний transmog за ID
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Завантажуємо трансмоги
-    const transmogsData = await loadTransmogsFromFile();
-    const transmog = transmogsData.find(set => set.id === id);
-    
-    if (!transmog) {
-      return res.status(404).json({ 
-        error: 'Transmog not found',
-        message: `No transmog set found with ID ${id}`
-      });
-    }
-    
-    // Розширюємо дані для детальної сторінки
-    let iconUrl = null;
-    if (transmog.items && transmog.items[0]) {
-      const previewItem = transmog.items[0];
-      const imageBasePath = path.join(__dirname, '../public/images/items');
-      const safeName = previewItem.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-      
-      const possibleExtensions = ['.jpg', '.svg', '.json'];
-      for (const ext of possibleExtensions) {
-        const fileName = `${previewItem.id}_${safeName}${ext}`;
-        try {
-          await fs.access(path.join(imageBasePath, fileName));
-          iconUrl = `${IMAGES_PATH}/${fileName}`;
-          break;
-        } catch {
-          // Файл не існує
-        }
-      }
-    }
-    
-    const detailedTransmog = {
-      id: transmog.id,
-      name: transmog.name,
-      iconUrl: iconUrl,
-      imageUrl: iconUrl,
-      class: transmog.classes && transmog.classes.length > 0 
-        ? transmog.classes.join(', ') 
-        : 'All',
-      classes: transmog.classes || ['All'],
-      expansion: transmog.expansion || 'Unknown',
-      quality: transmog.quality || 'Common',
-      description: `${transmog.quality || 'Epic'} transmog set. This set contains ${transmog.itemCount || 0} pieces and is suitable for ${transmog.classes ? transmog.classes.join(', ') : 'all classes'}.`,
-      items: (transmog.items || []).map(item => {
-        const safeName = item.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50);
-        return {
-          ...item,
-          iconUrl: `${IMAGES_PATH}/${item.id}_${safeName}.jpg`
-        };
-      }),
-      stats: {
-        itemCount: transmog.itemCount || 0,
-        minLevel: transmog.minLevel || 0,
-        maxLevel: transmog.maxLevel || 0,
-        quality: transmog.quality || 'Common'
-      },
-      source: {
-        type: 'Kaggle Dataset',
-        dataset: 'World of Warcraft Items',
-        url: 'https://www.kaggle.com/datasets/trolukovich/world-of-warcraft-items-dataset/'
-      }
-    };
-    
-    res.json(detailedTransmog);
+// --- Routes ---
 
-  } catch (error) {
-    console.error('Error fetching transmog details:', error.message);
-    
-    res.status(500).json({ 
-      error: 'Failed to fetch transmog details',
-      message: error.message
-    });
+router.get('/', async (req, res) => {
+  const { page = 0, limit = 20, search } = req.query;
+
+  let results = cachedSets;
+
+  if (search) {
+    const q = search.toLowerCase();
+    results = results.filter(s => s.name.toLowerCase().includes(q));
   }
+
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const start = pageNum * limitNum;
+  const paginated = results.slice(start, start + limitNum);
+
+  // Enrich with icons (lazy load)
+  const enriched = await Promise.all(paginated.map(async set => {
+    let iconUrl = null;
+    if (set.items && set.items.length > 0) {
+      // Try to get icon for first item
+      iconUrl = await blizzardService.getItemMedia(set.items[0].id);
+    }
+    return { ...set, iconUrl };
+  }));
+
+  res.json({
+    transmogs: enriched,
+    pagination: {
+      currentPage: pageNum,
+      totalItems: results.length,
+      totalPages: Math.ceil(results.length / limitNum)
+    }
+  });
+});
+
+router.get('/:id', async (req, res) => {
+  const set = cachedSets.find(s => s.id == req.params.id);
+  if (!set) return res.status(404).json({ error: 'Set not found' });
+
+  // Fetch icons for all items
+  const itemsWithIcons = await Promise.all((set.items || []).map(async item => {
+    const icon = await blizzardService.getItemMedia(item.id);
+    return { ...item, iconUrl: icon };
+  }));
+
+  res.json({
+    ...set,
+    items: itemsWithIcons,
+    wowheadLink: `https://www.wowhead.com/item-set=${set.id}`
+  });
+});
+
+router.get('/filters', (req, res) => {
+  // Since we don't have good class/expansion data yet from raw API, return basics
+  res.json({
+    classes: ['All'],
+    expansions: ['All'],
+    qualities: ['All']
+  });
+});
+
+router.get('/stats', (req, res) => {
+  res.json({
+    totalSets: cachedSets.length,
+    isHydrating
+  });
 });
 
 module.exports = router;

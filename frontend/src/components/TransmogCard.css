@@ -1,0 +1,166 @@
+.transmog-card {
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  backdrop-filter: blur(10px);
+}
+
+.transmog-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--quality-color);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 
+              0 0 15px var(--quality-color, rgba(255, 255, 255, 0.1));
+}
+
+.transmog-card-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* 1:1 Aspect Ratio */
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.transmog-card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.transmog-card:hover .transmog-card-image {
+  transform: scale(1.1);
+}
+
+.transmog-card-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.transmog-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.transmog-card:hover .transmog-card-overlay {
+  opacity: 1;
+}
+
+.view-details-text {
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid white;
+  border-radius: 20px;
+  transform: translateY(10px);
+  transition: transform 0.3s ease;
+}
+
+.transmog-card:hover .view-details-text {
+  transform: translateY(0);
+}
+
+.transmog-card-content {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transmog-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.transmog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.class-badge, .expansion-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+
+/* Class specific colors */
+.class-badge.warrior { color: #C79C6E; background: rgba(199, 156, 110, 0.15); }
+.class-badge.paladin { color: #F58CBA; background: rgba(245, 140, 186, 0.15); }
+.class-badge.hunter { color: #ABD473; background: rgba(171, 212, 115, 0.15); }
+.class-badge.rogue { color: #FFF569; background: rgba(255, 245, 105, 0.15); }
+.class-badge.priest { color: #FFFFFF; background: rgba(255, 255, 255, 0.15); }
+.class-badge.deathknight { color: #C41F3B; background: rgba(196, 31, 59, 0.15); }
+.class-badge.shaman { color: #0070DE; background: rgba(0, 112, 222, 0.15); }
+.class-badge.mage { color: #40C7EB; background: rgba(64, 199, 235, 0.15); }
+.class-badge.warlock { color: #8787ED; background: rgba(135, 135, 237, 0.15); }
+.class-badge.monk { color: #00FF96; background: rgba(0, 255, 150, 0.15); }
+.class-badge.druid { color: #FF7D0A; background: rgba(255, 125, 10, 0.15); }
+.class-badge.demonhunter { color: #A330C9; background: rgba(163, 48, 201, 0.15); }
+.class-badge.evoker { color: #33937F; background: rgba(51, 147, 127, 0.15); }
+
+.favorite-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.favorite-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  color: #ff4081;
+  transform: scale(1.1);
+}
+
+.favorite-button.favorited {
+  color: #ff4081;
+  background: rgba(0, 0, 0, 0.8);
+}

@@ -1,198 +1,98 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../components/ToastProvider';
 import RecentlyViewed from '../components/RecentlyViewed';
+import TransmogCard from '../components/TransmogCard';
 import '../styles/Catalog.css';
 
 const API_URL = '/api/transmogs';
 
-const WARCRAFT_CLASSES = [
-  { value: 'all', label: 'All' },
-  { value: 'warrior', label: 'Warrior' },
-  { value: 'paladin', label: 'Paladin' },
-  { value: 'hunter', label: 'Hunter' },
-  { value: 'rogue', label: 'Rogue' },
-  { value: 'priest', label: 'Priest' },
-  { value: 'deathknight', label: 'Death Knight' },
-  { value: 'shaman', label: 'Shaman' },
-  { value: 'mage', label: 'Mage' },
-  { value: 'warlock', label: 'Warlock' },
-  { value: 'monk', label: 'Monk' },
-  { value: 'druid', label: 'Druid' },
-  { value: 'demonhunter', label: 'Demon Hunter' },
-  { value: 'evoker', label: 'Evoker' }
-];
+async function fetchTransmogsRequest({ page, filter, expansion, quality, search }) {
+  const params = new URLSearchParams({
+    page,
+    limit: 20,
+    class: filter,
+    expansion,
+    quality,
+    search
+  });
 
-async function fetchTransmogsRequest(page) {
-  const url = `${API_URL}?page=${page}&limit=20`;
-  const res = await fetch(url);
+  const res = await fetch(`${API_URL}?${params.toString()}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function fetchFiltersRequest() {
+  const res = await fetch(`${API_URL}/filters`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlClass = searchParams.get('class') || 'all';
-  const urlSearch = searchParams.get('search') || '';
-  
-  const [filter, setFilter] = useState(urlClass);
-  const [expansionFilter, setExpansionFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState(urlSearch);
-  const [sortBy, setSortBy] = useState('name'); // name, expansion, class
-  const [sortOrder, setSortOrder] = useState('asc'); // asc, desc
-  const [currentPage, setCurrentPage] = useState(0);
+
+  // State initialization from URL
+  const [filter, setFilter] = useState(searchParams.get('class') || 'all');
+  const [expansionFilter, setExpansionFilter] = useState(searchParams.get('expansion') || 'all');
+  const [qualityFilter, setQualityFilter] = useState(searchParams.get('quality') || 'all');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '0', 10));
+
   const [favorites, setFavorites] = useState([]);
-  const navigate = useNavigate();
   const { showToast } = useToast();
 
-  // Синхронізуємо фільтр з URL параметром
-  useEffect(() => {
-    if (urlClass && urlClass !== filter) {
-      setFilter(urlClass);
-    }
-  }, [urlClass]);
-
-  // Синхронізуємо пошук з URL параметром
-  useEffect(() => {
-    if (urlSearch && urlSearch !== searchQuery) {
-      setSearchQuery(urlSearch);
-    }
-  }, [urlSearch]);
-
+  // Load favorites
   useEffect(() => {
     const savedFavorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     setFavorites(savedFavorites);
   }, []);
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ['transmogs', currentPage],
-    queryFn: () => fetchTransmogsRequest(currentPage),
-    staleTime: 30_000, // Зменшено до 30 секунд для швидшого оновлення
-    cacheTime: 5 * 60 * 1000, // Кеш на 5 хвилин
-    refetchOnWindowFocus: true, // Оновлювати при поверненні на вкладку
-    keepPreviousData: true
+  // Fetch filters options
+  const { data: filterOptions } = useQuery({
+    queryKey: ['transmogFilters'],
+    queryFn: fetchFiltersRequest,
+    staleTime: 5 * 60 * 1000
   });
 
+  // Fetch transmogs
+  const { data, isLoading, error, isFetching, refetch } = useQuery({
+    queryKey: ['transmogs', currentPage, filter, expansionFilter, qualityFilter, searchQuery],
+    queryFn: () => fetchTransmogsRequest({
+      page: currentPage,
+      filter,
+      expansion: expansionFilter,
+      quality: qualityFilter,
+      search: searchQuery
+    }),
+    keepPreviousData: true,
+    staleTime: 30000
+  });
+
+  // Update URL when state changes
   useEffect(() => {
-    if (error) {
-      showToast('Failed to load catalog. Please retry.', { type: 'error', duration: 3000 });
-    }
-  }, [error, showToast]);
+    const params = new URLSearchParams();
+    if (filter !== 'all') params.set('class', filter);
+    if (expansionFilter !== 'all') params.set('expansion', expansionFilter);
+    if (qualityFilter !== 'all') params.set('quality', qualityFilter);
+    if (searchQuery) params.set('search', searchQuery);
+    if (currentPage > 0) params.set('page', currentPage.toString());
 
-  // Debounce для пошуку та оновлення URL
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(0);
-      const newParams = new URLSearchParams(searchParams);
-      if (searchQuery.trim()) {
-        newParams.set('search', searchQuery.trim());
-      } else {
-        newParams.delete('search');
-      }
-      setSearchParams(newParams, { replace: true });
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchParams, setSearchParams]);
+    setSearchParams(params, { replace: true });
+  }, [filter, expansionFilter, qualityFilter, searchQuery, currentPage, setSearchParams]);
 
-  const transmogsRaw = data?.transmogs || [];
-  const totalPages = data?.pagination?.totalPages || 0;
-
-  const filteredTransmogs = useMemo(() => {
-    let arr = transmogsRaw;
-    
-    // Фільтрація за класом
-    if (filter !== 'all') {
-      arr = arr.filter(t => {
-        const transmogClass = (t.class || 'All').toLowerCase().replace(/\s+/g, '');
-        const filterClass = filter.toLowerCase();
-        
-        // Якщо клас трансмогу "All", показуємо його для всіх фільтрів (універсальні сети)
-        if (transmogClass === 'all') {
-          return true; // Показуємо універсальні сети для всіх класів
-        }
-        
-        return transmogClass === filterClass || transmogClass.includes(filterClass);
-      });
-    }
-    
-    // Фільтрація за expansion
-    if (expansionFilter !== 'all') {
-      arr = arr.filter(t => {
-        const expansion = (t.expansion || 'Unknown').toLowerCase();
-        return expansion === expansionFilter.toLowerCase() || expansion.includes(expansionFilter.toLowerCase());
-      });
-    }
-    
-    // Фільтрація за пошуковим запитом
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      arr = arr.filter(transmog =>
-        transmog.name?.toLowerCase().includes(q) ||
-        transmog.class?.toLowerCase().includes(q) ||
-        transmog.expansion?.toLowerCase().includes(q)
-      );
-    }
-    
-    // Сортування
-    arr.sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'name':
-          comparison = (a.name || '').localeCompare(b.name || '');
-          break;
-        case 'expansion':
-          comparison = (a.expansion || 'Unknown').localeCompare(b.expansion || 'Unknown');
-          break;
-        case 'class':
-          comparison = (a.class || 'All').localeCompare(b.class || 'All');
-          break;
-        default:
-          comparison = 0;
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-    
-    return arr;
-  }, [transmogsRaw, filter, expansionFilter, searchQuery, sortBy, sortOrder]);
-  
-  // Отримуємо унікальні expansions для фільтра
-  const availableExpansions = useMemo(() => {
-    const expansions = new Set();
-    transmogsRaw.forEach(t => {
-      if (t.expansion && t.expansion !== 'Unknown') {
-        expansions.add(t.expansion);
-      }
-    });
-    return Array.from(expansions).sort();
-  }, [transmogsRaw]);
-
-  const handleFilterChange = useCallback((newFilter) => {
-    setFilter(newFilter);
+  // Debounced search handler
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
     setCurrentPage(0);
-    // Оновлюємо URL без перезавантаження сторінки
-    const newParams = new URLSearchParams(searchParams);
-    if (newFilter === 'all') {
-      newParams.delete('class');
-    } else {
-      newParams.set('class', newFilter);
-    }
-    setSearchParams(newParams, { replace: true });
-  }, [searchParams, setSearchParams]);
+  };
 
-  const handleNextPage = useCallback(() => {
-    if (currentPage < totalPages - 1) setCurrentPage(prev => prev + 1);
-  }, [currentPage, totalPages]);
-
-  const handlePrevPage = useCallback(() => {
-    if (currentPage > 0) setCurrentPage(prev => prev - 1);
-  }, [currentPage]);
-
-  const handleTransmogClick = useCallback((id) => {
-    navigate(`/transmog/${id}`);
-  }, [navigate]);
+  const handleFilterChange = (type, value) => {
+    setCurrentPage(0);
+    if (type === 'class') setFilter(value);
+    if (type === 'expansion') setExpansionFilter(value);
+    if (type === 'quality') setQualityFilter(value);
+  };
 
   const toggleFavorite = useCallback((transmogId) => {
     const already = favorites.includes(transmogId);
@@ -204,29 +104,9 @@ function Catalog() {
     showToast(already ? 'Removed from favorites' : 'Added to favorites', { type: already ? 'info' : 'success' });
   }, [favorites, showToast]);
 
-  if (isLoading || isFetching) {
-    return (
-      <div className="catalog-page">
-        <div className="catalog-header">
-          <h1>Transmog Catalog</h1>
-          <div className="search-container">
-            <input type="text" className="search-input" placeholder="Search transmogs..." disabled />
-          </div>
-        </div>
-        <div className="catalog-skeleton-grid">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="skeleton-card">
-              <div className="skeleton-shimmer" />
-              <div className="skeleton-footer">
-                <div className="skeleton-title" />
-                <div className="skeleton-badge" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const transmogs = data?.transmogs || [];
+  const totalPages = data?.pagination?.totalPages || 0;
+  const totalItems = data?.pagination?.totalItems || 0;
 
   if (error) {
     return (
@@ -240,185 +120,107 @@ function Catalog() {
   return (
     <div className="catalog-page">
       <RecentlyViewed limit={5} />
-      
+
       <div className="catalog-header">
         <h1>Transmog Catalog</h1>
-        
+
         <div className="search-container">
           <input
             type="text"
             className="search-input"
             placeholder="Search transmogs..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
           />
         </div>
 
         <div className="catalog-filters">
+          {/* Class Filter */}
           <div className="filter-group">
             <span className="filter-label">Class:</span>
-            {WARCRAFT_CLASSES.map((cls) => (
-              <button
-                key={cls.value}
-                className={filter === cls.value ? 'active' : ''}
-                onClick={() => handleFilterChange(cls.value)}
-              >
-                {cls.label}
-              </button>
-            ))}
-          </div>
-          
-          {availableExpansions.length > 0 && (
-            <div className="filter-group">
-              <span className="filter-label">Expansion:</span>
-              <button
-                className={expansionFilter === 'all' ? 'active' : ''}
-                onClick={() => setExpansionFilter('all')}
-              >
-                All
-              </button>
-              {availableExpansions.map((exp) => (
-                <button
-                  key={exp}
-                  className={expansionFilter === exp.toLowerCase() ? 'active' : ''}
-                  onClick={() => setExpansionFilter(exp.toLowerCase())}
-                >
-                  {exp}
-                </button>
+            <select
+              value={filter}
+              onChange={(e) => handleFilterChange('class', e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Classes</option>
+              {filterOptions?.classes?.map(cls => (
+                <option key={cls} value={cls}>{cls}</option>
               ))}
-            </div>
-          )}
-          
-          <div className="filter-group">
-            <span className="filter-label">Sort:</span>
-            <select 
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="name">Name</option>
-              <option value="expansion">Expansion</option>
-              <option value="class">Class</option>
             </select>
-            <button
-              className={`sort-order-btn ${sortOrder === 'desc' ? 'active' : ''}`}
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+          </div>
+
+          {/* Expansion Filter */}
+          <div className="filter-group">
+            <span className="filter-label">Expansion:</span>
+            <select
+              value={expansionFilter}
+              onChange={(e) => handleFilterChange('expansion', e.target.value)}
+              className="filter-select"
             >
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </button>
+              <option value="all">All Expansions</option>
+              {filterOptions?.expansions?.map(exp => (
+                <option key={exp} value={exp}>{exp}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Quality Filter */}
+          <div className="filter-group">
+            <span className="filter-label">Quality:</span>
+            <select
+              value={qualityFilter}
+              onChange={(e) => handleFilterChange('quality', e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All Qualities</option>
+              {filterOptions?.qualities?.map(q => (
+                <option key={q} value={q}>{q}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
 
-      {filteredTransmogs.length === 0 ? (
+      {isLoading ? (
+        <div className="catalog-skeleton-grid">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="skeleton-card">
+              <div className="skeleton-shimmer" />
+            </div>
+          ))}
+        </div>
+      ) : transmogs.length === 0 ? (
         <div className="no-results">
-          <p>No transmogs found{searchQuery && ` matching "${searchQuery}"`}</p>
+          <p>No transmogs found matching your criteria</p>
         </div>
       ) : (
         <>
           <div className="catalog-grid">
-            {filteredTransmogs.map((transmog) => (
-              <div
+            {transmogs.map((transmog) => (
+              <TransmogCard
                 key={transmog.id}
-                className="catalog-item"
-              >
-                {(() => {
-                  // Пріоритет: imageUrl (велике зображення предмета) -> iconUrl -> placeholder
-                  const imageUrl = transmog.imageUrl || transmog.iconUrl;
-                  
-                  // Якщо немає зображення або це placeholder/share-icon, показуємо дефолтне
-                  if (!imageUrl || imageUrl.includes('questionmark') || imageUrl.includes('share-icon')) {
-                    return (
-                      <div className="catalog-item-placeholder">
-                        <span className="placeholder-icon">⚔️</span>
-                        <span className="placeholder-text">{transmog.name}</span>
-                      </div>
-                    );
-                  }
-                  
-                  // Спробуємо завантажити зображення
-                  return (
-                    <img
-                      src={imageUrl}
-                      alt={transmog.name || 'Transmog set'}
-                      className="catalog-bg-img"
-                      loading="lazy"
-                      decoding="async"
-                      fetchpriority="low"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      onError={(e) => {
-                        // Якщо зображення не завантажилося, показуємо placeholder
-                        e.target.style.display = 'none';
-                        if (!e.target.nextElementSibling || !e.target.nextElementSibling.classList.contains('catalog-item-placeholder')) {
-                          const placeholder = document.createElement('div');
-                          placeholder.className = 'catalog-item-placeholder';
-                          placeholder.innerHTML = `
-                            <span class="placeholder-icon">⚔️</span>
-                            <span class="placeholder-text">${transmog.name}</span>
-                          `;
-                          e.target.parentElement.appendChild(placeholder);
-                        }
-                      }}
-                    />
-                  );
-                })()}
-                <div 
-                  className="catalog-item-content"
-                  onClick={() => handleTransmogClick(transmog.id)}
-                >
-                  <div className="catalog-item-info">
-                    <h3>{transmog.name}</h3>
-                    <div className="catalog-item-meta">
-                      <span className={`class-badge ${transmog.class?.toLowerCase().replace(/\s+/g, '')}`}>
-                        {transmog.class}
-                      </span>
-                      {transmog.expansion && transmog.expansion !== 'Unknown' && (
-                        <span className="expansion-badge">{transmog.expansion}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <button
-                  className={`favorite-button ${favorites.includes(transmog.id) ? 'favorited' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(transmog.id);
-                  }}
-                  title={favorites.includes(transmog.id) ? 'Remove from favorites' : 'Add to favorites'}
-                  aria-label={favorites.includes(transmog.id) ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                  {favorites.includes(transmog.id) ? (
-                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" fill="currentColor"/>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                    </svg>
-                  )}
-                </button>
-              </div>
+                transmog={transmog}
+                isFavorite={favorites.includes(transmog.id)}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           </div>
 
           <div className="pagination">
-            <button 
-              onClick={handlePrevPage} 
+            <button
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
               disabled={currentPage === 0}
             >
               ← Previous
             </button>
             <span>
               Page {currentPage + 1} of {totalPages || 1}
-              {filteredTransmogs.length > 0 && (
-                <span className="results-count"> ({filteredTransmogs.length} {filteredTransmogs.length === 1 ? 'result' : 'results'})</span>
-              )}
+              <span className="results-count"> ({totalItems} items)</span>
             </span>
-            <button 
-              onClick={handleNextPage} 
-              disabled={currentPage >= totalPages - 1 || filteredTransmogs.length === 0}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage >= totalPages - 1}
             >
               Next →
             </button>
