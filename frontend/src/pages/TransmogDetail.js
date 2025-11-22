@@ -22,20 +22,18 @@ function TransmogDetail() {
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     setIsFavorite(favorites.includes(parseInt(id)));
-    
-    // Додаємо до історії переглядів
+
+    // Add to history
     const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewedTransmogs') || '[]');
     const transmogId = parseInt(id);
-    
-    // Видаляємо якщо вже є в історії
+
     const filtered = recentlyViewed.filter(item => item.id !== transmogId);
-    
-    // Додаємо на початок з timestamp
+
     const newHistory = [
       { id: transmogId, timestamp: Date.now() },
       ...filtered
-    ].slice(0, 10); // Зберігаємо тільки останні 10
-    
+    ].slice(0, 10);
+
     localStorage.setItem('recentlyViewedTransmogs', JSON.stringify(newHistory));
   }, [id]);
 
@@ -56,12 +54,10 @@ function TransmogDetail() {
     const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
     const transmogId = parseInt(id);
     const newIsFavorite = !isFavorite;
-    
-    // Запускаємо анімацію
+
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 500);
-    
-    // Оновлюємо стан безпечно
+
     if (newIsFavorite) {
       const newFavorites = [...favorites, transmogId];
       localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
@@ -78,7 +74,7 @@ function TransmogDetail() {
     return (
       <div className="transmog-detail-loading">
         <div className="loading-spinner"></div>
-        <p>Loading...</p>
+        <p>Summoning set details...</p>
       </div>
     );
   }
@@ -102,147 +98,147 @@ function TransmogDetail() {
     );
   }
 
+  // Handle classes array safely
+  const classesList = transmog.classes || (transmog.class ? [transmog.class] : ['All']);
+  const isAllClasses = classesList.includes('All');
+
   return (
     <div className="transmog-detail-page">
-      <div className="transmog-detail-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/catalog')}
-        >
-          ← Back to Catalog
-        </button>
-        
-        <button 
-          className={`favorite-button ${isFavorite ? 'favorited' : ''} ${isAnimating ? 'animating' : ''}`}
-          onClick={toggleFavorite}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <span className="favorite-icon">
-            {isFavorite ? (
-              <svg viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-                <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" fill="currentColor"/>
-              </svg>
-            ) : (
-              <svg viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-                <path d="M10 18L8.55 16.63C3.4 12.15 0 9.15 0 5.4C0 2.37 2.25 0 5 0C6.65 0 8.2 0.8 9 2.1C9.8 0.8 11.35 0 13 0C15.75 0 18 2.37 18 5.4C18 9.15 14.6 12.15 9.45 16.63L10 18Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-              </svg>
-            )}
-          </span>
-          <span className="favorite-button-text">
-            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-          </span>
-        </button>
-      </div>
+      {/* Background Blur Effect */}
+      <div className="detail-bg-blur" style={{ backgroundImage: `url(${transmog.iconUrl})` }}></div>
 
-      <div className="transmog-detail-content">
-        <div className="transmog-detail-main">
-          <div className="transmog-detail-image">
-            {transmog.iconUrl ? (
-              <img 
-                src={transmog.iconUrl} 
-                alt={transmog.name}
-                className="transmog-icon"
-                loading="lazy"
-                decoding="async"
-                fetchpriority="low"
-                sizes="(max-width: 768px) 90vw, 600px"
-              />
-            ) : (
-              <div className="transmog-icon-placeholder">
-                <span>⚔️</span>
-              </div>
-            )}
-          </div>
-
-          <div className="transmog-detail-info">
-            <h1 className="transmog-detail-title">{transmog.name}</h1>
-            
-            <div className="transmog-detail-meta">
-              <div className="meta-item">
-                <span className="meta-label">Class:</span>
-                <span className={`class-badge ${transmog.class?.toLowerCase().replace(' ', '')}`}>
-                  {transmog.class === 'All' ? 'All Classes' : transmog.class}
-                </span>
-              </div>
-              
-              {transmog.expansion && transmog.expansion !== 'Unknown' && (
-                <div className="meta-item">
-                  <span className="meta-label">Expansion:</span>
-                  <span className="expansion-badge">{transmog.expansion}</span>
-                </div>
-              )}
-              
-              {transmog.setId && (
-                <div className="meta-item">
-                  <span className="meta-label">Set ID:</span>
-                  <span className="set-id">{transmog.setId}</span>
-                </div>
-              )}
-            </div>
-
-            {transmog.description && transmog.description !== 'Epic transmog set from World of Warcraft' && (
-              <div className="transmog-detail-description">
-                <h3>Description</h3>
-                <p>{transmog.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="transmog-detail-items">
-          <h2>Set Items</h2>
-          {transmog.items && transmog.items.length > 0 ? (
-            <div className="items-grid">
-              {transmog.items.map((item, index) => (
-                <div key={index} className="item-card">
-                  <div className="item-icon">
-                    {item.iconUrl ? (
-                      <img src={item.iconUrl} alt={item.name} loading="lazy" decoding="async" fetchpriority="low" />
-                    ) : (
-                      <div className="item-icon-placeholder">?</div>
-                    )}
-                  </div>
-                  <div className="item-info">
-                    <h4>{item.name}</h4>
-                    <p>{item.slot}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="items-empty">
-              <div className="empty-icon">🎮</div>
-              <p>Set items information is being updated...</p>
-              {transmog.setId && (
-                <a 
-                  href={`https://www.wowhead.com/item-set=${transmog.setId}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="wowhead-link"
-                >
-                  View on Wowhead →
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="transmog-detail-actions-bottom">
-          <button 
-            className="action-button primary"
+      <div className="transmog-detail-container">
+        <div className="transmog-detail-header">
+          <button
+            className="back-button"
             onClick={() => navigate('/catalog')}
           >
-            Browse More Sets
+            ← Back to Catalog
           </button>
-          
-          {transmog.class && transmog.class !== 'All' && (
-            <button 
-              className="action-button secondary"
-              onClick={() => navigate('/catalog?class=' + transmog.class?.toLowerCase().replace(' ', ''))}
-            >
-              {transmog.class} Sets
-            </button>
-          )}
+
+          <button
+            className={`detail-favorite-button ${isFavorite ? 'favorited' : ''} ${isAnimating ? 'animating' : ''}`}
+            onClick={toggleFavorite}
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <span className="favorite-icon-wrapper">
+              <svg
+                className="heart-icon"
+                viewBox="0 0 24 24"
+                fill={isFavorite ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </span>
+            <span className="favorite-button-text">
+              {isFavorite ? 'Favorited' : 'Add to Favorites'}
+            </span>
+          </button>
+        </div>
+
+        <div className="transmog-detail-content-card">
+          <div className="detail-top-section">
+            <div className="detail-image-wrapper">
+              {transmog.iconUrl ? (
+                <img
+                  src={transmog.iconUrl}
+                  alt={transmog.name}
+                  className="detail-main-icon"
+                />
+              ) : (
+                <div className="detail-icon-placeholder">
+                  <span>⚔️</span>
+                </div>
+              )}
+              <div className="detail-image-glow"></div>
+            </div>
+
+            <div className="detail-info-wrapper">
+              <h1 className="detail-title">{transmog.name}</h1>
+
+              <div className="detail-badges">
+                {/* Quality Badge */}
+                {transmog.quality && transmog.quality !== 'Unknown' && (
+                  <span className={`quality-badge ${transmog.quality.toLowerCase()}`}>
+                    {transmog.quality}
+                  </span>
+                )}
+
+                {/* Expansion Badge */}
+                {transmog.expansion && transmog.expansion !== 'Unknown' && (
+                  <span className="expansion-badge-detail">
+                    {transmog.expansion}
+                  </span>
+                )}
+              </div>
+
+              <div className="detail-meta-clean">
+                <div className="meta-row-clean">
+                  <span className="meta-label-clean">Classes:</span>
+                  <div className="class-badges-list">
+                    {isAllClasses ? (
+                      <span className="class-badge-detail all">All Classes</span>
+                    ) : (
+                      classesList.map(cls => (
+                        <span key={cls} className={`class-badge-detail ${cls.toLowerCase().replace(' ', '')}`}>
+                          {cls}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {transmog.id && (
+                  <div className="meta-row-clean">
+                    <span className="meta-label-clean">Set ID:</span>
+                    <span className="id-value-clean">{transmog.id}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="detail-actions">
+                <a
+                  href={`https://www.wowhead.com/item-set=${transmog.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="wowhead-button"
+                >
+                  View on Wowhead <span className="external-icon">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="detail-items-section">
+            <h2>Set Components</h2>
+            <div className="detail-items-grid">
+              {transmog.items && transmog.items.length > 0 ? (
+                transmog.items.map((item, index) => (
+                  <div key={index} className="detail-item-card">
+                    <div className="item-card-inner">
+                      <div className="item-icon-wrapper">
+                        {item.iconUrl ? (
+                          <img src={item.iconUrl} alt={item.name} />
+                        ) : (
+                          <div className="item-placeholder">?</div>
+                        )}
+                      </div>
+                      <div className="item-details">
+                        <h4>{item.name}</h4>
+                        {item.slot && <span className="item-slot">{item.slot}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-items-message">
+                  <p>Item details are currently being updated by the server.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

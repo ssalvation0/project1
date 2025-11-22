@@ -87,6 +87,11 @@ async function getItemMedia(itemId) {
     }
 }
 
+// Get item details (for class/expansion extraction)
+async function getItem(itemId) {
+    return getBlizzardData(`/item/${itemId}`);
+}
+
 // Search/Filter item sets (simulated since API doesn't support complex filtering on index)
 // We will fetch the index and then fetch details for a batch, or use a known list
 // For optimization, we might need to fetch all sets once and cache them
@@ -102,5 +107,7 @@ async function getAllSetsWithDetails() {
 module.exports = {
     getItemSetsIndex,
     getItemSet,
-    getItemMedia
+    getItemMedia,
+    getItem
 };
+

@@ -10,6 +10,35 @@ const CACHE_FILE = path.join(__dirname, '../data/blizzard_transmogs_cache.json')
 let cachedSets = [];
 let isHydrating = false;
 
+// Helper: Infer expansion from Item ID (More reliable than level due to squish)
+function inferExpansion(itemId) {
+  if (!itemId) return 'Unknown';
+  const id = parseInt(itemId);
+
+  if (id < 25000) return 'Classic';
+  if (id < 35000) return 'Burning Crusade';
+  if (id < 55000) return 'Wrath of the Lich King';
+  if (id < 75000) return 'Cataclysm';
+  if (id < 100000) return 'Mists of Pandaria';
+  if (id < 130000) return 'Warlords of Draenor';
+  if (id < 150000) return 'Legion';
+  if (id < 180000) return 'Battle for Azeroth';
+  if (id < 190000) return 'Shadowlands';
+  if (id < 210000) return 'Dragonflight';
+  return 'The War Within';
+}
+
+// Helper: Map armor type to classes
+function getClassesForArmorType(subclass) {
+  const map = {
+    'Cloth': ['Mage', 'Priest', 'Warlock'],
+    'Leather': ['Rogue', 'Druid', 'Monk', 'Demon Hunter'],
+    'Mail': ['Hunter', 'Shaman', 'Evoker'],
+    'Plate': ['Warrior', 'Paladin', 'Death Knight']
+  };
+  return map[subclass] || ['All'];
+}
+
 // Load cache from disk
 async function loadCache() {
   try {
@@ -46,47 +75,98 @@ async function hydrateCache() {
     console.log(`📋 Found ${allSets.length} sets in Blizzard index`);
 
     // 2. Filter out sets we already have details for
-    const existingIds = new Set(cachedSets.map(s => s.id));
-    const newSets = allSets.filter(s => !existingIds.has(s.id));
+    // OR sets that have "Unknown" expansion/classes (re-fetch them to improve data)
+    const setsToProcess = allSets.filter(s => {
+      const existing = cachedSets.find(c => c.id === s.id);
+      if (!existing) return true;
+      // If we have it but it's incomplete, re-fetch
+      if (existing.expansion === 'Unknown' || existing.classes.length === 0 || existing.classes[0] === 'All') return true;
+      return false;
+    });
 
-    console.log(`⚡ Need to fetch details for ${newSets.length} new sets`);
+    console.log(`⚡ Need to process ${setsToProcess.length} sets`);
+
+    // Shuffle array to get a mix of expansions immediately
+    for (let i = setsToProcess.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [setsToProcess[i], setsToProcess[j]] = [setsToProcess[j], setsToProcess[i]];
+    }
 
     // 3. Fetch details in batches
-    const BATCH_SIZE = 5;
-    for (let i = 0; i < newSets.length; i += BATCH_SIZE) {
-      const batch = newSets.slice(i, i + BATCH_SIZE);
+    const BATCH_SIZE = 3;
+    for (let i = 0; i < setsToProcess.length; i += BATCH_SIZE) {
+      const batch = setsToProcess.slice(i, i + BATCH_SIZE);
 
       await Promise.all(batch.map(async (setMeta) => {
         try {
+          // Fetch Set Details
           const details = await blizzardService.getItemSet(setMeta.id);
+
+          let classes = [];
+          let expansion = 'Unknown';
+          let quality = 'Unknown';
+
+          // Fetch First Item Details to extract metadata
+          if (details.items && details.items.length > 0) {
+            try {
+              const firstItem = await blizzardService.getItem(details.items[0].id);
+
+              // 1. Extract Classes
+              // Check explicit requirements first (Tier Sets)
+              if (firstItem.preview_item?.requirements?.playable_classes?.links) {
+                classes = firstItem.preview_item.requirements.playable_classes.links.map(l => l.name);
+              }
+              // Fallback to Armor Type (Generic Sets)
+              else if (firstItem.item_subclass?.name) {
+                classes = getClassesForArmorType(firstItem.item_subclass.name);
+              }
+
+              // 2. Extract Expansion from Item ID
+              if (firstItem.id) {
+                expansion = inferExpansion(firstItem.id);
+              }
+
+              // 3. Extract Quality
+              if (firstItem.quality) {
+                quality = firstItem.quality.name;
+              }
+
+            } catch (itemErr) {
+              // Ignore item fetch error, keep defaults
+            }
+          }
 
           // Transform to our format
           const transformedSet = {
             id: details.id,
             name: details.name,
-            classes: [], // Will need to extract from items or effects
-            expansion: 'Unknown', // Blizzard API doesn't always give this directly
-            quality: 'Unknown',
+            classes: classes.length > 0 ? classes : ['All'],
+            expansion: expansion,
+            quality: quality,
             items: details.items ? details.items.map(item => ({
               id: item.id,
               name: item.name
             })) : []
           };
 
-          // Try to infer class from effects or description if possible
-          // For now, we'll leave it generic or try to fetch more info later
+          // Update or Add to Cache
+          const existingIndex = cachedSets.findIndex(s => s.id === details.id);
+          if (existingIndex >= 0) {
+            cachedSets[existingIndex] = transformedSet;
+          } else {
+            cachedSets.push(transformedSet);
+          }
 
-          cachedSets.push(transformedSet);
         } catch (err) {
           console.error(`⚠️ Failed to fetch set ${setMeta.id}:`, err.message);
         }
       }));
 
       // Save periodically
-      if (i % 20 === 0) await saveCache();
+      if (i % 10 === 0) await saveCache();
 
       // Rate limiting pause
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     await saveCache();
@@ -106,14 +186,86 @@ loadCache().then(() => {
 
 // --- Routes ---
 
+router.get('/filters', (req, res) => {
+  // Extract unique values from cache
+  const classes = new Set(['All']);
+  const expansions = new Set(['All']);
+  const qualities = new Set(['All']);
+
+  cachedSets.forEach(set => {
+    if (set.classes) set.classes.forEach(c => classes.add(c));
+    if (set.expansion) expansions.add(set.expansion);
+    if (set.quality) qualities.add(set.quality);
+  });
+
+  // Chronological order for expansions
+  const expansionOrder = [
+    'All',
+    'Classic',
+    'Burning Crusade',
+    'Wrath of the Lich King',
+    'Cataclysm',
+    'Mists of Pandaria',
+    'Warlords of Draenor',
+    'Legion',
+    'Battle for Azeroth',
+    'Shadowlands',
+    'Dragonflight',
+    'The War Within'
+  ];
+
+  const sortedExpansions = Array.from(expansions).sort((a, b) => {
+    const indexA = expansionOrder.indexOf(a);
+    const indexB = expansionOrder.indexOf(b);
+    // If not found in order list, put at the end
+    return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+  });
+
+  res.json({
+    classes: Array.from(classes).sort(),
+    expansions: sortedExpansions,
+    qualities: Array.from(qualities).sort()
+  });
+});
+
+router.get('/stats', (req, res) => {
+  res.json({
+    totalSets: cachedSets.length,
+    isHydrating
+  });
+});
+
 router.get('/', async (req, res) => {
-  const { page = 0, limit = 20, search } = req.query;
+  const {
+    page = 0,
+    limit = 20,
+    search,
+    class: classFilter,
+    expansion,
+    quality
+  } = req.query;
 
   let results = cachedSets;
 
+  // Filtering
   if (search) {
     const q = search.toLowerCase();
     results = results.filter(s => s.name.toLowerCase().includes(q));
+  }
+
+  if (classFilter && classFilter !== 'all') {
+    results = results.filter(s =>
+      s.classes.includes('All') ||
+      s.classes.some(c => c.toLowerCase() === classFilter.toLowerCase())
+    );
+  }
+
+  if (expansion && expansion !== 'all') {
+    results = results.filter(s => s.expansion === expansion);
+  }
+
+  if (quality && quality !== 'all') {
+    results = results.filter(s => s.quality === quality);
   }
 
   const pageNum = parseInt(page);
@@ -155,22 +307,6 @@ router.get('/:id', async (req, res) => {
     ...set,
     items: itemsWithIcons,
     wowheadLink: `https://www.wowhead.com/item-set=${set.id}`
-  });
-});
-
-router.get('/filters', (req, res) => {
-  // Since we don't have good class/expansion data yet from raw API, return basics
-  res.json({
-    classes: ['All'],
-    expansions: ['All'],
-    qualities: ['All']
-  });
-});
-
-router.get('/stats', (req, res) => {
-  res.json({
-    totalSets: cachedSets.length,
-    isHydrating
   });
 });
 
