@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
 import RecentlyViewed from '../components/RecentlyViewed';
+import NewsCarousel from '../components/NewsCarousel';
 import '../styles/Home.css';
 
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
@@ -119,13 +120,13 @@ function Home() {
             </button>
           </div>
         </div>
-        <div 
+        <div
           className={`scroll-indicator ${!showScrollIndicator ? 'hidden' : ''}`}
           onClick={scrollToCards}
         >
           <span>SCROLL TO EXPLORE</span>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </section>
@@ -138,9 +139,9 @@ function Home() {
               const imageKey = classImageMap[slug] || slug;
               const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
               const isAboveFold = idx < 4;
-              
+
               return (
-                <div 
+                <div
                   key={cls.name}
                   className="card-item"
                   style={{ '--card-index': idx }}
@@ -164,9 +165,9 @@ function Home() {
                 </div>
               );
             })}
-            
+
             {/* Catalog Card */}
-            <div 
+            <div
               className="card-item"
               style={{ '--card-index': warcraftClasses.length }}
             >
@@ -185,7 +186,7 @@ function Home() {
             </div>
 
             {/* Random Card */}
-            <div 
+            <div
               className="card-item"
               style={{ '--card-index': warcraftClasses.length + 1 }}
             >
@@ -203,6 +204,7 @@ function Home() {
               />
             </div>
           </div>
+          <NewsCarousel />
         </main>
       )}
     </div>
