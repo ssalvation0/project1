@@ -28,14 +28,12 @@
   pointer-events: none;
   z-index: -1;
   /* Soft circular vignette that fully fades before edges */
-  background: radial-gradient(
-    circle at center,
-    rgba(0,0,0,0.40) 0%,
-    rgba(0,0,0,0.28) 28%,
-    rgba(0,0,0,0.14) 54%,
-    rgba(0,0,0,0.06) 70%,
-    rgba(0,0,0,0.0) 82%
-  );
+  background: radial-gradient(circle at center,
+      rgba(0, 0, 0, 0.40) 0%,
+      rgba(0, 0, 0, 0.28) 28%,
+      rgba(0, 0, 0, 0.14) 54%,
+      rgba(0, 0, 0, 0.06) 70%,
+      rgba(0, 0, 0, 0.0) 82%);
   filter: blur(12px);
 }
 
@@ -155,6 +153,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -162,9 +161,12 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(-50%) translateY(0);
   }
+
   50% {
     transform: translateX(-50%) translateY(-8px);
   }
@@ -215,12 +217,10 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.5) 60%,
-    rgba(0, 0, 0, 0.8) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.5) 60%,
+      rgba(0, 0, 0, 0.8) 100%);
   transition: opacity 0.35s ease;
   pointer-events: none;
   z-index: 1;
@@ -230,11 +230,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.6) 100%
-  );
+  background: radial-gradient(circle at center,
+      transparent 0%,
+      rgba(0, 0, 0, 0.6) 100%);
   opacity: 0;
   transition: opacity 0.35s ease;
   pointer-events: none;
@@ -260,12 +258,10 @@
   line-height: 1.2;
   text-align: center;
   z-index: 3;
-  background: linear-gradient(
-    to top,
-    rgba(10, 15, 25, 0.95) 0%,
-    rgba(10, 15, 25, 0.85) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      rgba(10, 15, 25, 0.95) 0%,
+      rgba(10, 15, 25, 0.85) 50%,
+      transparent 100%);
   backdrop-filter: blur(8px);
   border-top: 1px solid rgba(229, 211, 179, 0.15);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
@@ -304,12 +300,10 @@
 
 .class-card:hover .class-card-text,
 .class-card:focus-within .class-card-text {
-  background: linear-gradient(
-    to top,
-    rgba(10, 15, 25, 0.98) 0%,
-    rgba(10, 15, 25, 0.9) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      rgba(10, 15, 25, 0.98) 0%,
+      rgba(10, 15, 25, 0.9) 50%,
+      transparent 100%);
   border-top-color: rgba(229, 211, 179, 0.3);
   text-shadow: 0 0 20px currentColor;
 }
@@ -317,7 +311,7 @@
 /* --- КОЛЬОРИ КЛАСІВ --- */
 .class-card[data-class="warrior"]:hover,
 .class-card[data-class="warrior"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(199, 156, 110, 0.5),
     inset 0 0 80px rgba(199, 156, 110, 0.1);
@@ -330,7 +324,7 @@
 
 .class-card[data-class="paladin"]:hover,
 .class-card[data-class="paladin"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(245, 140, 186, 0.5),
     inset 0 0 80px rgba(245, 140, 186, 0.1);
@@ -343,7 +337,7 @@
 
 .class-card[data-class="hunter"]:hover,
 .class-card[data-class="hunter"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(171, 212, 115, 0.5),
     inset 0 0 80px rgba(171, 212, 115, 0.1);
@@ -356,7 +350,7 @@
 
 .class-card[data-class="rogue"]:hover,
 .class-card[data-class="rogue"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(255, 245, 105, 0.5),
     inset 0 0 80px rgba(255, 245, 105, 0.1);
@@ -369,7 +363,7 @@
 
 .class-card[data-class="priest"]:hover,
 .class-card[data-class="priest"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(255, 255, 255, 0.5),
     inset 0 0 80px rgba(255, 255, 255, 0.1);
@@ -382,7 +376,7 @@
 
 .class-card[data-class="deathknight"]:hover,
 .class-card[data-class="deathknight"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(196, 31, 59, 0.5),
     inset 0 0 80px rgba(196, 31, 59, 0.1);
@@ -395,7 +389,7 @@
 
 .class-card[data-class="shaman"]:hover,
 .class-card[data-class="shaman"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(0, 112, 222, 0.5),
     inset 0 0 80px rgba(0, 112, 222, 0.1);
@@ -408,7 +402,7 @@
 
 .class-card[data-class="mage"]:hover,
 .class-card[data-class="mage"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(105, 204, 240, 0.5),
     inset 0 0 80px rgba(105, 204, 240, 0.1);
@@ -421,7 +415,7 @@
 
 .class-card[data-class="warlock"]:hover,
 .class-card[data-class="warlock"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(148, 130, 201, 0.5),
     inset 0 0 80px rgba(148, 130, 201, 0.1);
@@ -434,7 +428,7 @@
 
 .class-card[data-class="monk"]:hover,
 .class-card[data-class="monk"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(0, 255, 150, 0.5),
     inset 0 0 80px rgba(0, 255, 150, 0.1);
@@ -447,7 +441,7 @@
 
 .class-card[data-class="druid"]:hover,
 .class-card[data-class="druid"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(255, 125, 10, 0.5),
     inset 0 0 80px rgba(255, 125, 10, 0.1);
@@ -460,7 +454,7 @@
 
 .class-card[data-class="demonhunter"]:hover,
 .class-card[data-class="demonhunter"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(163, 53, 238, 0.5),
     inset 0 0 80px rgba(163, 53, 238, 0.1);
@@ -473,7 +467,7 @@
 
 .class-card[data-class="evoker"]:hover,
 .class-card[data-class="evoker"]:focus-within {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(51, 147, 127, 0.5),
     inset 0 0 80px rgba(51, 147, 127, 0.1);
@@ -486,7 +480,7 @@
 
 .class-card.view-all:hover,
 .class-card.random-card:hover {
-  box-shadow: 
+  box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.6),
     0 0 60px rgba(229, 211, 179, 0.5),
     inset 0 0 80px rgba(229, 211, 179, 0.1);
@@ -599,10 +593,22 @@
     opacity: 0;
     transform: translateY(40px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+.news-section-wrapper {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: none;
+  margin-top: 40px;
+}
+
+.news-section-wrapper.animate {
+  animation: cardFadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 @media (max-width: 1400px) {
@@ -665,8 +671,16 @@
 }
 
 /* Hero parallax background and overlay */
-.hero-section { overflow: hidden; position: relative; }
-.hero-content { position: relative; z-index: 2; }
+.hero-section {
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
 .hero-parallax {
   position: absolute;
   inset: -12% -8% -8% -8%;
@@ -680,13 +694,14 @@
   z-index: 0;
   pointer-events: none;
 }
+
 .hero-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 600px at 50% 20%, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.6) 100%),
-    linear-gradient(180deg, rgba(15,12,9,0.70) 0%, rgba(15,12,9,0.85) 55%, rgba(15,12,9,0.95) 100%);
+    radial-gradient(1200px 600px at 50% 20%, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.6) 100%),
+    linear-gradient(180deg, rgba(15, 12, 9, 0.70) 0%, rgba(15, 12, 9, 0.85) 55%, rgba(15, 12, 9, 0.95) 100%);
   z-index: 1;
 }
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
-import RecentlyViewed from '../components/RecentlyViewed';
 import NewsCarousel from '../components/NewsCarousel';
 import '../styles/Home.css';
 
@@ -31,9 +30,11 @@ const warcraftClasses = [
 function Home() {
   const [showCards, setShowCards] = useState(false);
   const [animateCards, setAnimateCards] = useState(false);
+  const [animateNews, setAnimateNews] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
+  const newsRef = useRef(null);
   const heroRef = useRef(null);
 
   const classImageMap = {
@@ -81,6 +82,12 @@ function Home() {
           const isVisible = rect.top < window.innerHeight * 0.75;
           if (isVisible) setAnimateCards(true);
         }
+
+        if (newsRef.current && !animateNews) {
+          const rect = newsRef.current.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight * 0.8;
+          if (isVisible) setAnimateNews(true);
+        }
       });
     };
 
@@ -91,7 +98,7 @@ function Home() {
       window.removeEventListener('scroll', handleScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [animateCards]);
+  }, [animateCards, animateNews]);
 
   const handleRandomTransmog = () => {
     const randomId = Math.floor(Math.random() * 13) + 1;
@@ -204,7 +211,12 @@ function Home() {
               />
             </div>
           </div>
-          <NewsCarousel />
+          <div
+            ref={newsRef}
+            className={`news-section-wrapper ${animateNews ? 'animate' : ''}`}
+          >
+            <NewsCarousel />
+          </div>
         </main>
       )}
     </div>
