@@ -63,20 +63,24 @@ const NewsCarousel = () => {
         setTimeout(() => setIsAutoPlaying(true), 10000);
     };
 
+    const handlePrev = () => {
+        setActiveIndex((prev) => (prev === 0 ? newsItems.length - 1 : prev - 1));
+    };
+
+    const handleNext = () => {
+        setActiveIndex((prev) => (prev === newsItems.length - 1 ? 0 : prev + 1));
+    };
+
     return (
         <section className="news-carousel-section">
-            <div className="section-divider">
-                <h2 className="section-title">Latest News</h2>
-            </div>
-
             <div className="carousel-container">
                 <div className="carousel-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                     {newsItems.map((item) => (
                         <div key={item.id} className="carousel-slide">
                             <div className="news-card">
                                 <div className="news-image-wrapper">
+                                    <span className="news-category">{item.category}</span>
                                     <img src={item.image} alt={item.title} className="news-image" />
-                                    <div className="news-category">{item.category}</div>
                                 </div>
                                 <div className="news-content">
                                     <div className="news-date">{item.date}</div>
@@ -89,12 +93,24 @@ const NewsCarousel = () => {
                     ))}
                 </div>
 
+                <button className="carousel-arrow prev" onClick={handlePrev} aria-label="Previous slide">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+
+                <button className="carousel-arrow next" onClick={handleNext} aria-label="Next slide">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </button>
+
                 <div className="carousel-indicators">
                     {newsItems.map((_, index) => (
                         <button
                             key={index}
                             className={`carousel-dot ${index === activeIndex ? 'active' : ''}`}
-                            onClick={() => handleDotClick(index)}
+                            onClick={() => setActiveIndex(index)}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
