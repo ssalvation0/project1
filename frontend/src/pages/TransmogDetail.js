@@ -217,19 +217,26 @@ function TransmogDetail() {
               {transmog.items && transmog.items.length > 0 ? (
                 transmog.items.map((item, index) => (
                   <div key={index} className="detail-item-card">
-                    <div className="item-card-inner">
-                      <div className="item-icon-wrapper">
-                        {item.iconUrl ? (
-                          <img src={item.iconUrl} alt={item.name} />
-                        ) : (
-                          <div className="item-placeholder">?</div>
-                        )}
+                    <a
+                      href={`https://www.wowhead.com/item=${item.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="item-card-link"
+                    >
+                      <div className="item-card-inner">
+                        <div className="item-icon-wrapper">
+                          {item.iconUrl ? (
+                            <img src={item.iconUrl} alt={item.name} />
+                          ) : (
+                            <div className="item-placeholder">?</div>
+                          )}
+                        </div>
+                        <div className="item-details">
+                          <h4>{item.name}</h4>
+                          {item.slot && <span className="item-slot">{item.slot}</span>}
+                        </div>
                       </div>
-                      <div className="item-details">
-                        <h4>{item.name}</h4>
-                        {item.slot && <span className="item-slot">{item.slot}</span>}
-                      </div>
-                    </div>
+                    </a>
                   </div>
                 ))
               ) : (

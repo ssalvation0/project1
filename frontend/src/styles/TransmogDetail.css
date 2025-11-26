@@ -444,6 +444,17 @@
   letter-spacing: 0.05em;
 }
 
+.item-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.detail-item-card:hover .item-card-link {
+  /* Optional: Add hover effect specific to the link if needed */
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .detail-top-section {
