@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import './NewsCarousel.css';
 
 // Import images directly to ensure Webpack handles them
@@ -45,30 +46,48 @@ const newsItems = [
 const NewsCarousel = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-    const autoPlayRef = useRef(null);
+    // const autoPlayRef = useRef(null); // Removed as per instruction
+
+    const [selectedNews, setSelectedNews] = useState(null);
 
     useEffect(() => {
-        if (isAutoPlaying) {
-            autoPlayRef.current = setInterval(() => {
-                setActiveIndex((prev) => (prev + 1) % newsItems.length);
-            }, 5000);
-        }
-        return () => clearInterval(autoPlayRef.current);
-    }, [isAutoPlaying]);
+        const interval = setInterval(() => {
+            if (isAutoPlaying && !selectedNews) {
+                setActiveIndex((prev) => (prev === newsItems.length - 1 ? 0 : prev + 1));
+            }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [isAutoPlaying, selectedNews]);
 
     const handleDotClick = (index) => {
         setActiveIndex(index);
         setIsAutoPlaying(false);
-        // Resume autoplay after 10s of inactivity
         setTimeout(() => setIsAutoPlaying(true), 10000);
     };
 
-    const handlePrev = () => {
+    const handlePrev = (e) => {
+        e.stopPropagation();
         setActiveIndex((prev) => (prev === 0 ? newsItems.length - 1 : prev - 1));
     };
 
-    const handleNext = () => {
+    const handleNext = (e) => {
+        e.stopPropagation();
         setActiveIndex((prev) => (prev === newsItems.length - 1 ? 0 : prev + 1));
+    };
+
+    const openModal = (newsItem) => {
+        setSelectedNews(newsItem);
+        setIsAutoPlaying(false);
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.documentElement.style.overflow = 'hidden'; // Lock html too
+    };
+
+    const closeModal = () => {
+        setSelectedNews(null);
+        setIsAutoPlaying(true);
+        document.body.style.overflow = 'unset';
+        document.documentElement.style.overflow = 'unset';
     };
 
     return (
@@ -86,7 +105,7 @@ const NewsCarousel = () => {
                                     <div className="news-date">{item.date}</div>
                                     <h3 className="news-title">{item.title}</h3>
                                     <p className="news-description">{item.description}</p>
-                                    <button className="news-btn">Read More</button>
+                                    <button className="news-btn" onClick={() => openModal(item)}>Read More</button>
                                 </div>
                             </div>
                         </div>
@@ -116,6 +135,38 @@ const NewsCarousel = () => {
                     ))}
                 </div>
             </div>
+
+            {/* News Modal - Rendered via Portal */}
+            {selectedNews && ReactDOM.createPortal(
+                <div className="news-modal-overlay" onClick={closeModal}>
+                    <div className="news-modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="news-modal-close" onClick={closeModal}>×</button>
+                        <div className="news-modal-header">
+                            <span className="news-category">{selectedNews.category}</span>
+                            <img src={selectedNews.image} alt={selectedNews.title} className="news-modal-image" />
+                            <div className="news-modal-meta">
+                                <span className="news-date">{selectedNews.date}</span>
+                            </div>
+                            <h2 className="news-modal-title">{selectedNews.title}</h2>
+                        </div>
+                        <div className="news-modal-body">
+                            <p className="news-modal-intro">{selectedNews.description}</p>
+                            <div className="news-modal-text">
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                <h3>Key Highlights</h3>
+                                <ul>
+                                    <li>Detailed analysis of the new features and mechanics.</li>
+                                    <li>Developer insights and design philosophy.</li>
+                                    <li>Community feedback and future roadmap adjustments.</li>
+                                </ul>
+                                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </section>
     );
 };
