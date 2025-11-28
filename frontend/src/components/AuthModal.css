@@ -91,17 +91,14 @@
 
 .auth-modal-form-section {
     flex: 1;
-    padding: 40px 40px 40px 60px;
+    padding: 30px;
     overflow-y: auto;
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 0 24px 24px 0; /* Заокруглення тільки справа */
-    z-index: 1;
-    margin-left: auto;
-    max-width: 100%;
     justify-content: center;
     align-items: center;
+    border-radius: 0 24px 24px 0;
     background: rgba(20, 20, 20, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -112,40 +109,25 @@
 }
 
 .auth-modal-content {
+    font-family: 'Raleway', sans-serif;
+    color: #f2e6c9;
     width: 100%;
     max-width: 380px;
+    padding-top: 0;
 }
 
 .auth-modal-content h2 {
     font-family: 'Cinzel', serif;
     color: #f2e6c9;
-    margin: 0 0 2rem 0;
+    margin: 0 0 1.5rem 0; /* Зменшено з 2rem */
     font-size: 2rem;
     text-align: center;
 }
 
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    font-family: 'Raleway', sans-serif;
-    margin-bottom: 1.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    color: #f2e6c9;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.auth-form input {
-    padding: 14px 16px;
+/* Загальні стилі для всіх полів */
+.auth-form input,
+.stepper-content input {
+    padding: 16px 16px 16px 50px;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
@@ -154,35 +136,209 @@
     transition: all 0.3s;
 }
 
-.auth-form input:focus {
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Зменшено з 20px */
+    font-family: 'Raleway', sans-serif;
+    margin-bottom: 1.5rem; /* Зменшено з 2rem */
+}
+
+.auth-form .form-group,
+.stepper-content .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.form-group label {
+    color: #f2e6c9;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Іконка для email */
+.form-group:has(input[type="email"])::before {
+    content: '✉';
+    position: absolute;
+    left: 16px;
+    bottom: 14px; /* Змінено з top на bottom для кращого позиціонування */
+    font-size: 28px; /* Збільшено розмір */
+    color: #f2e6c9; /* Змінено з #d4af37 */
+    pointer-events: none;
+    line-height: 1;
+}
+
+/* Іконка для password */
+.form-group:has(input[type="password"])::before {
+    content: '⚿';
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    font-size: 25px;
+    color: #f2e6c9;
+    pointer-events: none;
+    line-height: 1;
+}
+
+/* Іконка для name */
+.form-group:has(input[type="text"])::before {
+    content: '👤';
+    position: absolute;
+    left: 16px;
+    bottom: 14px;
+    font-size: 20px;
+    color: #f2e6c9; /* Змінено з #d4af37 */
+    pointer-events: none;
+}
+
+.submit-btn {
+    padding: 14px 24px; /* Той самий padding */
+    background: transparent;
+    border: 1px solid #f2e6c9;
+    border-radius: 6px;
+    color: #f2e6c9;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Raleway', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 0; /* Видалити якщо є */
+}
+
+.submit-btn:hover {
+    background: rgba(242, 230, 201, 0.1); /* Змінено */
+    border-color: #fff;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(242, 230, 201, 0.3); /* Змінено */
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Кнопки степпера */
+.stepper-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.stepper-buttons .submit-btn,
+.stepper-buttons .back-btn {
+    flex: 1;
+}
+
+.back-btn {
+    padding: 14px 24px; /* Збільшено з 12px */
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: #f2e6c9;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Raleway', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 0; /* Видалити якщо є */
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #f2e6c9;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(242, 230, 201, 0.2);
+}
+
+.back-btn:active {
+    transform: scale(0.98);
+}
+
+.stepper-container {
+    margin-bottom: 1.5rem;
+}
+
+/* Крок підтвердження */
+.confirmation-step {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    color: #f2e6c9;
+    margin-bottom: 1rem; /* Додати */
+}
+
+.confirmation-step p {
+    margin: 10px 0;
+    font-size: 15px;
+}
+
+.confirmation-step strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.stepper-content {
+    min-height: auto;
+    width: 100%;
+    overflow: visible;
+    margin-bottom: 1.5rem; /* Відступ після контенту степпера */
+}
+
+.stepper-content > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Прибрати gap тут */
+}
+
+/* Внутрішній контейнер з полями - ВАЖЛИВО */
+.stepper-content > div > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px; /* Додати gap сюди! */
+}
+
+.stepper-content .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    margin-bottom: 0;
+}
+
+.stepper-content input {
+    padding: 16px 16px 16px 50px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.stepper-content input:focus {
     outline: none;
     border-color: #f2e6c9;
     background: rgba(255, 255, 255, 0.08);
 }
 
-.submit-btn {
-    padding: 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 10px;
-}
-
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+/* Motion div всередині stepper-content */
+.stepper-content > div > div {
+    width: 100%;
 }
 
 .toggle-mode {
     text-align: center;
     color: #f2e6c9;
     font-size: 14px;
-    margin: 0;
+    margin: 1.5rem 0 0 0; /* Зменшено з 2rem */
 }
 
 .toggle-mode span {
