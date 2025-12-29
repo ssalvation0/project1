@@ -75,26 +75,30 @@ function AuthModal({ isOpen, onClose }) {
 
     return (
         <div className={`auth-modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
-            <div 
-                className="auth-modal-container" 
+            <div
+                className="auth-modal-container"
                 onClick={(e) => e.stopPropagation()}
                 ref={modalRef}
             >
                 <div className="auth-modal-image-section">
-                    <img 
+                    <img
                         src={`${process.env.PUBLIC_URL}/images/logreg_pic.jpg`}
-                        alt="World of Warcraft" 
+                        alt="World of Warcraft"
                         className="auth-modal-image"
                         onError={(e) => console.error('Image failed to load:', e)}
+                        width="400"
+                        height="600"
+                        loading="lazy"
+                        decoding="async"
                     />
                 </div>
 
                 <div className="auth-modal-form-section">
                     <button className="auth-modal-close" onClick={onClose}>×</button>
-                    
+
                     <div className="auth-modal-content">
                         <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
-                        
+
                         {!isLogin && (
                             <Stepper currentStep={currentStep}>
                                 <Step label="Personal Info">
@@ -108,7 +112,7 @@ function AuthModal({ isOpen, onClose }) {
                                         />
                                     </div>
                                 </Step>
-                                
+
                                 <Step label="Account">
                                     <div>
                                         <div className="form-group">
@@ -120,7 +124,7 @@ function AuthModal({ isOpen, onClose }) {
                                                 required
                                             />
                                         </div>
-                                        
+
                                         <div className="form-group">
                                             <input
                                                 type="password"
@@ -132,7 +136,7 @@ function AuthModal({ isOpen, onClose }) {
                                         </div>
                                     </div>
                                 </Step>
-                                
+
                                 <Step label="Confirm">
                                     <div className="confirmation-step">
                                         <p><strong>Name:</strong> {name}</p>
@@ -141,7 +145,7 @@ function AuthModal({ isOpen, onClose }) {
                                 </Step>
                             </Stepper>
                         )}
-                        
+
                         {isLogin ? (
                             // ЛОГІН - окрема форма
                             <form className="auth-form" onSubmit={handleSubmit}>
@@ -154,7 +158,7 @@ function AuthModal({ isOpen, onClose }) {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div className="form-group">
                                     <input
                                         type="password"
@@ -164,7 +168,7 @@ function AuthModal({ isOpen, onClose }) {
                                         required
                                     />
                                 </div>
-                                
+
                                 <button type="submit" className="submit-btn">
                                     Login
                                 </button>
@@ -182,7 +186,7 @@ function AuthModal({ isOpen, onClose }) {
                                 </button>
                             </div>
                         )}
-                        
+
                         <p className="toggle-mode">
                             {isLogin ? "Don't have an account? " : "Already have an account? "}
                             <span onClick={toggleMode}>

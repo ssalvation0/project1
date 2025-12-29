@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import './ToastProvider.css';
 
-const ToastContext = createContext({ showToast: () => {} });
+const ToastContext = createContext({ showToast: () => { } });
 
 export function useToast() {
   return useContext(ToastContext);
@@ -11,8 +11,15 @@ export default function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const idRef = useRef(0);
 
-  const remove = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  // Start exit animation, then remove after animation completes
+  const startExit = useCallback((id) => {
+    setToasts((prev) =>
+      prev.map((t) => t.id === id ? { ...t, exiting: true } : t)
+    );
+    // Remove from DOM after exit animation (300ms)
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 300);
   }, []);
 
   const showToast = useCallback((message, opts = {}) => {
@@ -22,12 +29,13 @@ export default function ToastProvider({ children }) {
       message: String(message || ''),
       type: opts.type || 'info', // 'success' | 'error' | 'info'
       duration: typeof opts.duration === 'number' ? opts.duration : 2500,
+      exiting: false,
     };
     setToasts((prev) => [...prev, toast]);
     if (toast.duration > 0) {
-      setTimeout(() => remove(id), toast.duration);
+      setTimeout(() => startExit(id), toast.duration);
     }
-  }, [remove]);
+  }, [startExit]);
 
   // Auto-remove on route change visibility (defensive)
   useEffect(() => {
@@ -43,9 +51,19 @@ export default function ToastProvider({ children }) {
       {children}
       <div className="toast-region" aria-live="polite" aria-atomic="true">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast ${t.type}`} role="status">
+          <div
+            key={t.id}
+            className={`toast ${t.type} ${t.exiting ? 'exiting' : ''}`}
+            role="status"
+          >
             <span className="toast-message">{t.message}</span>
-            <button className="toast-close" onClick={() => remove(t.id)} aria-label="Close notification">×</button>
+            <button
+              className="toast-close"
+              onClick={() => startExit(t.id)}
+              aria-label="Close notification"
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>

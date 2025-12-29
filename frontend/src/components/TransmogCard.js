@@ -1,46 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TransmogCard.css';
+
+// Quality color map - defined outside component to prevent recreation
+const QUALITY_COLORS = {
+    poor: '#9d9d9d',
+    common: '#ffffff',
+    uncommon: '#1eff00',
+    rare: '#0070dd',
+    epic: '#a335ee',
+    legendary: '#ff8000',
+    artifact: '#e6cc80'
+};
+
+const getQualityColor = (quality) => {
+    return QUALITY_COLORS[quality?.toLowerCase()] || '#ffffff';
+};
 
 const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
 
-    const handleClick = () => {
+    const handleClick = useCallback(() => {
         navigate(`/transmog/${transmog.id}`);
-    };
+    }, [navigate, transmog.id]);
 
-    const handleFavoriteClick = (e) => {
+    const handleFavoriteClick = useCallback((e) => {
         e.stopPropagation();
         onToggleFavorite(transmog.id);
-    };
+    }, [onToggleFavorite, transmog.id]);
 
-    // Determine which image to show
-    // Priority: iconUrl (from Wowhead) -> placeholder
+    const handleImageError = useCallback(() => {
+        setImageError(true);
+    }, []);
+
+    // Memoize computed values
     const imageUrl = transmog.iconUrl;
     const showPlaceholder = !imageUrl || imageError;
+    const qualityColor = useMemo(() => getQualityColor(transmog.quality), [transmog.quality]);
 
-    // Get quality color for border/glow
-    const getQualityColor = (quality) => {
-        switch (quality?.toLowerCase()) {
-            case 'poor': return '#9d9d9d';
-            case 'common': return '#ffffff';
-            case 'uncommon': return '#1eff00';
-            case 'rare': return '#0070dd';
-            case 'epic': return '#a335ee';
-            case 'legendary': return '#ff8000';
-            case 'artifact': return '#e6cc80';
-            default: return '#ffffff';
+    // Memoize style object
+    const cardStyle = useMemo(() => ({
+        '--quality-color': qualityColor
+    }), [qualityColor]);
+
+    // Memoize class badge info
+    const classBadge = useMemo(() => {
+        if (transmog.classes && transmog.classes.length > 0 && transmog.classes[0] !== 'All') {
+            return {
+                className: `class-badge ${transmog.classes[0].toLowerCase().replace(/\s+/g, '')}`,
+                text: transmog.classes[0]
+            };
         }
-    };
-
-    const qualityColor = getQualityColor(transmog.quality);
+        return null;
+    }, [transmog.classes]);
 
     return (
         <div
             className="transmog-card"
             onClick={handleClick}
-            style={{ '--quality-color': qualityColor }}
+            style={cardStyle}
         >
             <div className="transmog-card-image-container">
                 {showPlaceholder ? (
@@ -53,7 +72,10 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                         alt={transmog.name}
                         className="transmog-card-image"
                         loading="lazy"
-                        onError={() => setImageError(true)}
+                        decoding="async"
+                        onError={handleImageError}
+                        width="128"
+                        height="128"
                     />
                 )}
 
@@ -68,9 +90,9 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                 </h3>
 
                 <div className="transmog-meta">
-                    {transmog.classes && transmog.classes.length > 0 && transmog.classes[0] !== 'All' && (
-                        <span className={`class-badge ${transmog.classes[0].toLowerCase().replace(/\s+/g, '')}`}>
-                            {transmog.classes[0]}
+                    {classBadge && (
+                        <span className={classBadge.className}>
+                            {classBadge.text}
                         </span>
                     )}
                     {transmog.expansion && transmog.expansion !== 'Unknown' && (
@@ -92,4 +114,11 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     );
 };
 
-export default TransmogCard;
+// Use React.memo with custom comparison for better performance
+export default React.memo(TransmogCard, (prevProps, nextProps) => {
+    return (
+        prevProps.transmog.id === nextProps.transmog.id &&
+        prevProps.isFavorite === nextProps.isFavorite &&
+        prevProps.onToggleFavorite === nextProps.onToggleFavorite
+    );
+});

@@ -99,7 +99,15 @@ const NewsCarousel = () => {
                             <div className="news-card">
                                 <div className="news-image-wrapper">
                                     <span className="news-category">{item.category}</span>
-                                    <img src={item.image} alt={item.title} className="news-image" />
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="news-image"
+                                        width="800"
+                                        height="450"
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
                                 </div>
                                 <div className="news-content">
                                     <div className="news-date">{item.date}</div>
@@ -143,7 +151,14 @@ const NewsCarousel = () => {
                         <button className="news-modal-close" onClick={closeModal}>×</button>
                         <div className="news-modal-header">
                             <span className="news-category">{selectedNews.category}</span>
-                            <img src={selectedNews.image} alt={selectedNews.title} className="news-modal-image" />
+                            <img
+                                src={selectedNews.image}
+                                alt={selectedNews.title}
+                                className="news-modal-image"
+                                width="1200"
+                                height="675"
+                                decoding="async"
+                            />
                             <div className="news-modal-meta">
                                 <span className="news-date">{selectedNews.date}</span>
                             </div>

@@ -228,11 +228,28 @@ router.get('/filters', (req, res) => {
   });
 });
 
-router.get('/stats', (req, res) => {
-  res.json({
-    totalSets: cachedSets.length,
-    isHydrating
-  });
+// Batch fetch transmogs by IDs
+router.get('/batch', async (req, res) => {
+  const ids = (req.query.ids || '').split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+
+  if (ids.length === 0) {
+    return res.json([]);
+  }
+
+  const results = cachedSets.filter(s => ids.includes(s.id));
+
+  // Enrich with icons
+  const enriched = await Promise.all(results.map(async set => {
+    let iconUrl = null;
+    if (set.items && set.items.length > 0) {
+      iconUrl = await blizzardService.getItemMedia(set.items[0].id);
+    }
+    return { ...set, iconUrl };
+  }));
+
+  // Cache for 1 hour
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.json(enriched);
 });
 
 router.get('/', async (req, res) => {
@@ -283,6 +300,8 @@ router.get('/', async (req, res) => {
     return { ...set, iconUrl };
   }));
 
+  // Cache for 5 minutes (list changes slowly)
+  res.setHeader('Cache-Control', 'public, max-age=300');
   res.json({
     transmogs: enriched,
     pagination: {
@@ -303,6 +322,8 @@ router.get('/:id', async (req, res) => {
     return { ...item, iconUrl: icon };
   }));
 
+  // Cache for 24 hours (details are static)
+  res.setHeader('Cache-Control', 'public, max-age=86400');
   res.json({
     ...set,
     items: itemsWithIcons,

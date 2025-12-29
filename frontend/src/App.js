@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -7,27 +7,47 @@ import './App.css';
 import backgroundImage from './images/background.jpg';
 import ToastProvider from './components/ToastProvider';
 
-const Home = lazy(() => import('./pages/Home'));
-const Catalog = lazy(() => import('./pages/Catalog'));
-const TransmogDetail = lazy(() => import('./pages/TransmogDetail'));
+// Lazy load pages for code splitting
+const Home = React.lazy(() => import('./pages/Home'));
+const Catalog = React.lazy(() => import('./pages/Catalog'));
+const TransmogDetail = React.lazy(() => import('./pages/TransmogDetail'));
+
+// Loading fallback component - memoized to prevent re-renders
+const LoadingFallback = React.memo(() => (
+  <div style={{ padding: '140px 20px', textAlign: 'center', color: '#e5d3b3' }}>
+    Loading…
+  </div>
+));
 
 function App() {
   const [scrollOpacity, setScrollOpacity] = useState(0.3);
 
   useEffect(() => {
+    let rafId;
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const maxScroll = 500;
-      const newOpacity = Math.min(0.3 + (scrollPosition / maxScroll) * 0.4, 0.7);
-      setScrollOpacity(newOpacity);
+      if (!ticking) {
+        rafId = requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY;
+          const maxScroll = 500;
+          const newOpacity = Math.min(0.3 + (scrollPosition / maxScroll) * 0.4, 0.7);
+          setScrollOpacity(newOpacity);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
-  // JSON-LD Structured Data for SEO
-  const structuredData = {
+  // Memoize structured data to prevent recreation on each render
+  const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "TransmogVault",
@@ -41,7 +61,17 @@ function App() {
       },
       "query-input": "required name=search_term_string"
     }
-  };
+  }), []);
+
+  // Memoize background styles
+  const backgroundStyle = useMemo(() => ({
+    backgroundImage: `url(${backgroundImage})`,
+    opacity: 1
+  }), []);
+
+  const overlayStyle = useMemo(() => ({
+    opacity: scrollOpacity
+  }), [scrollOpacity]);
 
   return (
     <Router>
@@ -51,28 +81,25 @@ function App() {
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
           />
-          <div 
+          <div
             className="background-image"
-            style={{ 
-              backgroundImage: `url(${backgroundImage})`,
-              opacity: 1 
-            }}
+            style={backgroundStyle}
             aria-hidden="true"
           />
-          <div 
+          <div
             className="background-overlay"
-            style={{ opacity: scrollOpacity }}
+            style={overlayStyle}
             aria-hidden="true"
           />
           <Particles />
           <Header />
-          <Suspense fallback={<div style={{padding:'140px 20px',textAlign:'center',color:'#e5d3b3'}}>Loading…</div>}>
+          <React.Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/transmog/:id" element={<TransmogDetail />} />
             </Routes>
-          </Suspense>
+          </React.Suspense>
           <Footer />
         </div>
       </ToastProvider>

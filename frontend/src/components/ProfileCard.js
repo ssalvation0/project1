@@ -59,7 +59,9 @@ const ProfileCardComponent = ({
   onClick,
   imageLoading = 'lazy',
   imageFetchPriority = 'low',
-  imageSizes = '(max-width: 768px) 50vw, 25vw'
+  imageSizes = '(max-width: 768px) 50vw, 25vw',
+  imageWidth = 400,
+  imageHeight = 600
 }) => {
   const wrapRef = useRef(null);
   const cardRef = useRef(null);
@@ -191,7 +193,8 @@ const ProfileCardComponent = ({
     const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
 
     animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
-    animationHandlers.createSmoothAnimation(ANIMATION_CONFIG.INITIAL_DURATION, initialX, initialY, card, wrap);
+    // Removed initial animation loop to improve performance
+    // animationHandlers.createSmoothAnimation(ANIMATION_CONFIG.INITIAL_DURATION, initialX, initialY, card, wrap);
 
     return () => {
       card.removeEventListener('pointerenter', pointerEnterHandler);
@@ -225,9 +228,9 @@ const ProfileCardComponent = ({
   const webp = local ? toFormat(avatarUrl, 'webp') : null;
 
   return (
-    <div 
-      ref={wrapRef} 
-      className={`pc-card-wrapper ${className}`.trim()} 
+    <div
+      ref={wrapRef}
+      className={`pc-card-wrapper ${className}`.trim()}
       style={cardStyle}
       onClick={handleCardClick}
     >
@@ -244,6 +247,8 @@ const ProfileCardComponent = ({
               decoding="async"
               fetchpriority={imageFetchPriority}
               sizes={imageSizes}
+              width={imageWidth}
+              height={imageHeight}
               onError={e => {
                 e.target.style.display = 'none';
               }}

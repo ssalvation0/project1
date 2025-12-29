@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
 import NewsCarousel from '../components/NewsCarousel';
@@ -27,6 +27,22 @@ const warcraftClasses = [
   { name: 'Evoker', role: 'Healer / DPS' }
 ];
 
+const classImageMap = {
+  'warrior': 'warrior',
+  'paladin': 'paladin',
+  'hunter': 'hunter',
+  'rogue': 'rogue',
+  'priest': 'priest',
+  'deathknight': 'deathknight',
+  'shaman': 'shaman',
+  'mage': 'mage',
+  'warlock': 'warlock',
+  'monk': 'monk',
+  'druid': 'druid',
+  'demonhunter': 'demonhunter',
+  'evoker': 'evoker'
+};
+
 function Home() {
   const [showCards, setShowCards] = useState(false);
   const [animateCards, setAnimateCards] = useState(false);
@@ -37,21 +53,8 @@ function Home() {
   const newsRef = useRef(null);
   const heroRef = useRef(null);
 
-  const classImageMap = {
-    'warrior': 'warrior',
-    'paladin': 'paladin',
-    'hunter': 'hunter',
-    'rogue': 'rogue',
-    'priest': 'priest',
-    'deathknight': 'deathknight',
-    'shaman': 'shaman',
-    'mage': 'mage',
-    'warlock': 'warlock',
-    'monk': 'monk',
-    'druid': 'druid',
-    'demonhunter': 'demonhunter',
-    'evoker': 'evoker'
-  };
+  // Track if animations have been triggered (only animate once)
+  const animationsTriggeredRef = useRef({ cards: false, news: false });
 
   useEffect(() => {
     setShowCards(true);
@@ -59,55 +62,104 @@ function Home() {
 
   useEffect(() => {
     let rafId;
-    const updateParallax = () => {
-      if (heroRef.current) {
-        const y = window.scrollY || 0;
-        heroRef.current.style.setProperty('--hero-parallax', `${y}`);
+    let lastScrollY = 0;
+    let ticking = false;
+
+    const handleScroll = () => {
+      lastScrollY = window.scrollY;
+
+      if (!ticking) {
+        rafId = requestAnimationFrame(() => {
+          // Update scroll indicator
+          setShowScrollIndicator(lastScrollY <= 100);
+
+          // Parallax effect
+          if (heroRef.current) {
+            heroRef.current.style.setProperty('--hero-parallax', `${lastScrollY}`);
+          }
+
+          // Cards animation - only check if not yet triggered
+          if (!animationsTriggeredRef.current.cards && cardsRef.current) {
+            const rect = cardsRef.current.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.75) {
+              animationsTriggeredRef.current.cards = true;
+              setAnimateCards(true);
+            }
+          }
+
+          // News animation - only check if not yet triggered
+          if (!animationsTriggeredRef.current.news && newsRef.current) {
+            const rect = newsRef.current.getBoundingClientRect();
+            if (rect.top < window.innerHeight * 0.8) {
+              animationsTriggeredRef.current.news = true;
+              setAnimateNews(true);
+            }
+          }
+
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    const handleScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        if (window.scrollY > 100) {
-          setShowScrollIndicator(false);
-        } else {
-          setShowScrollIndicator(true);
-        }
-
-        updateParallax();
-
-        if (cardsRef.current && !animateCards) {
-          const rect = cardsRef.current.getBoundingClientRect();
-          const isVisible = rect.top < window.innerHeight * 0.75;
-          if (isVisible) setAnimateCards(true);
-        }
-
-        if (newsRef.current && !animateNews) {
-          const rect = newsRef.current.getBoundingClientRect();
-          const isVisible = rect.top < window.innerHeight * 0.8;
-          if (isVisible) setAnimateNews(true);
-        }
-      });
-    };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    handleScroll(); // Initial check
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [animateCards, animateNews]);
+  }, []); // Empty deps - scroll handler doesn't need to re-register
 
-  const handleRandomTransmog = () => {
+  const handleRandomTransmog = useCallback(() => {
     const randomId = Math.floor(Math.random() * 13) + 1;
     navigate(`/transmog/${randomId}`);
-  };
+  }, [navigate]);
 
-  const scrollToCards = () => {
+  const scrollToCards = useCallback(() => {
     cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
+
+  const navigateToCatalog = useCallback(() => {
+    navigate('/catalog');
+  }, [navigate]);
+
+  // Memoize class cards to prevent re-renders
+  const classCards = useMemo(() => {
+    return warcraftClasses.map((cls, idx) => {
+      const slug = cls.name.toLowerCase().replace(/ /g, '');
+      const imageKey = classImageMap[slug] || slug;
+      const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
+      const isAboveFold = idx < 4;
+
+      return (
+        <div
+          key={cls.name}
+          className="card-item"
+          style={{ '--card-index': idx }}
+        >
+          <ProfileCard
+            avatarUrl={src}
+            name={cls.name}
+            title={cls.role}
+            contactText="View Sets"
+            showUserInfo={true}
+            enableTilt={true}
+            enableMobileTilt={false}
+            className={`class-${slug}`}
+            onClick={() => navigate(`/catalog?class=${slug}`)}
+            onContactClick={() => navigate(`/catalog?class=${slug}`)}
+            behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${cls.color}66 4%, ${cls.color}44 10%, ${cls.color}22 50%, transparent 100%)`}
+            imageLoading={isAboveFold ? 'eager' : 'lazy'}
+            imageFetchPriority={isAboveFold ? 'high' : 'low'}
+            imageSizes="(max-width: 768px) 50vw, 25vw"
+            imageWidth={400}
+            imageHeight={600}
+          />
+        </div>
+      );
+    });
+  }, [navigate]);
 
   return (
     <div className="home-bg">
@@ -122,7 +174,7 @@ function Home() {
             <button className="hero-btn primary" onClick={scrollToCards}>
               Get Started
             </button>
-            <button className="hero-btn secondary" onClick={() => navigate('/catalog')}>
+            <button className="hero-btn secondary" onClick={navigateToCatalog}>
               Browse Catalog
             </button>
           </div>
@@ -141,37 +193,7 @@ function Home() {
       {showCards && (
         <main className="profile-cards-container" ref={cardsRef}>
           <div className={`cards-grid ${animateCards ? 'animate' : ''}`}>
-            {warcraftClasses.map((cls, idx) => {
-              const slug = cls.name.toLowerCase().replace(/ /g, '');
-              const imageKey = classImageMap[slug] || slug;
-              const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
-              const isAboveFold = idx < 4;
-
-              return (
-                <div
-                  key={cls.name}
-                  className="card-item"
-                  style={{ '--card-index': idx }}
-                >
-                  <ProfileCard
-                    avatarUrl={src}
-                    name={cls.name}
-                    title={cls.role}
-                    contactText="View Sets"
-                    showUserInfo={true}
-                    enableTilt={true}
-                    enableMobileTilt={false}
-                    className={`class-${slug}`}
-                    onClick={() => navigate(`/catalog?class=${slug}`)}
-                    onContactClick={() => navigate(`/catalog?class=${slug}`)}
-                    behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${cls.color}66 4%, ${cls.color}44 10%, ${cls.color}22 50%, transparent 100%)`}
-                    imageLoading={isAboveFold ? 'eager' : 'lazy'}
-                    imageFetchPriority={isAboveFold ? 'high' : 'low'}
-                    imageSizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-              );
-            })}
+            {classCards}
 
             {/* Catalog Card */}
             <div
@@ -186,9 +208,11 @@ function Home() {
                 showUserInfo={true}
                 enableTilt={true}
                 className="special-card catalog-card"
-                onClick={() => navigate('/catalog')}
-                onContactClick={() => navigate('/catalog')}
+                onClick={navigateToCatalog}
+                onContactClick={navigateToCatalog}
                 behindGradient="radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), #DAA52066 4%, #DAA52044 10%, #DAA52022 50%, transparent 100%)"
+                imageWidth={400}
+                imageHeight={600}
               />
             </div>
 
@@ -208,6 +232,8 @@ function Home() {
                 onClick={handleRandomTransmog}
                 onContactClick={handleRandomTransmog}
                 behindGradient="radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), #FF006666 4%, #FF006644 10%, #FF006622 50%, transparent 100%)"
+                imageWidth={400}
+                imageHeight={600}
               />
             </div>
           </div>
@@ -223,4 +249,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default React.memo(Home);
