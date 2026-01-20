@@ -38,6 +38,7 @@ function toFormat(url, ext) {
   return url.replace(/\.(png|jpe?g|svg)$/i, `.${ext}`);
 }
 
+
 const ProfileCardComponent = ({
   avatarUrl,
   iconUrl,
@@ -50,9 +51,12 @@ const ProfileCardComponent = ({
   enableMobileTilt = false,
   mobileTiltSensitivity = 5,
   name,
-  title,
-  handle,
-  status,
+  title, // Used as Description for Class Hub
+  handle, // Optional, maybe unused for Class Hub
+  status, // Optional
+  roles = [], // Array of role strings: 'Tank', 'Healer', 'Damage'
+  specs = [], // Array of strings or objects representing specs
+  bestSources = [], // Array of strings
   contactText = 'View Sets',
   showUserInfo = true,
   onContactClick,
@@ -193,8 +197,6 @@ const ProfileCardComponent = ({
     const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
 
     animationHandlers.updateCardTransform(initialX, initialY, card, wrap);
-    // Removed initial animation loop to improve performance
-    // animationHandlers.createSmoothAnimation(ANIMATION_CONFIG.INITIAL_DURATION, initialX, initialY, card, wrap);
 
     return () => {
       card.removeEventListener('pointerenter', pointerEnterHandler);
@@ -223,10 +225,6 @@ const ProfileCardComponent = ({
     onClick?.();
   }, [onClick]);
 
-  const local = isLocalImage(avatarUrl);
-  const avif = local ? toFormat(avatarUrl, 'avif') : null;
-  const webp = local ? toFormat(avatarUrl, 'webp') : null;
-
   return (
     <div
       ref={wrapRef}
@@ -253,32 +251,26 @@ const ProfileCardComponent = ({
                 e.target.style.display = 'none';
               }}
             />
-            {showUserInfo && (
-              <div className="pc-user-info">
-                <div className="pc-user-details">
-                  <div className="pc-user-text">
-                    <div className="pc-handle">{handle}</div>
-                    <div className="pc-status">{status}</div>
-                  </div>
-                </div>
-                <button
-                  className="pc-contact-btn"
-                  onClick={handleContactClick}
-                  type="button"
-                  aria-label={`View ${name || 'class'} sets`}
-                >
-                  {contactText}
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="pc-content">
-            <div className="pc-details">
-              <h3>{name}</h3>
-              <p>{title}</p>
-            </div>
           </div>
         </div>
+
+        {/* Original User Info Structure */}
+        <div className="pc-details">
+          <h3>{name}</h3>
+          {title && <p>{title}</p>}
+        </div>
+
+        {showUserInfo && (
+          <div className="pc-user-info">
+            <button
+              className="pc-contact-btn"
+              onClick={handleContactClick}
+              type="button"
+            >
+              {contactText}
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

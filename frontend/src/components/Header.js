@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
 import AuthModal from './AuthModal';
@@ -7,12 +7,22 @@ import AuthModal from './AuthModal';
 function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoggedIn] = useState(false); // стан авторизації
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
       // // TODO: Profile navigation
     } else {
       setIsModalOpen(true);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
     }
   };
 
@@ -30,6 +40,19 @@ function Header() {
               decoding="async"
             />
           </Link>
+
+          {/* Global Search */}
+          <form className="global-search-form" onSubmit={handleSearchSubmit} role="search">
+            <input
+              type="text"
+              className="global-search-input"
+              placeholder="Search class, armor type, color..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search transmogs"
+            />
+          </form>
+
           <button
             className="login-btn"
             onClick={handleProfileClick}

@@ -18,13 +18,14 @@
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;  /* логотип ліворуч, кнопка праворуч */
+  justify-content: space-between;
+  /* логотип ліворуч, кнопка праворуч */
   width: 100%;
 }
 
 .small-logo {
   width: 200px;
-  height: auto; 
+  height: auto;
   margin-left: 100px;
 }
 
@@ -46,24 +47,33 @@ body {
 }
 
 .profile-button {
-  width: 50px;                 /* кругла кнопка */
+  width: 50px;
+  /* кругла кнопка */
   height: 50px;
-  border-radius: 50%;          /* робимо її круглою */
-  border: none;                /* без обвідки */
-  background-color: #ff8c00;   /* базовий колір */
-  cursor: pointer;             /* курсор при наведенні */
+  border-radius: 50%;
+  /* робимо її круглою */
+  border: none;
+  /* без обвідки */
+  background-color: #ff8c00;
+  /* базовий колір */
+  cursor: pointer;
+  /* курсор при наведенні */
   transition: background-color 0.3s ease, transform 0.2s ease;
   margin-right: 30px;
 }
 
 .profile-button:hover {
-  background-color: #ffa733;   /* підсвічування */
-  transform: scale(1.1);       /* легке збільшення */
+  background-color: #ffa733;
+  /* підсвічування */
+  transform: scale(1.1);
+  /* легке збільшення */
 }
 
 .profile-button:active {
-  transform: scale(0.99);       /* кнопка трохи зменшується при натисканні */
-  background-color: #e57b00;    /* можна змінити колір під час натискання */
+  transform: scale(0.99);
+  /* кнопка трохи зменшується при натисканні */
+  background-color: #e57b00;
+  /* можна змінити колір під час натискання */
 }
 
 .header.wide-capsule {
@@ -76,12 +86,12 @@ body {
   height: 78px;
   background: rgba(28, 20, 8, 0.87);
   border-radius: 38px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 1.5px 12px rgba(240,178,52,0.07) inset;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 1.5px 12px rgba(240, 178, 52, 0.07) inset;
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.2px solid rgba(200,160,40,0.13);
+  border: 1.2px solid rgba(200, 160, 40, 0.13);
 }
 
 .header-content {
@@ -105,23 +115,68 @@ body {
   text-decoration: none;
 }
 
+.global-search-form {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 20px;
+  position: relative;
+}
+
+.global-search-input {
+  width: 100%;
+  padding: 10px 16px;
+  padding-left: 36px;
+  /* Space for icon */
+  border-radius: 20px;
+  border: 1px solid rgba(229, 211, 179, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e5d3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 16px;
+}
+
+.global-search-input:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(229, 211, 179, 0.6);
+  box-shadow: 0 0 10px rgba(229, 211, 179, 0.1);
+}
+
+.global-search-input::placeholder {
+  color: rgba(229, 211, 179, 0.5);
+}
+
+@media (max-width: 768px) {
+  .global-search-form {
+    margin: 0 10px;
+    max-width: 200px;
+  }
+}
+
 .login-btn {
   display: inline-block;
   min-width: 120px;
   padding: 11px 32px;
   border-radius: 13px;
-  background: rgba(40,28,15,0.68);
+  background: rgba(40, 28, 15, 0.68);
   color: #f2e6c9;
   font-family: 'Cinzel', serif;
   font-weight: 600;
   font-size: 1.07rem;
-  border: 1.5px solid rgba(240,216,120,0.31);
+  border: 1.5px solid rgba(240, 216, 120, 0.31);
   box-shadow: none;
   cursor: pointer;
   transition: background 0.25s, color 0.22s, border-color 0.19s, box-shadow 0.2s, transform 0.16s;
   outline: none;
   letter-spacing: 0.01em;
 }
+
 .login-btn:hover {
   color: #ffe9b0;
   border-color: #fff7c2;
@@ -129,8 +184,9 @@ body {
   box-shadow: 0 0 14px 1.5px #ffc70033, 0 3px 12px #855d1b17 inset;
   transform: translateY(-1.5px) scale(1.050);
 }
+
 .login-btn:active {
-  background: rgba(35,25,10,0.76);
+  background: rgba(35, 25, 10, 0.76);
   color: #ffe184;
   border-color: #ffe1848b;
   transform: scale(0.97);
@@ -146,6 +202,7 @@ body {
     width: 150px;
   }
 }
+
 @media (max-width: 800px) {
   .header.wide-capsule {
     width: 99vw;
@@ -153,8 +210,16 @@ body {
     height: 67px;
     border-radius: 24px;
   }
-  .header-content { padding: 0 10px; }
-  .small-logo { width: 120px; max-height: 50px; }
+
+  .header-content {
+    padding: 0 10px;
+  }
+
+  .small-logo {
+    width: 120px;
+    max-height: 50px;
+  }
+
   .login-btn {
     min-width: 94px;
     font-size: 0.91rem;
@@ -162,9 +227,16 @@ body {
     border-radius: 9px;
   }
 }
+
 @media (max-width: 480px) {
-  .header.wide-capsule { height: 58px; }
-  .small-logo { width: 76px; }
+  .header.wide-capsule {
+    height: 58px;
+  }
+
+  .small-logo {
+    width: 76px;
+  }
+
   .login-btn {
     min-width: 94px;
     font-size: 0.91rem;

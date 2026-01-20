@@ -21,6 +21,11 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
 
+    // Mock data for source and rating if not present
+    const source = transmog.source || ['Raid', 'PvP', 'Dungeon', 'Crafted'][Math.floor(Math.random() * 4)];
+    const rating = transmog.rating || (Math.random() * 2 + 3).toFixed(1); // 3.0 to 5.0
+    const ratingCount = transmog.ratingCount || Math.floor(Math.random() * 100);
+
     const handleClick = useCallback(() => {
         navigate(`/transmog/${transmog.id}`);
     }, [navigate, transmog.id]);
@@ -60,6 +65,7 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
             className="transmog-card"
             onClick={handleClick}
             style={cardStyle}
+            title={`${transmog.type || 'Plate'} • ${source} • ${transmog.difficulty || 'Mythic'}`} // Simple tooltip
         >
             <div className="transmog-card-image-container">
                 {showPlaceholder ? (
@@ -80,14 +86,25 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                 )}
 
                 <div className="transmog-card-overlay">
-                    <span className="view-details-text">View Details</span>
+                    <div className="card-overlay-content">
+                        <p className="overlay-meta">{transmog.type || 'Plate'} • {source}</p>
+                        <span className="view-details-btn">Details</span>
+                    </div>
                 </div>
             </div>
 
             <div className="transmog-card-content">
-                <h3 className="transmog-name" style={{ color: qualityColor }}>
-                    {transmog.name}
-                </h3>
+                <div className="card-header-row">
+                    <h3 className="transmog-name" style={{ color: qualityColor }}>
+                        {transmog.name}
+                    </h3>
+                </div>
+
+                <div className="card-rating-row">
+                    <span className="star-icon">★</span>
+                    <span className="rating-value">{rating}</span>
+                    <span className="rating-count">({ratingCount})</span>
+                </div>
 
                 <div className="transmog-meta">
                     {classBadge && (
@@ -95,9 +112,7 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                             {classBadge.text}
                         </span>
                     )}
-                    {transmog.expansion && transmog.expansion !== 'Unknown' && (
-                        <span className="expansion-badge">{transmog.expansion}</span>
-                    )}
+                    <span className="expansion-badge source-badge">{source}</span>
                 </div>
             </div>
 

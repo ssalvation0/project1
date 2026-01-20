@@ -10,34 +10,27 @@
   flex-direction: column;
   height: 100%;
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .transmog-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  border-color: var(--quality-color);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6),
-    0 0 25px var(--quality-color, rgba(255, 255, 255, 0.05));
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+  border-color: rgba(229, 211, 179, 0.4);
 }
 
 .transmog-card-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%;
-  /* 1:1 Aspect Ratio */
-  background: #0a0a0a;
+  aspect-ratio: 3/2;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(229, 211, 179, 0.1);
 }
 
 .transmog-card-image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: transform 0.5s ease;
 }
 
 .transmog-card:hover .transmog-card-image {
@@ -68,89 +61,143 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.4s ease;
-  backdrop-filter: blur(0px);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(2px);
+  padding: 16px;
 }
 
 .transmog-card:hover .transmog-card-overlay {
   opacity: 1;
-  backdrop-filter: blur(3px);
-  background: rgba(0, 0, 0, 0.4);
 }
 
-.view-details-text {
+.card-overlay-content {
+  text-align: center;
+  transform: translateY(10px);
+  transition: transform 0.3s ease;
+  width: 100%;
+}
+
+.transmog-card:hover .card-overlay-content {
+  transform: translateY(0);
+}
+
+.overlay-meta {
   color: #e5d3b3;
-  font-family: 'Cinzel', serif;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
   font-weight: 600;
-  padding: 12px 28px;
-  border: 1px solid rgba(229, 211, 179, 0.5);
-  border-radius: 4px;
-  transform: translateY(15px) scale(0.95);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background: rgba(0, 0, 0, 0.8);
-  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-size: 0.9rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-.transmog-card:hover .view-details-text {
-  transform: translateY(0) scale(1);
-  border-color: #e5d3b3;
-  background: rgba(20, 15, 10, 0.9);
+.view-details-btn {
+  display: inline-block;
+  color: #1a1a1a;
+  background: linear-gradient(135deg, #e5d3b3 0%, #c79c6e 100%);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+.view-details-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
 }
 
 .transmog-card-content {
-  padding: 20px;
+  padding: 16px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: linear-gradient(to bottom, rgba(30, 25, 20, 0.4), transparent);
-  position: relative;
-  z-index: 1;
+  gap: 8px;
+  background: rgba(20, 15, 10, 0.4);
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2px;
 }
 
 .transmog-name {
   margin: 0;
   font-family: 'Cinzel', serif;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.3;
-  color: #f2e6c9;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  letter-spacing: 0.02em;
+  color: var(--quality-color, #e5d3b3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.card-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.star-icon {
+  color: #ffd700;
+  font-size: 0.9rem;
+}
+
+.rating-value {
+  color: #fff;
+  font-weight: 700;
+}
+
+.rating-count {
+  color: #888;
+  font-size: 0.7rem;
 }
 
 .transmog-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-top: auto;
 }
 
 .class-badge,
-.expansion-badge {
+.expansion-badge,
+.source-badge {
   font-family: 'Raleway', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border-radius: 2px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  color: #aaa;
 }
 
 .expansion-badge {
   background: rgba(229, 211, 179, 0.1);
   color: #e5d3b3;
   border-color: rgba(229, 211, 179, 0.2);
+}
+
+.source-badge {
+  color: #8bd;
+  border-color: rgba(100, 200, 255, 0.2);
+  background: rgba(100, 200, 255, 0.05);
 }
 
 /* Class specific colors */

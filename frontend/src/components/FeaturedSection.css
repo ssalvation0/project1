@@ -1,0 +1,130 @@
+.featured-section {
+    padding: 40px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.featured-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(229, 211, 179, 0.2);
+    padding-bottom: 16px;
+}
+
+.featured-title-group h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: #f2e6c9;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.05em;
+}
+
+.featured-tagline {
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(229, 211, 179, 0.7);
+    margin: 4px 0 0 0;
+}
+
+.featured-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.view-all-btn {
+    background: transparent;
+    border: 1px solid rgba(229, 211, 179, 0.4);
+    color: #e5d3b3;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.view-all-btn:hover {
+    background: rgba(229, 211, 179, 0.1);
+    border-color: #e5d3b3;
+    color: #fff;
+}
+
+.featured-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.control-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(229, 211, 179, 0.4);
+    background: rgba(0, 0, 0, 0.6);
+    color: #e5d3b3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    font-size: 1.2rem;
+    padding-bottom: 2px;
+    /* Visual center adjustment */
+}
+
+.control-btn:hover {
+    background: rgba(229, 211, 179, 0.2);
+    border-color: #e5d3b3;
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.featured-scroll-container {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 10px 4px 40px 4px;
+    /* Bottom padding for hover effects */
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.featured-scroll-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.featured-item-wrapper {
+    min-width: 280px;
+    max-width: 280px;
+    flex: 0 0 auto;
+}
+
+/* Ensure TransmogCard scales properly inside */
+.featured-item-wrapper .transmog-card {
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .featured-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .featured-controls {
+        align-self: flex-end;
+    }
+}

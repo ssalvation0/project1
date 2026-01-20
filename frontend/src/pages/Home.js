@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
 import NewsCarousel from '../components/NewsCarousel';
+import OnboardingWizard from '../components/OnboardingWizard';
+import FeaturedSection from '../components/FeaturedSection';
+import PatchNotes from '../components/PatchNotes';
 import '../styles/Home.css';
 
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
@@ -11,20 +14,131 @@ const imagesMap = imagesContext.keys().reduce((map, filePath) => {
   return map;
 }, {});
 
+// Mock data generator for showcases
+const generateMockTransmogs = (count, baseId, type) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: baseId + i,
+    name: `${type} Set ${i + 1}`,
+    class: ['Warrior', 'Paladin', 'Mage', 'Rogue'][i % 4],
+    stars: 4 + (i % 2) * 0.5,
+    votes: 10 + i * 5,
+    image: imagesMap[['warrior', 'paladin', 'mage', 'rogue'][i % 4]] || process.env.PUBLIC_URL + '/images/warrior.jpg',
+    source: i % 2 === 0 ? 'Raid' : 'PvP',
+    expansion: 'Dragonflight'
+  }));
+};
+
+const FEATURED_ITEMS = generateMockTransmogs(6, 100, 'Featured');
+const TRENDING_ITEMS = generateMockTransmogs(6, 200, 'Trending');
+
+const CLASS_METADATA = {
+  'Death Knight': {
+    roles: ['Tank', 'DPS'],
+    specs: ['Blood', 'Frost', 'Unholy'],
+    bestSources: ['Icecrown Citadel', 'Naxxramas', 'Torghast'],
+    accent: '#C41F3B',
+    title: 'Suffering Well'
+  },
+  'Paladin': {
+    roles: ['Tank', 'Healer', 'DPS'],
+    specs: ['Holy', 'Protection', 'Retribution'],
+    bestSources: ['Legion Order Hall', 'Tomb of Sargeras'],
+    accent: '#F58CBA',
+    title: 'Justice Demands Retribution'
+  },
+  'Warrior': {
+    roles: ['Tank', 'DPS'],
+    specs: ['Arms', 'Fury', 'Protection'],
+    bestSources: ['Blackrock Foundry', 'Trial of Valor'],
+    accent: '#C79C6E',
+    title: 'For the Horde/Alliance!'
+  },
+  'Hunter': {
+    roles: ['DPS'],
+    specs: ['Beast Mastery', 'Marksmanship', 'Survival'],
+    bestSources: ['Nighthold', 'Antorus'],
+    accent: '#ABD473',
+    title: 'Hunt or Be Hunted'
+  },
+  'Rogue': {
+    roles: ['DPS'],
+    specs: ['Assassination', 'Outlaw', 'Subtlety'],
+    bestSources: ['Black Temple', 'Vault of the Incarnates'],
+    accent: '#FFF569',
+    title: 'From the Shadows'
+  },
+  'Priest': {
+    roles: ['Healer', 'DPS'],
+    specs: ['Discipline', 'Holy', 'Shadow'],
+    bestSources: ['Ulduar', 'Tomb of Sargeras'],
+    accent: '#FFFFFF',
+    title: 'Light and Void'
+  },
+  'Shaman': {
+    roles: ['Healer', 'DPS'],
+    specs: ['Elemental', 'Enhancement', 'Restoration'],
+    bestSources: ['Throne of Thunder', 'Firelands'],
+    accent: '#0070DE',
+    title: 'Elements Guide Me'
+  },
+  'Mage': {
+    roles: ['DPS'],
+    specs: ['Arcane', 'Fire', 'Frost'],
+    bestSources: ['Dalaran', 'Firelands', 'Nighthold'],
+    accent: '#40C7EB',
+    title: 'Master of the Arcane'
+  },
+  'Warlock': {
+    roles: ['DPS'],
+    specs: ['Affliction', 'Demonology', 'Destruction'],
+    bestSources: ['Black Temple', 'Hellfire Citadel'],
+    accent: '#8787ED',
+    title: 'Power Overwhelming'
+  },
+  'Monk': {
+    roles: ['Tank', 'Healer', 'DPS'],
+    specs: ['Brewmaster', 'Mistweaver', 'Windwalker'],
+    bestSources: ['Throne of Thunder', 'Mogu’shan Vaults'],
+    accent: '#00FF96',
+    title: 'Balance in All Things'
+  },
+  'Druid': {
+    roles: ['Tank', 'Healer', 'DPS'],
+    specs: ['Balance', 'Feral', 'Guardian', 'Restoration'],
+    bestSources: ['Emerald Nightmare', 'Firelands'],
+    accent: '#FF7D0A',
+    title: 'Nature Protects'
+  },
+  'Demon Hunter': {
+    roles: ['Tank', 'DPS'],
+    specs: ['Havoc', 'Vengeance'],
+    bestSources: ['Nighthold', 'Black Temple'],
+    accent: '#A330C9',
+    title: 'I Am My Scars'
+  },
+  'Evoker': {
+    roles: ['Healer', 'DPS'],
+    specs: ['Devastation', 'Preservation', 'Augmentation'],
+    bestSources: ['Vault of the Incarnates', 'Aberrus'],
+    accent: '#33937F',
+    title: 'Fly With Me'
+  }
+};
+
 const warcraftClasses = [
-  { name: 'Warrior', role: 'Tank / DPS' },
-  { name: 'Paladin', role: 'Tank / Healer / DPS' },
-  { name: 'Hunter', role: 'Ranged DPS' },
-  { name: 'Rogue', role: 'Melee DPS' },
-  { name: 'Priest', role: 'Healer / DPS' },
-  { name: 'Death Knight', role: 'Tank / DPS' },
-  { name: 'Shaman', role: 'Healer / DPS' },
-  { name: 'Mage', role: 'Ranged DPS' },
-  { name: 'Warlock', role: 'Ranged DPS' },
-  { name: 'Monk', role: 'Tank / Healer / DPS' },
-  { name: 'Druid', role: 'Tank / Healer / DPS' },
-  { name: 'Demon Hunter', role: 'Tank / DPS' },
-  { name: 'Evoker', role: 'Healer / DPS' }
+  { name: 'Warrior' },
+  { name: 'Paladin' },
+  { name: 'Hunter' },
+  { name: 'Rogue' },
+  { name: 'Priest' },
+  { name: 'Death Knight' },
+  { name: 'Shaman' },
+  { name: 'Mage' },
+  { name: 'Warlock' },
+  { name: 'Monk' },
+  { name: 'Druid' },
+  { name: 'Demon Hunter' },
+  { name: 'Evoker' }
 ];
 
 const classImageMap = {
@@ -48,6 +162,7 @@ function Home() {
   const [animateCards, setAnimateCards] = useState(false);
   const [animateNews, setAnimateNews] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
   const newsRef = useRef(null);
@@ -124,6 +239,10 @@ function Home() {
     navigate('/catalog');
   }, [navigate]);
 
+  const openWizard = useCallback(() => {
+    setIsWizardOpen(true);
+  }, []);
+
   // Memoize class cards to prevent re-renders
   const classCards = useMemo(() => {
     return warcraftClasses.map((cls, idx) => {
@@ -131,6 +250,10 @@ function Home() {
       const imageKey = classImageMap[slug] || slug;
       const src = imagesMap[imageKey] || `${process.env.PUBLIC_URL}/images/${imageKey}.jpg`;
       const isAboveFold = idx < 4;
+
+      // Get metadata
+      const meta = CLASS_METADATA[cls.name] || {};
+      const accent = meta.accent || '#e5d3b3';
 
       return (
         <div
@@ -141,7 +264,7 @@ function Home() {
           <ProfileCard
             avatarUrl={src}
             name={cls.name}
-            title={cls.role}
+            title={meta.title || cls.name}
             contactText="View Sets"
             showUserInfo={true}
             enableTilt={true}
@@ -149,12 +272,15 @@ function Home() {
             className={`class-${slug}`}
             onClick={() => navigate(`/catalog?class=${slug}`)}
             onContactClick={() => navigate(`/catalog?class=${slug}`)}
-            behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${cls.color}66 4%, ${cls.color}44 10%, ${cls.color}22 50%, transparent 100%)`}
+            behindGradient={`radial-gradient(farthest-side circle at var(--pointer-x) var(--pointer-y), ${accent}66 4%, ${accent}44 10%, ${accent}22 50%, transparent 100%)`}
             imageLoading={isAboveFold ? 'eager' : 'lazy'}
             imageFetchPriority={isAboveFold ? 'high' : 'low'}
             imageSizes="(max-width: 768px) 50vw, 25vw"
             imageWidth={400}
             imageHeight={600}
+            roles={meta.roles}
+            specs={meta.specs}
+            bestSources={meta.bestSources}
           />
         </div>
       );
@@ -171,11 +297,11 @@ function Home() {
             define your style
           </h1>
           <div className="hero-buttons">
-            <button className="hero-btn primary" onClick={scrollToCards}>
-              Get Started
+            <button className="hero-btn primary" onClick={openWizard}>
+              Start Transmog Build
             </button>
             <button className="hero-btn secondary" onClick={navigateToCatalog}>
-              Browse Catalog
+              Browse All Sets
             </button>
           </div>
         </div>
@@ -192,6 +318,17 @@ function Home() {
 
       {showCards && (
         <main className="profile-cards-container" ref={cardsRef}>
+
+          {/* Featured Showcase */}
+          <div className={`showcase-wrapper ${animateCards ? 'animate' : ''}`}>
+            <FeaturedSection
+              title="Featured This Week"
+              tagline="Curated sets from the community"
+              items={FEATURED_ITEMS}
+              viewAllLink="/catalog?sort=featured"
+            />
+          </div>
+
           <div className={`cards-grid ${animateCards ? 'animate' : ''}`}>
             {classCards}
 
@@ -237,6 +374,19 @@ function Home() {
               />
             </div>
           </div>
+
+          {/* Trending Showcase */}
+          <div className={`showcase-wrapper ${animateCards ? 'animate' : ''}`}>
+            <FeaturedSection
+              title="Trending Now"
+              tagline="Highest rated by the community"
+              items={TRENDING_ITEMS}
+              viewAllLink="/catalog?sort=top_rated"
+            />
+          </div>
+
+          <PatchNotes />
+
           <div
             ref={newsRef}
             className={`news-section-wrapper ${animateNews ? 'animate' : ''}`}
@@ -245,6 +395,12 @@ function Home() {
           </div>
         </main>
       )}
+
+      {/* Onboarding Wizard */}
+      <OnboardingWizard
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+      />
     </div>
   );
 }
