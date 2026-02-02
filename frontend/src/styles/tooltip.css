@@ -1,0 +1,77 @@
+/* ===========================================
+   TOOLTIP COMPONENT
+   Pure CSS tooltips with backdrop blur
+   =========================================== */
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 8px 12px;
+    background: rgba(20, 15, 10, 0.95);
+    border: 1px solid rgba(229, 211, 179, 0.3);
+    border-radius: 6px;
+    color: #e5d3b3;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Arrow */
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(20, 15, 10, 0.95);
+}
+
+/* Show on hover */
+.tooltip-wrapper:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-12px);
+}
+
+/* Tooltip positions */
+.tooltip.tooltip-top {
+    bottom: 100%;
+    top: auto;
+}
+
+.tooltip.tooltip-bottom {
+    bottom: auto;
+    top: 100%;
+    transform: translateX(-50%) translateY(8px);
+}
+
+.tooltip.tooltip-bottom::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(20, 15, 10, 0.95);
+}
+
+.tooltip-wrapper:hover .tooltip.tooltip-bottom {
+    transform: translateX(-50%) translateY(12px);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .tooltip {
+        transition: opacity 0.1s;
+    }
+}

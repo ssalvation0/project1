@@ -29775,5 +29775,709 @@
         "name": "Warhelm of the Bold"
       }
     ]
+  },
+  {
+    "id": 1983,
+    "name": "Voidbreaker's Accordance",
+    "classes": [
+      "Mage"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250063,
+        "name": "Voidbreaker's Robe"
+      },
+      {
+        "id": 250061,
+        "name": "Voidbreaker's Gloves"
+      },
+      {
+        "id": 250060,
+        "name": "Voidbreaker's Veil"
+      },
+      {
+        "id": 250059,
+        "name": "Voidbreaker's Britches"
+      },
+      {
+        "id": 250058,
+        "name": "Voidbreaker's Leyline Nexi"
+      }
+    ]
+  },
+  {
+    "id": 1986,
+    "name": "Blind Oath's Burden",
+    "classes": [
+      "Priest"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250052,
+        "name": "Blind Oath's Touch"
+      },
+      {
+        "id": 250051,
+        "name": "Blind Oath's Winged Crest"
+      },
+      {
+        "id": 250050,
+        "name": "Blind Oath's Leggings"
+      },
+      {
+        "id": 250054,
+        "name": "Blind Oath's Raiment"
+      },
+      {
+        "id": 250049,
+        "name": "Blind Oath's Seraphguards"
+      }
+    ]
+  },
+  {
+    "id": 1982,
+    "name": "Primal Sentry's Camouflage",
+    "classes": [
+      "Hunter"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 249991,
+        "name": "Primal Sentry's Scaleplate"
+      },
+      {
+        "id": 249989,
+        "name": "Primal Sentry's Talonguards"
+      },
+      {
+        "id": 249988,
+        "name": "Primal Sentry's Maw"
+      },
+      {
+        "id": 249987,
+        "name": "Primal Sentry's Legguards"
+      },
+      {
+        "id": 249986,
+        "name": "Primal Sentry's Trophies"
+      }
+    ]
+  },
+  {
+    "id": 1984,
+    "name": "Way of Ra-den's Chosen",
+    "classes": [
+      "Monk"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250018,
+        "name": "Battle Garb of Ra-den's Chosen"
+      },
+      {
+        "id": 250016,
+        "name": "Thunderfists of Ra-den's Chosen"
+      },
+      {
+        "id": 250015,
+        "name": "Fearsome Visage of Ra-den's Chosen"
+      },
+      {
+        "id": 250014,
+        "name": "Swiftsweepers of Ra-den's Chosen"
+      },
+      {
+        "id": 250013,
+        "name": "Aurastones of Ra-den's Chosen"
+      }
+    ]
+  },
+  {
+    "id": 1987,
+    "name": "Motley of the Grim Jest",
+    "classes": [
+      "Rogue"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250009,
+        "name": "Fantastic Finery of the Grim Jest"
+      },
+      {
+        "id": 250007,
+        "name": "Sleight of Hand of the Grim Jest"
+      },
+      {
+        "id": 250006,
+        "name": "Masquerade of the Grim Jest"
+      },
+      {
+        "id": 250005,
+        "name": "Blade Holsters of the Grim Jest"
+      },
+      {
+        "id": 250004,
+        "name": "Venom Casks of the Grim Jest"
+      }
+    ]
+  },
+  {
+    "id": 1976,
+    "name": "Warmonger's Chainmail",
+    "classes": [
+      "Hunter",
+      "Shaman",
+      "Evoker"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 255906,
+        "name": "Galactic Warmonger's Chestguard"
+      },
+      {
+        "id": 255907,
+        "name": "Galactic Warmonger's Greaves"
+      },
+      {
+        "id": 255908,
+        "name": "Galactic Warmonger's Grips"
+      },
+      {
+        "id": 255909,
+        "name": "Galactic Warmonger's Helm"
+      },
+      {
+        "id": 255910,
+        "name": "Galactic Warmonger's Leggings"
+      },
+      {
+        "id": 255911,
+        "name": "Galactic Warmonger's Epaulets"
+      },
+      {
+        "id": 255912,
+        "name": "Galactic Warmonger's Cinch"
+      },
+      {
+        "id": 255913,
+        "name": "Galactic Warmonger's Armguards"
+      }
+    ]
+  },
+  {
+    "id": 1990,
+    "name": "Rage of the Night Ender",
+    "classes": [
+      "Warrior"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 249955,
+        "name": "Night Ender's Breastplate"
+      },
+      {
+        "id": 249953,
+        "name": "Night Ender's Fists"
+      },
+      {
+        "id": 249952,
+        "name": "Night Ender's Tusks"
+      },
+      {
+        "id": 249951,
+        "name": "Night Ender's Chausses"
+      },
+      {
+        "id": 249950,
+        "name": "Night Ender's Pauldrons"
+      }
+    ]
+  },
+  {
+    "id": 1988,
+    "name": "Mantle of the Primal Core",
+    "classes": [
+      "Shaman"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 249982,
+        "name": "Embrace of the Primal Core"
+      },
+      {
+        "id": 249980,
+        "name": "Earthgrips of the Primal Core"
+      },
+      {
+        "id": 249979,
+        "name": "Locus of the Primal Core"
+      },
+      {
+        "id": 249978,
+        "name": "Leggings of the Primal Core"
+      },
+      {
+        "id": 249977,
+        "name": "Tempests of the Primal Core"
+      }
+    ]
+  },
+  {
+    "id": 1989,
+    "name": "Reign of the Abyssal Immolator",
+    "classes": [
+      "Warlock"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250043,
+        "name": "Abyssal Immolator's Grasps"
+      },
+      {
+        "id": 250042,
+        "name": "Abyssal Immolator's Smoldering Flames"
+      },
+      {
+        "id": 250041,
+        "name": "Abyssal Immolator's Pillars"
+      },
+      {
+        "id": 250045,
+        "name": "Abyssal Immolator's Dreadrobe"
+      },
+      {
+        "id": 250040,
+        "name": "Abyssal Immolator's Fury"
+      }
+    ]
+  },
+  {
+    "id": 1977,
+    "name": "Warmonger's Plate",
+    "classes": [
+      "Warrior",
+      "Paladin",
+      "Death Knight"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 255898,
+        "name": "Galactic Warmonger's Faceplate"
+      },
+      {
+        "id": 255899,
+        "name": "Galactic Warmonger's Cuirass"
+      },
+      {
+        "id": 255900,
+        "name": "Galactic Warmonger's Sabatons"
+      },
+      {
+        "id": 255901,
+        "name": "Galactic Warmonger's Gauntlets"
+      },
+      {
+        "id": 255902,
+        "name": "Galactic Warmonger's Legguards"
+      },
+      {
+        "id": 255903,
+        "name": "Galactic Warmonger's Spaulders"
+      },
+      {
+        "id": 255904,
+        "name": "Galactic Warmonger's Clasp"
+      },
+      {
+        "id": 255905,
+        "name": "Galactic Warmonger's Bracers"
+      }
+    ]
+  },
+  {
+    "id": 1967,
+    "name": "Root Warden's Regalia",
+    "classes": [
+      "Hunter",
+      "Shaman",
+      "Evoker"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 244609,
+        "name": "World Tender's Trunkplate"
+      },
+      {
+        "id": 244610,
+        "name": "World Tender's Rootslippers"
+      },
+      {
+        "id": 244611,
+        "name": "World Tender's Barkclasp"
+      }
+    ]
+  },
+  {
+    "id": 1966,
+    "name": "Murder Row Materials",
+    "classes": [
+      "Rogue",
+      "Druid",
+      "Monk",
+      "Demon Hunter"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 244613,
+        "name": "Row Walker's Insurance"
+      },
+      {
+        "id": 244614,
+        "name": "Row Walker's Swiftgrips"
+      },
+      {
+        "id": 244612,
+        "name": "Row Walker's Deflectors"
+      }
+    ]
+  },
+  {
+    "id": 1970,
+    "name": "Torment's Duality",
+    "classes": [
+      "All"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 251884,
+        "name": "Abyss Sabre"
+      },
+      {
+        "id": 251885,
+        "name": "Radiant Foil"
+      }
+    ]
+  },
+  {
+    "id": 1978,
+    "name": "Relentless Rider's Lament",
+    "classes": [
+      "Death Knight"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 249973,
+        "name": "Relentless Rider's Cuirass"
+      },
+      {
+        "id": 249971,
+        "name": "Relentless Rider's Bonegrasps"
+      },
+      {
+        "id": 249970,
+        "name": "Relentless Rider's Crown"
+      },
+      {
+        "id": 249969,
+        "name": "Relentless Rider's Legguards"
+      },
+      {
+        "id": 249968,
+        "name": "Relentless Rider's Dreadthorns"
+      }
+    ]
+  },
+  {
+    "id": 1980,
+    "name": "Sprouts of the Luminous Bloom",
+    "classes": [
+      "Druid"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250027,
+        "name": "Trunk of the Luminous Bloom"
+      },
+      {
+        "id": 250025,
+        "name": "Arbortenders of the Luminous Bloom"
+      },
+      {
+        "id": 250024,
+        "name": "Branches  of the Luminous Bloom"
+      },
+      {
+        "id": 250023,
+        "name": "Phloemwraps of the Luminous Bloom"
+      },
+      {
+        "id": 250022,
+        "name": "Seedpods of the Luminous Bloom"
+      }
+    ]
+  },
+  {
+    "id": 1979,
+    "name": "Devouring Reaver's Sheathe",
+    "classes": [
+      "Demon Hunter"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250036,
+        "name": "Devouring Reaver's Engine"
+      },
+      {
+        "id": 250034,
+        "name": "Devouring Reaver's Essence Grips"
+      },
+      {
+        "id": 250033,
+        "name": "Devouring Reaver's Intake"
+      },
+      {
+        "id": 250032,
+        "name": "Devouring Reaver's Pistons"
+      },
+      {
+        "id": 250031,
+        "name": "Devouring Reaver's Exhaustplates"
+      }
+    ]
+  },
+  {
+    "id": 1957,
+    "name": "Sunfire Silk Trappings",
+    "classes": [
+      "Mage",
+      "Priest",
+      "Warlock"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 239657,
+        "name": "Sunfire Bracers"
+      },
+      {
+        "id": 239659,
+        "name": "Sunfire Treads"
+      },
+      {
+        "id": 239658,
+        "name": "Sunfire Cloak"
+      }
+    ]
+  },
+  {
+    "id": 1981,
+    "name": "Livery of the Black Talon",
+    "classes": [
+      "Evoker"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 250000,
+        "name": "Frenzyward of the Black Talon"
+      },
+      {
+        "id": 249998,
+        "name": "Enforcer's Grips of the Black Talon"
+      },
+      {
+        "id": 249997,
+        "name": "Hornhelm of the Black Talon"
+      },
+      {
+        "id": 249996,
+        "name": "Greaves of the Black Talon"
+      },
+      {
+        "id": 249995,
+        "name": "Beacons of the Black Talon"
+      }
+    ]
+  },
+  {
+    "id": 1974,
+    "name": "Warmonger's Vestments",
+    "classes": [
+      "Mage",
+      "Priest",
+      "Warlock"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 255882,
+        "name": "Galactic Warmonger's Garb"
+      },
+      {
+        "id": 255883,
+        "name": "Galactic Warmonger's Slippers"
+      },
+      {
+        "id": 255884,
+        "name": "Galactic Warmonger's Gloves"
+      },
+      {
+        "id": 255885,
+        "name": "Galactic Warmonger's Mask"
+      },
+      {
+        "id": 255886,
+        "name": "Galactic Warmonger's Pants"
+      },
+      {
+        "id": 255887,
+        "name": "Galactic Warmonger's Cord"
+      },
+      {
+        "id": 255888,
+        "name": "Galactic Warmonger's Bindings"
+      },
+      {
+        "id": 255889,
+        "name": "Galactic Warmonger's Mantle"
+      }
+    ]
+  },
+  {
+    "id": 1985,
+    "name": "Luminant Verdict's Vestments",
+    "classes": [
+      "Paladin"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 249964,
+        "name": "Luminant Verdict's Divine Warplate"
+      },
+      {
+        "id": 249962,
+        "name": "Luminant Verdict's Gauntlets"
+      },
+      {
+        "id": 249961,
+        "name": "Luminant Verdict's Unwavering Gaze"
+      },
+      {
+        "id": 249960,
+        "name": "Luminant Verdict's Greaves"
+      },
+      {
+        "id": 249959,
+        "name": "Luminant Verdict's Providence Watch"
+      }
+    ]
+  },
+  {
+    "id": 1958,
+    "name": "Arcanoweave Trappings",
+    "classes": [
+      "Mage",
+      "Priest",
+      "Warlock"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 239660,
+        "name": "Arcanoweave Bracers"
+      },
+      {
+        "id": 239662,
+        "name": "Arcanoweave Treads"
+      },
+      {
+        "id": 239661,
+        "name": "Arcanoweave Cloak"
+      }
+    ]
+  },
+  {
+    "id": 1975,
+    "name": "Warmonger's Armor",
+    "classes": [
+      "Rogue",
+      "Druid",
+      "Monk",
+      "Demon Hunter"
+    ],
+    "expansion": "The War Within",
+    "quality": "Epic",
+    "items": [
+      {
+        "id": 255890,
+        "name": "Galactic Warmonger's Boots"
+      },
+      {
+        "id": 255891,
+        "name": "Galactic Warmonger's Handwraps"
+      },
+      {
+        "id": 255892,
+        "name": "Galactic Warmonger's Hood"
+      },
+      {
+        "id": 255893,
+        "name": "Galactic Warmonger's Breeches"
+      },
+      {
+        "id": 255894,
+        "name": "Galactic Warmonger's Belt"
+      },
+      {
+        "id": 255895,
+        "name": "Galactic Warmonger's Wraps"
+      },
+      {
+        "id": 255896,
+        "name": "Galactic Warmonger's Jerkin"
+      },
+      {
+        "id": 255897,
+        "name": "Galactic Warmonger's Shoulderguard"
+      }
+    ]
   }
 ]

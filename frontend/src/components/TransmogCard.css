@@ -451,3 +451,13 @@
     transform: translateY(-50%) scale(1.1);
   }
 }
+
+/* ===========================================
+   MOBILE TOUCH IMPROVEMENTS
+   =========================================== */
+@media (max-width: 768px) {
+  .transmog-card {
+    margin-bottom: 16px;
+    /* More space for finger scrolling */
+  }
+}

@@ -4,6 +4,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Particles from './components/Particles';
 import './App.css';
+import './styles/buttons.css';
+import './styles/tooltip.css';
 import backgroundImage from './images/background.jpg';
 import ToastProvider from './components/ToastProvider';
 
@@ -12,10 +14,45 @@ const Home = React.lazy(() => import('./pages/Home'));
 const Catalog = React.lazy(() => import('./pages/Catalog'));
 const TransmogDetail = React.lazy(() => import('./pages/TransmogDetail'));
 
-// Loading fallback component - memoized to prevent re-renders
+// Loading fallback component - uses skeleton cards for better UX
 const LoadingFallback = React.memo(() => (
-  <div style={{ padding: '140px 20px', textAlign: 'center', color: '#e5d3b3' }}>
-    Loading…
+  <div style={{
+    padding: '140px 20px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '30px',
+    maxWidth: '1400px',
+    margin: '0 auto'
+  }}>
+    {[...Array(6)].map((_, i) => (
+      <div key={i} className="skeleton-card" style={{
+        background: 'rgba(20, 15, 10, 0.6)',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        height: '350px'
+      }}>
+        <div style={{
+          width: '100%',
+          height: '200px',
+          background: 'linear-gradient(90deg, rgba(30,30,30,0.8) 0%, rgba(50,50,50,0.8) 50%, rgba(30,30,30,0.8) 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 1.5s infinite'
+        }} />
+        <div style={{ padding: '16px' }}>
+          <div style={{
+            height: '20px',
+            background: 'rgba(229,211,179,0.2)',
+            borderRadius: '4px',
+            marginBottom: '12px',
+            width: '70%'
+          }} />
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ height: '18px', width: '60px', background: 'rgba(229,211,179,0.15)', borderRadius: '3px' }} />
+            <div style={{ height: '18px', width: '60px', background: 'rgba(229,211,179,0.15)', borderRadius: '3px' }} />
+          </div>
+        </div>
+      </div>
+    ))}
   </div>
 ));
 

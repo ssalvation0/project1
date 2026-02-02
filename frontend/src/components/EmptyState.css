@@ -1,0 +1,45 @@
+/* ===========================================
+   EMPTY STATE COMPONENT
+   For displaying when no data is available
+   =========================================== */
+
+.empty-state {
+    padding: 80px 20px;
+    text-align: center;
+    color: rgba(229, 211, 179, 0.6);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.empty-state-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: rgba(229, 211, 179, 0.8);
+    margin: 0 0 10px 0;
+    letter-spacing: 0.02em;
+}
+
+.empty-state-message {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1rem;
+    color: rgba(229, 211, 179, 0.6);
+    margin: 0 0 20px 0;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.empty-state-actions {
+    margin-top: 24px;
+}
+
+.empty-state-actions .btn,
+.empty-state-actions button {
+    margin: 0 8px;
+}

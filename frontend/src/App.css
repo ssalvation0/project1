@@ -4,22 +4,39 @@
   box-sizing: border-box;
 }
 
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+  /* Account for fixed header */
+}
+
 /* Accessible focus ring (only on keyboard navigation) */
 :focus {
   outline: none;
 }
 
 :focus-visible {
-  outline: 2px solid rgba(229, 211, 179, 0.7);
-  outline-offset: 2px;
+  outline: 3px solid rgba(229, 211, 179, 0.8);
+  outline-offset: 3px;
   border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(229, 211, 179, 0.2);
 }
 
 button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid rgba(229, 211, 179, 0.85);
+  outline: 3px solid rgba(229, 211, 179, 0.85);
   outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(229, 211, 179, 0.15);
+}
+
+/* Base button touch target sizes */
+button,
+.btn,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Images defaults */
@@ -60,6 +77,16 @@ body {
   padding: 0;
   color: #fff;
   overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Paragraph readability */
+p {
+  max-width: 70ch;
+  line-height: 1.7;
 }
 
 .background-image {
@@ -83,4 +110,15 @@ body {
   background-color: #000;
   z-index: -2;
   transition: opacity 0.3s ease;
+}
+
+/* Shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
