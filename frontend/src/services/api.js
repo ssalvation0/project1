@@ -39,3 +39,21 @@ export const getItem = (id) => apiRequest(`/items/${id}`);
 export const getItemMedia = (id) => apiRequest(`/items/${id}/media`);
 
 export const clearCache = () => apiRequest('/cache/clear', { method: 'POST' });
+
+// Auth API
+export const register = (data) => apiRequest('/auth/register', {
+  method: 'POST',
+  body: JSON.stringify(data)
+});
+
+export const login = (data) => apiRequest('/auth/login', {
+  method: 'POST',
+  body: JSON.stringify(data)
+});
+
+export const getMe = () => {
+  const token = localStorage.getItem('token');
+  return apiRequest('/auth/me', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+};

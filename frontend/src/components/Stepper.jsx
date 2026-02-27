@@ -66,7 +66,7 @@ function StepIndicator({ step, currentStep, label, onClickStep, disableStepIndic
           ) : status === 'active' ? (
             <div className="active-dot" />
           ) : (
-            <div className="inactive-number">{step + 1}</div>
+            <span className="inactive-number">{step + 1}</span>
           )}
         </motion.div>
       </motion.div>

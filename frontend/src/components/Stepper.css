@@ -57,12 +57,18 @@
   justify-content: flex-end;
 }
 
-.step-indicator {
+.stepper-wrapper .step-indicator {
   position: relative;
   cursor: pointer;
+  font-size: unset;
+  color: unset;
+  flex-direction: row;
+  gap: 0;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
-.step-indicator-inner {
+.stepper-wrapper .step-indicator-inner {
   display: flex;
   height: 2rem;
   width: 2rem;
@@ -70,6 +76,7 @@
   justify-content: center;
   border-radius: 9999px;
   font-weight: 600;
+  font-size: 0.75rem !important;
   transition: all 0.3s;
 }
 
@@ -93,6 +100,7 @@
   overflow: hidden;
   border-radius: 0.25rem;
   background-color: #52525b;
+  margin-top: calc(1rem - 0.0625rem); /* Центрування по середині кружечків (половина висоти кружка - половина висоти лінії) */
 }
 
 .step-connector-inner {
@@ -129,7 +137,7 @@
 
 .stepper-indicators {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   margin-bottom: 1.5rem; /* Відступ між індикаторами та контентом */
 }
@@ -147,10 +155,12 @@
   gap: 0.5rem;
 }
 
-.inactive-number {
-  font-size: 0.875rem;
+.stepper-wrapper .inactive-number {
+  font-size: 0.75rem !important;
   font-weight: 600;
-  color: #a3a3a3;
+  color: inherit;
+  line-height: 1;
+  text-align: center;
 }
 
 .auth-modal-form-section {

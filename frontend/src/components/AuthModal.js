@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AuthModal.css';
 import Stepper, { Step } from './Stepper.jsx';
+import { register, login } from '../services/api';
 
-function AuthModal({ isOpen, onClose }) {
+function AuthModal({ isOpen, onClose, onAuth }) {
     const [isLogin, setIsLogin] = useState(true);
     const [currentStep, setCurrentStep] = useState(0);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [preferences, setPreferences] = useState([]);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const modalRef = useRef(null);
 
@@ -44,12 +48,33 @@ function AuthModal({ isOpen, onClose }) {
         return () => document.removeEventListener('keydown', handleKey);
     }, [isOpen, onClose]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!isLogin && currentStep < 2) {
+        setError('');
+
+        if (!isLogin && currentStep < 3) {
             setCurrentStep(currentStep + 1);
-        } else {
-            console.log({ name, email, password, isLogin });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            let result;
+            if (isLogin) {
+                result = await login({ email, password });
+            } else {
+                result = await register({ name, email, password, preferences });
+            }
+
+            localStorage.setItem('token', result.token);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            onAuth?.(result.user);
+            onClose();
+            resetForm();
+        } catch (err) {
+            setError(err.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -63,7 +88,9 @@ function AuthModal({ isOpen, onClose }) {
         setName('');
         setEmail('');
         setPassword('');
+        setPreferences([]);
         setCurrentStep(0);
+        setError('');
     };
 
     const toggleMode = () => {
@@ -98,6 +125,8 @@ function AuthModal({ isOpen, onClose }) {
 
                     <div className="auth-modal-content">
                         <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+
+                        {error && <div className="auth-error">{error}</div>}
 
                         {!isLogin && (
                             <Stepper currentStep={currentStep}>
@@ -137,10 +166,45 @@ function AuthModal({ isOpen, onClose }) {
                                     </div>
                                 </Step>
 
+                                <Step label="Preferences">
+                                    <div className="preferences-step">
+                                        <p className="preferences-label">Select your favorite transmog categories:</p>
+                                        <div className="preferences-grid">
+                                            {[
+                                                { id: 'plate', label: 'Plate', icon: '🛡️' },
+                                                { id: 'mail', label: 'Mail', icon: '⛓️' },
+                                                { id: 'leather', label: 'Leather', icon: '🦊' },
+                                                { id: 'cloth', label: 'Cloth', icon: '🧙' },
+                                                { id: 'weapons', label: 'Weapons', icon: '⚔️' },
+                                                { id: 'sets', label: 'Full Sets', icon: '👑' },
+                                            ].map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    className={`preference-chip ${preferences.includes(item.id) ? 'selected' : ''}`}
+                                                    onClick={() => {
+                                                        setPreferences(prev =>
+                                                            prev.includes(item.id)
+                                                                ? prev.filter(p => p !== item.id)
+                                                                : [...prev, item.id]
+                                                        );
+                                                    }}
+                                                >
+                                                    <span className="preference-icon">{item.icon}</span>
+                                                    <span className="preference-text">{item.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </Step>
+
                                 <Step label="Confirm">
                                     <div className="confirmation-step">
                                         <p><strong>Name:</strong> {name}</p>
                                         <p><strong>Email:</strong> {email}</p>
+                                        {preferences.length > 0 && (
+                                            <p><strong>Preferences:</strong> {preferences.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</p>
+                                        )}
                                     </div>
                                 </Step>
                             </Stepper>
@@ -169,8 +233,8 @@ function AuthModal({ isOpen, onClose }) {
                                     />
                                 </div>
 
-                                <button type="submit" className="submit-btn">
-                                    Login
+                                <button type="submit" className="submit-btn" disabled={loading}>
+                                    {loading ? 'Loading...' : 'Login'}
                                 </button>
                             </form>
                         ) : (
@@ -181,8 +245,8 @@ function AuthModal({ isOpen, onClose }) {
                                         Back
                                     </button>
                                 )}
-                                <button type="button" onClick={handleSubmit} className="submit-btn">
-                                    {currentStep === 2 ? 'Sign Up' : 'Next'}
+                                <button type="button" onClick={handleSubmit} className="submit-btn" disabled={loading}>
+                                    {currentStep === 3 ? (loading ? 'Signing Up...' : 'Sign Up') : 'Next'}
                                 </button>
                             </div>
                         )}

@@ -124,6 +124,17 @@
     text-align: center;
 }
 
+.auth-error {
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.4);
+    border-radius: 8px;
+    color: #ff6b6b;
+    padding: 10px 14px;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
 /* Загальні стилі для всіх полів */
 .auth-form input,
 .stepper-content input {
@@ -163,9 +174,10 @@
     content: '✉';
     position: absolute;
     left: 16px;
-    bottom: 14px; /* Змінено з top на bottom для кращого позиціонування */
-    font-size: 28px; /* Збільшено розмір */
-    color: #f2e6c9; /* Змінено з #d4af37 */
+    top: 50%;
+    transform: translateY(-55%);
+    font-size: 25px;
+    color: #f2e6c9;
     pointer-events: none;
     line-height: 1;
 }
@@ -175,7 +187,8 @@
     content: '⚿';
     position: absolute;
     left: 14px;
-    bottom: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 25px;
     color: #f2e6c9;
     pointer-events: none;
@@ -187,9 +200,10 @@
     content: '👤';
     position: absolute;
     left: 16px;
-    bottom: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 20px;
-    color: #f2e6c9; /* Змінено з #d4af37 */
+    color: #f2e6c9;
     pointer-events: none;
 }
 
@@ -281,6 +295,66 @@
 .confirmation-step strong {
     color: #fff;
     font-weight: 600;
+}
+
+/* Preferences step */
+.preferences-step {
+    width: 100%;
+}
+
+.preferences-label {
+    color: #f2e6c9;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 14px 0;
+    text-align: center;
+}
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.preference-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #a3a3a3;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: 'Raleway', sans-serif;
+}
+
+.preference-chip:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(242, 230, 201, 0.4);
+    color: #f2e6c9;
+}
+
+.preference-chip.selected {
+    background: rgba(242, 230, 201, 0.1);
+    border-color: #f2e6c9;
+    color: #f2e6c9;
+    box-shadow: 0 0 15px rgba(242, 230, 201, 0.3);
+}
+
+.preference-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.preference-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .stepper-content {
