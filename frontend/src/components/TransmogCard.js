@@ -17,14 +17,22 @@ const getQualityColor = (quality) => {
     return QUALITY_COLORS[quality?.toLowerCase()] || '#ffffff';
 };
 
+// Stable pseudo-random based on transmog ID (deterministic)
+const seededRandom = (id, salt = 0) => {
+    const x = Math.sin(id * 9301 + salt * 49297 + 49297) * 49297;
+    return x - Math.floor(x);
+};
+
+const SOURCES = ['Raid', 'PvP', 'Dungeon', 'Crafted'];
+
 const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
 
-    // Mock data for source and rating if not present
-    const source = transmog.source || ['Raid', 'PvP', 'Dungeon', 'Crafted'][Math.floor(Math.random() * 4)];
-    const rating = transmog.rating || (Math.random() * 2 + 3).toFixed(1); // 3.0 to 5.0
-    const ratingCount = transmog.ratingCount || Math.floor(Math.random() * 100);
+    // Deterministic mock data based on transmog ID
+    const source = useMemo(() => transmog.source || SOURCES[Math.floor(seededRandom(transmog.id, 1) * SOURCES.length)], [transmog.source, transmog.id]);
+    const rating = useMemo(() => transmog.rating || (seededRandom(transmog.id, 2) * 2 + 3).toFixed(1), [transmog.rating, transmog.id]);
+    const ratingCount = useMemo(() => transmog.ratingCount || Math.floor(seededRandom(transmog.id, 3) * 100), [transmog.ratingCount, transmog.id]);
 
     const handleClick = useCallback(() => {
         navigate(`/transmog/${transmog.id}`);

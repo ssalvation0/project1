@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
@@ -6,13 +6,39 @@ import AuthModal from './AuthModal';
 
 function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoggedIn] = useState(false); // стан авторизації
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
+  const syncAuth = useCallback(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      setUser(stored ? JSON.parse(stored) : null);
+    } catch { setUser(null); }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('auth-change', syncAuth);
+    window.addEventListener('storage', syncAuth);
+    return () => {
+      window.removeEventListener('auth-change', syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
+  }, [syncAuth]);
+
+  const handleAuth = (userData) => {
+    setUser(userData);
+    window.dispatchEvent(new Event('auth-change'));
+  };
+
   const handleProfileClick = () => {
-    if (isLoggedIn) {
-      // // TODO: Profile navigation
+    if (user) {
+      navigate('/profile');
     } else {
       setIsModalOpen(true);
     }
@@ -53,18 +79,24 @@ function Header() {
             />
           </form>
 
+          {/* TODO: remove temp link */}
+          <Link to="/profile" className="login-btn" style={{ textDecoration: 'none', marginRight: 8 }}>
+            Profile
+          </Link>
+
           <button
             className="login-btn"
             onClick={handleProfileClick}
-            aria-label={isLoggedIn ? 'Open profile' : 'Sign up or login'}
+            aria-label={user ? 'Open profile' : 'Sign up or login'}
           >
-            {isLoggedIn ? 'Profile' : 'Sign up / Login'}
+            {user ? user.name : 'Sign up / Login'}
           </button>
         </div>
       </nav>
       <AuthModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onAuth={handleAuth}
       />
     </>
   );

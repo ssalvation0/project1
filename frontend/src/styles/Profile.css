@@ -1,0 +1,318 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 140px 20px 80px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(20, 15, 10, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(229, 211, 179, 0.15);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Header */
+.profile-header-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgba(229, 211, 179, 0.12);
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(229, 211, 179, 0.25), rgba(200, 160, 40, 0.3));
+  border: 2px solid rgba(229, 211, 179, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-avatar-text {
+  font-family: 'Cinzel', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #f2e6c9;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.profile-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f2e6c9;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.profile-email {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.95rem;
+  color: rgba(229, 211, 179, 0.7);
+  margin: 0;
+}
+
+.profile-member-since {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(229, 211, 179, 0.45);
+  margin: 4px 0 0 0;
+}
+
+/* Sections */
+.profile-section {
+  margin-bottom: 32px;
+}
+
+.profile-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #e5d3b3;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.02em;
+}
+
+/* Preferences */
+.profile-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-pref-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(229, 211, 179, 0.08);
+  border: 1px solid rgba(229, 211, 179, 0.18);
+  border-radius: 20px;
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.profile-pref-tag:hover {
+  background: rgba(229, 211, 179, 0.14);
+  border-color: rgba(229, 211, 179, 0.3);
+}
+
+.profile-pref-icon {
+  font-size: 1.1rem;
+}
+
+/* Account Info */
+.profile-account-info {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(229, 211, 179, 0.08);
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.profile-info-row + .profile-info-row {
+  border-top: 1px solid rgba(229, 211, 179, 0.08);
+}
+
+.profile-info-label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(229, 211, 179, 0.5);
+  font-weight: 500;
+}
+
+.profile-info-value {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.95rem;
+  color: #e5d3b3;
+  font-weight: 500;
+}
+
+/* Actions */
+.profile-actions {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(229, 211, 179, 0.12);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-logout-btn {
+  padding: 12px 32px;
+  border-radius: 12px;
+  background: rgba(180, 50, 50, 0.2);
+  color: #e5a0a0;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1.5px solid rgba(180, 50, 50, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.01em;
+}
+
+.profile-logout-btn:hover {
+  background: rgba(180, 50, 50, 0.35);
+  border-color: rgba(220, 80, 80, 0.5);
+  color: #f0b0b0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(180, 50, 50, 0.2);
+}
+
+.profile-logout-btn:active {
+  transform: scale(0.97);
+}
+
+/* Loading */
+.profile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+}
+
+.profile-loading p {
+  font-family: 'Raleway', sans-serif;
+  color: rgba(229, 211, 179, 0.6);
+  font-size: 1rem;
+}
+
+.profile-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(229, 211, 179, 0.15);
+  border-top-color: #e5d3b3;
+  border-radius: 50%;
+  animation: profile-spin 0.8s linear infinite;
+}
+
+@keyframes profile-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Favorites */
+.profile-fav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  margin-left: 10px;
+  border-radius: 12px;
+  background: rgba(229, 211, 179, 0.12);
+  border: 1px solid rgba(229, 211, 179, 0.2);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(229, 211, 179, 0.7);
+  vertical-align: middle;
+}
+
+.profile-favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.profile-favorites-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+}
+
+.profile-favorites-loading p {
+  font-family: 'Raleway', sans-serif;
+  color: rgba(229, 211, 179, 0.5);
+  font-size: 0.9rem;
+}
+
+.profile-favorites-empty {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  border: 1px dashed rgba(229, 211, 179, 0.12);
+}
+
+.profile-favorites-empty-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.profile-favorites-empty p {
+  font-family: 'Raleway', sans-serif;
+  color: rgba(229, 211, 179, 0.6);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.profile-favorites-empty-hint {
+  font-size: 0.85rem !important;
+  color: rgba(229, 211, 179, 0.4) !important;
+  margin-top: 8px !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .profile-container {
+    padding: 32px 20px;
+    border-radius: 18px;
+  }
+
+  .profile-header-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .profile-avatar-text {
+    font-size: 1.3rem;
+  }
+
+  .profile-name {
+    font-size: 1.4rem;
+  }
+
+  .profile-actions {
+    justify-content: center;
+  }
+}
