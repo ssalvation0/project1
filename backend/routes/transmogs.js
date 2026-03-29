@@ -184,6 +184,12 @@ loadCache().then(() => {
   hydrateCache();
 });
 
+// Generate Wowhead model viewer preview URL for a transmog set
+function getSetPreviewUrl(setId) {
+  const bucket = setId % 256;
+  return `https://wow.zamimg.com/modelviewer/live/webthumbs/transmog/1/1/${bucket}/${setId}.jpg`;
+}
+
 // --- Routes ---
 
 router.get('/filters', (req, res) => {
@@ -244,7 +250,7 @@ router.get('/batch', async (req, res) => {
     if (set.items && set.items.length > 0) {
       iconUrl = await blizzardService.getItemMedia(set.items[0].id);
     }
-    return { ...set, iconUrl };
+    return { ...set, iconUrl, previewUrl: getSetPreviewUrl(set.id) };
   }));
 
   // Cache for 1 hour
@@ -297,7 +303,7 @@ router.get('/', async (req, res) => {
       // Try to get icon for first item
       iconUrl = await blizzardService.getItemMedia(set.items[0].id);
     }
-    return { ...set, iconUrl };
+    return { ...set, iconUrl, previewUrl: getSetPreviewUrl(set.id) };
   }));
 
   // Cache for 5 minutes (list changes slowly)
@@ -327,6 +333,7 @@ router.get('/:id', async (req, res) => {
   res.json({
     ...set,
     items: itemsWithIcons,
+    previewUrl: getSetPreviewUrl(set.id),
     wowheadLink: `https://www.wowhead.com/item-set=${set.id}`
   });
 });

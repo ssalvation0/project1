@@ -236,7 +236,7 @@
 /* Сітка трансмогів */
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 30px;
   max-width: 1400px;
   margin: 0 auto;
@@ -368,31 +368,33 @@
 
 .class-badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 3px 8px;
   border: 1px solid;
-  border-radius: 8px;
+  border-radius: 4px;
   font-family: 'Raleway', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .expansion-badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 3px 8px;
   border: 1px solid rgba(229, 211, 179, 0.4);
-  border-radius: 8px;
+  border-radius: 4px;
   font-family: 'Raleway', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   font-weight: 600;
   color: #e5d3b3;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 /* Кольори класів WoW */
@@ -759,7 +761,7 @@
 /* Skeleton grid while loading */
 .catalog-skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 30px;
   max-width: 1400px;
   margin: 0 auto;

@@ -30479,5 +30479,24 @@
         "name": "Galactic Warmonger's Shoulderguard"
       }
     ]
+  },
+  {
+    "id": 1971,
+    "name": "Voidlight Bindings",
+    "classes": [
+      "All"
+    ],
+    "expansion": "The War Within",
+    "quality": "Rare",
+    "items": [
+      {
+        "id": 251093,
+        "name": "Omission of Light"
+      },
+      {
+        "id": 251217,
+        "name": "Occlusion of Void"
+      }
+    ]
   }
 ]

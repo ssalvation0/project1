@@ -21,7 +21,7 @@
 .transmog-card-image-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 3/2;
+  aspect-ratio: 13/22;
   overflow: hidden;
   border-bottom: 1px solid rgba(229, 211, 179, 0.1);
 }
@@ -168,24 +168,26 @@
 
 .transmog-meta {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
   margin-top: auto;
+  overflow: hidden;
 }
 
 .class-badge,
 .expansion-badge,
 .source-badge {
   font-family: 'Raleway', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 2px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.3);
   color: #aaa;
+  white-space: nowrap;
 }
 
 .expansion-badge {

@@ -152,7 +152,7 @@
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(229, 211, 179, 0.2);
-  aspect-ratio: 1;
+  aspect-ratio: 13/22;
   background: rgba(0, 0, 0, 0.2);
 }
 
@@ -697,9 +697,8 @@
 
 .similar-set-image {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 13/22;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
 }
 
 .similar-set-image img {

@@ -352,15 +352,13 @@ function TransmogDetail() {
         <div className="transmog-detail-content-card">
           <div className="detail-top-section">
             <div className="detail-image-wrapper">
-              {transmog.iconUrl ? (
+              {(transmog.previewUrl || transmog.iconUrl) ? (
                 <img
-                  src={transmog.iconUrl}
+                  src={transmog.previewUrl || transmog.iconUrl}
                   alt={transmog.name}
                   className="detail-main-icon"
                   loading="eager"
                   decoding="async"
-                  width="256"
-                  height="256"
                 />
               ) : (
                 <div className="detail-icon-placeholder">
@@ -512,13 +510,11 @@ function TransmogDetail() {
                     className="similar-set-card"
                   >
                     <div className="similar-set-image">
-                      {set.iconUrl ? (
+                      {(set.previewUrl || set.iconUrl) ? (
                         <img
-                          src={set.iconUrl}
+                          src={set.previewUrl || set.iconUrl}
                           alt={set.name}
                           loading="lazy"
-                          width="128"
-                          height="128"
                           decoding="async"
                         />
                       ) : (

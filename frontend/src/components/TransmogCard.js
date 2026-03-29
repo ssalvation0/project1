@@ -47,8 +47,8 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
         setImageError(true);
     }, []);
 
-    // Memoize computed values
-    const imageUrl = transmog.iconUrl;
+    // Memoize computed values - prefer previewUrl (full set render) over iconUrl (item icon)
+    const imageUrl = transmog.previewUrl || transmog.iconUrl;
     const showPlaceholder = !imageUrl || imageError;
     const qualityColor = useMemo(() => getQualityColor(transmog.quality), [transmog.quality]);
 
@@ -88,8 +88,6 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                         loading="lazy"
                         decoding="async"
                         onError={handleImageError}
-                        width="128"
-                        height="128"
                     />
                 )}
 

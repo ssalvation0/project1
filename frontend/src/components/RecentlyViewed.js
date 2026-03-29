@@ -98,14 +98,12 @@ function RecentlyViewed({ limit = 5 }) {
         onMouseMove={handleMouseMove}
       >
         <div className="recently-viewed-image">
-          {transmog.iconUrl ? (
+          {(transmog.previewUrl || transmog.iconUrl) ? (
             <img
-              src={transmog.iconUrl}
+              src={transmog.previewUrl || transmog.iconUrl}
               alt={transmog.name}
               loading="lazy"
               decoding="async"
-              width="160"
-              height="120"
             />
           ) : (
             <div className="recently-viewed-placeholder">⚔️</div>
