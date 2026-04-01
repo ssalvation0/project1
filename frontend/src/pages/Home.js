@@ -298,7 +298,7 @@ function Home() {
           </h1>
           <div className="hero-buttons">
             <button className="hero-btn primary btn-ripple btn-ripple-dark" onClick={openWizard}>
-              Start Transmog Build
+              Find Sets by Class
             </button>
             <button className="hero-btn secondary btn-ripple btn-ripple-gold" onClick={navigateToCatalog}>
               Browse All Sets

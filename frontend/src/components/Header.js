@@ -3,38 +3,52 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
 import AuthModal from './AuthModal';
+import { supabase } from '../services/supabase';
 
 function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      return stored ? JSON.parse(stored) : null;
-    } catch { return null; }
-  });
+  const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  const syncAuth = useCallback(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      setUser(stored ? JSON.parse(stored) : null);
-    } catch { setUser(null); }
+  // Listen to Supabase auth state changes
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const u = session.user;
+        setUser({
+          name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+          email: u.email,
+          preferences: u.user_metadata?.preferences || [],
+          createdAt: u.created_at,
+          avatarUrl: u.user_metadata?.avatar_url || null,
+        });
+      }
+    });
+
+    // Subscribe to auth changes (login, logout, Google OAuth redirect)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const u = session.user;
+        setUser({
+          name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+          email: u.email,
+          preferences: u.user_metadata?.preferences || [],
+          createdAt: u.created_at,
+          avatarUrl: u.user_metadata?.avatar_url || null,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    window.addEventListener('auth-change', syncAuth);
-    window.addEventListener('storage', syncAuth);
-    return () => {
-      window.removeEventListener('auth-change', syncAuth);
-      window.removeEventListener('storage', syncAuth);
-    };
-  }, [syncAuth]);
-
-  const handleAuth = (userData) => {
+  const handleAuth = useCallback((userData) => {
     setUser(userData);
-    window.dispatchEvent(new Event('auth-change'));
-  };
+  }, []);
 
   const handleProfileClick = () => {
     if (user) {
@@ -67,7 +81,6 @@ function Header() {
             />
           </Link>
 
-          {/* Global Search */}
           <form className="global-search-form" onSubmit={handleSearchSubmit} role="search">
             <input
               type="text"
@@ -79,10 +92,11 @@ function Header() {
             />
           </form>
 
-          {/* TODO: remove temp link */}
-          <Link to="/profile" className="login-btn" style={{ textDecoration: 'none', marginRight: 8 }}>
-            Profile
-          </Link>
+          {user && (
+            <Link to="/profile" className="login-btn" style={{ textDecoration: 'none', marginRight: 8 }}>
+              Profile
+            </Link>
+          )}
 
           <button
             className="login-btn"

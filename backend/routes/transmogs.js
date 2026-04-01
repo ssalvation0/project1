@@ -25,7 +25,8 @@ function inferExpansion(itemId) {
   if (id < 180000) return 'Battle for Azeroth';
   if (id < 190000) return 'Shadowlands';
   if (id < 210000) return 'Dragonflight';
-  return 'The War Within';
+  if (id < 249000) return 'The War Within';
+  return 'Midnight';
 }
 
 // Helper: Map armor type to classes
@@ -217,7 +218,8 @@ router.get('/filters', (req, res) => {
     'Battle for Azeroth',
     'Shadowlands',
     'Dragonflight',
-    'The War Within'
+    'The War Within',
+    'Midnight'
   ];
 
   const sortedExpansions = Array.from(expansions).sort((a, b) => {

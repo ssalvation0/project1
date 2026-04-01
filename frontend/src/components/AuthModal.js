@@ -1,7 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AuthModal.css';
 import Stepper, { Step } from './Stepper.jsx';
-import { register, login } from '../services/api';
+import { supabase } from '../services/supabase';
+
+const IconMail = () => (
+    <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="3"/>
+        <path d="M22 7l-10 6L2 7"/>
+    </svg>
+);
+
+const IconLock = () => (
+    <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="11" width="14" height="10" rx="2"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+    </svg>
+);
+
+const IconUser = () => (
+    <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M20 21a8 8 0 0 0-16 0"/>
+    </svg>
+);
 
 function AuthModal({ isOpen, onClose, onAuth }) {
     const [isLogin, setIsLogin] = useState(true);
@@ -48,6 +69,23 @@ function AuthModal({ isOpen, onClose, onAuth }) {
         return () => document.removeEventListener('keydown', handleKey);
     }, [isOpen, onClose]);
 
+    const handleGoogleLogin = async () => {
+        setError('');
+        setLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/profile'
+                }
+            });
+            if (error) throw error;
+        } catch (err) {
+            setError(err.message || 'Google login failed');
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -59,18 +97,49 @@ function AuthModal({ isOpen, onClose, onAuth }) {
 
         setLoading(true);
         try {
-            let result;
             if (isLogin) {
-                result = await login({ email, password });
-            } else {
-                result = await register({ name, email, password, preferences });
-            }
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (error) throw error;
 
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('user', JSON.stringify(result.user));
-            onAuth?.(result.user);
-            onClose();
-            resetForm();
+                const user = {
+                    name: data.user.user_metadata?.name || data.user.email.split('@')[0],
+                    email: data.user.email,
+                    preferences: data.user.user_metadata?.preferences || [],
+                    createdAt: data.user.created_at,
+                };
+                onAuth?.(user);
+                onClose();
+                resetForm();
+            } else {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            name,
+                            preferences,
+                        }
+                    }
+                });
+                if (error) throw error;
+
+                if (data.user?.identities?.length === 0) {
+                    throw new Error('An account with this email already exists');
+                }
+
+                const user = {
+                    name,
+                    email: data.user.email,
+                    preferences,
+                    createdAt: data.user.created_at,
+                };
+                onAuth?.(user);
+                onClose();
+                resetForm();
+            }
         } catch (err) {
             setError(err.message || 'Something went wrong');
         } finally {
@@ -124,19 +193,47 @@ function AuthModal({ isOpen, onClose, onAuth }) {
                     <button className="auth-modal-close" onClick={onClose}>×</button>
 
                     <div className="auth-modal-content">
-                        <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+                        <div className="auth-modal-header">
+                            <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                            <p className="auth-modal-subtitle">
+                                {isLogin
+                                    ? 'Sign in to your TransmogVault account'
+                                    : 'Join the transmog community'}
+                            </p>
+                        </div>
 
                         {error && <div className="auth-error">{error}</div>}
 
+                        <button
+                            type="button"
+                            className="google-auth-btn"
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                        >
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <div className="auth-divider">
+                            <span>or</span>
+                        </div>
+
                         {!isLogin && (
+                            <form onSubmit={handleSubmit} style={{width: '100%'}}>
                             <Stepper currentStep={currentStep}>
-                                <Step label="Personal Info">
-                                    <div className="form-group">
+                                <Step label="Info">
+                                    <div className="input-group">
+                                        <IconUser />
                                         <input
                                             type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            placeholder="Enter your name"
+                                            placeholder="Your name"
                                             required
                                         />
                                     </div>
@@ -144,53 +241,69 @@ function AuthModal({ isOpen, onClose, onAuth }) {
 
                                 <Step label="Account">
                                     <div>
-                                        <div className="form-group">
+                                        <div className="input-group">
+                                            <IconMail />
                                             <input
                                                 type="email"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="Enter your email"
+                                                placeholder="Email address"
                                                 required
                                             />
                                         </div>
 
-                                        <div className="form-group">
+                                        <div className="input-group">
+                                            <IconLock />
                                             <input
                                                 type="password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="Enter your password"
+                                                placeholder="Password"
                                                 required
                                             />
                                         </div>
                                     </div>
                                 </Step>
 
-                                <Step label="Preferences">
+                                <Step label="Main">
                                     <div className="preferences-step">
-                                        <p className="preferences-label">Select your favorite transmog categories:</p>
-                                        <div className="preferences-grid">
+                                        <p className="preferences-label">Pick your main class (up to 3)</p>
+                                        <div className="preferences-grid main-class-grid">
                                             {[
-                                                { id: 'plate', label: 'Plate', icon: '🛡️' },
-                                                { id: 'mail', label: 'Mail', icon: '⛓️' },
-                                                { id: 'leather', label: 'Leather', icon: '🦊' },
-                                                { id: 'cloth', label: 'Cloth', icon: '🧙' },
-                                                { id: 'weapons', label: 'Weapons', icon: '⚔️' },
-                                                { id: 'sets', label: 'Full Sets', icon: '👑' },
+                                                { id: 'warrior', label: 'Warrior' },
+                                                { id: 'paladin', label: 'Paladin' },
+                                                { id: 'hunter', label: 'Hunter' },
+                                                { id: 'rogue', label: 'Rogue' },
+                                                { id: 'priest', label: 'Priest' },
+                                                { id: 'deathknight', label: 'Death Knight' },
+                                                { id: 'shaman', label: 'Shaman' },
+                                                { id: 'mage', label: 'Mage' },
+                                                { id: 'warlock', label: 'Warlock' },
+                                                { id: 'monk', label: 'Monk' },
+                                                { id: 'druid', label: 'Druid' },
+                                                { id: 'demonhunter', label: 'Demon Hunter' },
+                                                { id: 'evoker', label: 'Evoker' },
                                             ].map((item) => (
                                                 <button
                                                     key={item.id}
                                                     type="button"
                                                     className={`preference-chip ${preferences.includes(item.id) ? 'selected' : ''}`}
                                                     onClick={() => {
-                                                        setPreferences(prev =>
-                                                            prev.includes(item.id)
-                                                                ? prev.filter(p => p !== item.id)
-                                                                : [...prev, item.id]
-                                                        );
+                                                        setPreferences(prev => {
+                                                            if (prev.includes(item.id)) {
+                                                                return prev.filter(p => p !== item.id);
+                                                            }
+                                                            if (prev.length >= 3) return prev;
+                                                            return [...prev, item.id];
+                                                        });
                                                     }}
                                                 >
-                                                    <span className="preference-icon">{item.icon}</span>
+                                                    <img
+                                                        src={`https://wow.zamimg.com/images/wow/icons/medium/classicon_${item.id}.jpg`}
+                                                        alt={item.label}
+                                                        className="preference-icon"
+                                                        loading="lazy"
+                                                    />
                                                     <span className="preference-text">{item.label}</span>
                                                 </button>
                                             ))}
@@ -200,61 +313,64 @@ function AuthModal({ isOpen, onClose, onAuth }) {
 
                                 <Step label="Confirm">
                                     <div className="confirmation-step">
-                                        <p><strong>Name:</strong> {name}</p>
-                                        <p><strong>Email:</strong> {email}</p>
+                                        <p><strong>Name</strong><br/>{name}</p>
+                                        <p><strong>Email</strong><br/>{email}</p>
                                         {preferences.length > 0 && (
-                                            <p><strong>Preferences:</strong> {preferences.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</p>
+                                            <p><strong>Preferences</strong><br/>{preferences.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</p>
                                         )}
                                     </div>
                                 </Step>
                             </Stepper>
-                        )}
 
-                        {isLogin ? (
-                            // ЛОГІН - окрема форма
-                            <form className="auth-form" onSubmit={handleSubmit}>
-                                <div className="form-group">
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="Enter your email"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter your password"
-                                        required
-                                    />
-                                </div>
-
-                                <button type="submit" className="submit-btn" disabled={loading}>
-                                    {loading ? 'Loading...' : 'Login'}
-                                </button>
-                            </form>
-                        ) : (
-                            // РЕЄСТРАЦІЯ - кнопки
                             <div className="stepper-buttons">
                                 {currentStep > 0 && (
                                     <button type="button" onClick={handleBack} className="back-btn">
                                         Back
                                     </button>
                                 )}
-                                <button type="button" onClick={handleSubmit} className="submit-btn" disabled={loading}>
-                                    {currentStep === 3 ? (loading ? 'Signing Up...' : 'Sign Up') : 'Next'}
+                                <button type="submit" className="submit-btn" disabled={loading}>
+                                    {currentStep === 3 ? (loading ? 'Creating...' : 'Create Account') : 'Continue'}
                                 </button>
                             </div>
+                            </form>
                         )}
+
+                        {isLogin ? (
+                            <form className="auth-form" onSubmit={handleSubmit}>
+                                <div className="input-group">
+                                    <IconMail />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Email address"
+                                        required
+                                        autoComplete="email"
+                                    />
+                                </div>
+
+                                <div className="input-group">
+                                    <IconLock />
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Password"
+                                        required
+                                        autoComplete="current-password"
+                                    />
+                                </div>
+
+                                <button type="submit" className="submit-btn" disabled={loading}>
+                                    {loading ? 'Signing in...' : 'Sign In'}
+                                </button>
+                            </form>
+                        ) : null}
 
                         <p className="toggle-mode">
                             {isLogin ? "Don't have an account? " : "Already have an account? "}
                             <span onClick={toggleMode}>
-                                {isLogin ? 'Sign Up' : 'Login'}
+                                {isLogin ? 'Sign Up' : 'Sign In'}
                             </span>
                         </p>
                     </div>

@@ -1,16 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMe, getTransmogSet } from '../services/api';
+import { getTransmogSet } from '../services/api';
+import { supabase } from '../services/supabase';
 import TransmogCard from '../components/TransmogCard';
 import '../styles/Profile.css';
-
-// TODO: remove demo user after login works
-const DEMO_USER = {
-  name: 'Serhiy Danylyuk',
-  email: 'serhiy@example.com',
-  preferences: ['plate', 'weapons', 'sets'],
-  createdAt: '2026-01-15T10:00:00.000Z',
-};
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -21,29 +14,21 @@ function Profile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // No token — show demo user for preview
-      setUser(DEMO_USER);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) {
+        navigate('/');
+        return;
+      }
+      const u = session.user;
+      setUser({
+        name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+        email: u.email,
+        preferences: u.user_metadata?.preferences || [],
+        createdAt: u.created_at,
+        avatarUrl: u.user_metadata?.avatar_url || null,
+      });
       setLoading(false);
-      return;
-    }
-
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch {}
-    }
-
-    getMe()
-      .then((data) => {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-      })
-      .catch(() => {
-        // Fallback to demo on error
-        setUser(DEMO_USER);
-      })
-      .finally(() => setLoading(false));
+    });
   }, [navigate]);
 
   // Load favorite transmog IDs from localStorage
@@ -74,7 +59,6 @@ function Profile() {
       .finally(() => setFavoritesLoading(false));
   }, [favorites]);
 
-  // Toggle favorite (remove from profile)
   const toggleFavorite = useCallback((transmogId) => {
     setFavorites(prev => {
       const newFavs = prev.includes(transmogId)
@@ -85,10 +69,8 @@ function Profile() {
     });
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.dispatchEvent(new Event('auth-change'));
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/');
   };
 
@@ -128,7 +110,11 @@ function Profile() {
         {/* Header Section */}
         <div className="profile-header-section">
           <div className="profile-avatar">
-            <span className="profile-avatar-text">{initials}</span>
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name} className="profile-avatar-img" />
+            ) : (
+              <span className="profile-avatar-text">{initials}</span>
+            )}
           </div>
           <div className="profile-header-info">
             <h1 className="profile-name">{user.name}</h1>

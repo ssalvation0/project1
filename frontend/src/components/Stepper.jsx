@@ -55,9 +55,9 @@ function StepIndicator({ step, currentStep, label, onClickStep, disableStepIndic
         initial={false}>
         <motion.div
           variants={{
-            inactive: { scale: 1, backgroundColor: '#222', color: '#a3a3a3' },
-            active: { scale: 1, backgroundColor: '#5227FF', color: '#5227FF' },
-            complete: { scale: 1, backgroundColor: '#5227FF', color: '#3b82f6' }
+            inactive: { scale: 1, backgroundColor: 'rgba(255,255,255,0.06)', color: '#a3a3a3' },
+            active: { scale: 1, backgroundColor: 'rgba(242,230,201,0.2)', color: '#f2e6c9' },
+            complete: { scale: 1, backgroundColor: 'rgba(242,230,201,0.15)', color: '#f2e6c9' }
           }}
           transition={{ duration: 0.3 }}
           className="step-indicator-inner">
@@ -104,7 +104,7 @@ function Stepper({ currentStep, children, onClickStep, disableStepIndicators = f
                   initial={{ width: '0%' }}
                   animate={{ 
                     width: currentStep > index ? '100%' : '0%',
-                    backgroundColor: currentStep > index ? '#5227FF' : '#52525b'
+                    backgroundColor: currentStep > index ? 'rgba(242,230,201,0.3)' : 'rgba(255,255,255,0.06)'
                   }}
                   transition={{ duration: 0.3 }}
                 />

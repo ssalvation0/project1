@@ -133,12 +133,23 @@ function getAcquisitionInfo(expansion, quality, classes) {
       difficulty: 'Medium'
     },
     'The War Within': {
-      source: 'Current Content',
-      description: 'From the latest expansion\'s raids and activities.',
+      source: 'Khaz Algar Raids',
+      description: 'From Nerub-ar Palace and other War Within content.',
+      tips: [
+        'Most War Within raids are now easily farmable',
+        'Check group finder for raid groups',
+        'Catalyst system converts gear to tier appearance'
+      ],
+      difficulty: 'Medium'
+    },
+    'Midnight': {
+      source: 'Current Content — Quel\'Thalas Raids',
+      description: 'From The Voidspire, The Dreamrift, and March on Quel\'Danas — the Season 1 raids of Midnight.',
       tips: [
         'Current tier - actively dropping from raids',
-        'Check group finder for raid groups',
-        'Mythic+ also provides tier appearances via Catalyst'
+        'Tier tokens drop from Vorasius, Salhadaar, Vaelgor & Ezzorak, and Lightblinded Vanguard',
+        'Use the Matrix Catalyst to convert gear to tier appearance',
+        'Great Vault also rewards tier pieces weekly'
       ],
       difficulty: 'Hard'
     }
