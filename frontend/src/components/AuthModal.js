@@ -130,6 +130,15 @@ function AuthModal({ isOpen, onClose, onAuth }) {
                     throw new Error('An account with this email already exists');
                 }
 
+                // If email confirmation is enabled, Supabase returns a user but no active session yet.
+                // In that case, do not mark user as logged in in the UI.
+                if (!data.session) {
+                    setError('Account created. Please confirm your email, then sign in.');
+                    setIsLogin(true);
+                    setCurrentStep(0);
+                    return;
+                }
+
                 const user = {
                     name,
                     email: data.user.email,

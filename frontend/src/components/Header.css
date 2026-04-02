@@ -177,6 +177,17 @@ body {
   letter-spacing: 0.01em;
 }
 
+.login-btn--profile {
+  min-width: auto;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .login-btn:hover {
   color: #ffe9b0;
   border-color: #fff7c2;
@@ -185,11 +196,22 @@ body {
   transform: translateY(-1.5px) scale(1.050);
 }
 
+.login-btn--profile:hover {
+  background: rgba(70, 52, 28, 0.86);
+  box-shadow: 0 0 14px 1.5px #ffc70033, 0 3px 12px #855d1b17 inset;
+  transform: scale(1.15);
+}
+
 .login-btn:active {
   background: rgba(35, 25, 10, 0.76);
   color: #ffe184;
   border-color: #ffe1848b;
   transform: scale(0.97);
+}
+
+.login-btn--profile:active {
+  background: rgba(35, 25, 10, 0.76);
+  transform: scale(0.9);
 }
 
 @media (max-width: 768px) {

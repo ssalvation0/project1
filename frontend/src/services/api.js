@@ -34,6 +34,12 @@ export const getTransmogs = (page = 0, pageSize = 20, classFilter = 'all', searc
 
 export const getTransmogSet = (id) => apiRequest(`/transmogs/${id}`);
 
+// Generate Wowhead preview URL for a transmog set (fallback if backend doesn't provide)
+export const generatePreviewUrl = (setId) => {
+  const bucket = setId % 256;
+  return `https://wow.zamimg.com/modelviewer/live/webthumbs/transmog/1/1/${bucket}/${setId}.jpg`;
+};
+
 export const getItem = (id) => apiRequest(`/items/${id}`);
 
 export const getItemMedia = (id) => apiRequest(`/items/${id}/media`);
