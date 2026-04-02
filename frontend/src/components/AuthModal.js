@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './AuthModal.css';
 import Stepper, { Step } from './Stepper.jsx';
 import { supabase } from '../services/supabase';
+import { upsertProfile } from '../services/db';
 
 const IconMail = () => (
     <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -24,7 +25,7 @@ const IconUser = () => (
     </svg>
 );
 
-function AuthModal({ isOpen, onClose, onAuth }) {
+function AuthModal({ isOpen, onClose }) {
     const [isLogin, setIsLogin] = useState(true);
     const [currentStep, setCurrentStep] = useState(0);
     const [name, setName] = useState('');
@@ -33,6 +34,8 @@ function AuthModal({ isOpen, onClose, onAuth }) {
     const [preferences, setPreferences] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [forgotPassword, setForgotPassword] = useState(false);
+    const [resetSent, setResetSent] = useState(false);
 
     const modalRef = useRef(null);
 
@@ -98,19 +101,13 @@ function AuthModal({ isOpen, onClose, onAuth }) {
         setLoading(true);
         try {
             if (isLogin) {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { error } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
                 if (error) throw error;
 
-                const user = {
-                    name: data.user.user_metadata?.name || data.user.email.split('@')[0],
-                    email: data.user.email,
-                    preferences: data.user.user_metadata?.preferences || [],
-                    createdAt: data.user.created_at,
-                };
-                onAuth?.(user);
+                // AuthContext picks up the session automatically
                 onClose();
                 resetForm();
             } else {
@@ -139,13 +136,16 @@ function AuthModal({ isOpen, onClose, onAuth }) {
                     return;
                 }
 
-                const user = {
-                    name,
-                    email: data.user.email,
-                    preferences,
-                    createdAt: data.user.created_at,
-                };
-                onAuth?.(user);
+                // Save profile to DB
+                try {
+                    await upsertProfile(data.user.id, {
+                        name,
+                        class_preferences: preferences,
+                        style_preferences: [],
+                    });
+                } catch {}
+
+                // AuthContext picks up the session automatically
                 onClose();
                 resetForm();
             }
@@ -162,6 +162,27 @@ function AuthModal({ isOpen, onClose, onAuth }) {
         }
     };
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        if (!email) {
+            setError('Enter your email address first');
+            return;
+        }
+        setLoading(true);
+        setError('');
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/profile',
+            });
+            if (error) throw error;
+            setResetSent(true);
+        } catch (err) {
+            setError(err.message || 'Failed to send reset email');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const resetForm = () => {
         setName('');
         setEmail('');
@@ -169,6 +190,8 @@ function AuthModal({ isOpen, onClose, onAuth }) {
         setPreferences([]);
         setCurrentStep(0);
         setError('');
+        setForgotPassword(false);
+        setResetSent(false);
     };
 
     const toggleMode = () => {
@@ -203,11 +226,13 @@ function AuthModal({ isOpen, onClose, onAuth }) {
 
                     <div className="auth-modal-content">
                         <div className="auth-modal-header">
-                            <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                            <h2>{forgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}</h2>
                             <p className="auth-modal-subtitle">
-                                {isLogin
-                                    ? 'Sign in to your TransmogVault account'
-                                    : 'Join the transmog community'}
+                                {forgotPassword
+                                    ? 'We\'ll send you a link to set a new password'
+                                    : isLogin
+                                        ? 'Sign in to your TransmogVault account'
+                                        : 'Join the transmog community'}
                             </p>
                         </div>
 
@@ -344,7 +369,7 @@ function AuthModal({ isOpen, onClose, onAuth }) {
                             </form>
                         )}
 
-                        {isLogin ? (
+                        {isLogin && !forgotPassword ? (
                             <form className="auth-form" onSubmit={handleSubmit}>
                                 <div className="input-group">
                                     <IconMail />
@@ -373,6 +398,46 @@ function AuthModal({ isOpen, onClose, onAuth }) {
                                 <button type="submit" className="submit-btn" disabled={loading}>
                                     {loading ? 'Signing in...' : 'Sign In'}
                                 </button>
+
+                                <p className="forgot-password" onClick={() => { setForgotPassword(true); setError(''); }}>
+                                    Forgot password?
+                                </p>
+                            </form>
+                        ) : null}
+
+                        {forgotPassword ? (
+                            <form className="auth-form" onSubmit={handleForgotPassword}>
+                                {resetSent ? (
+                                    <div className="reset-sent-message">
+                                        <p>Check your email for a password reset link.</p>
+                                        <button type="button" className="submit-btn" onClick={() => { setForgotPassword(false); setResetSent(false); }}>
+                                            Back to Sign In
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="auth-modal-subtitle" style={{ marginBottom: '12px' }}>
+                                            Enter your email and we'll send you a reset link
+                                        </p>
+                                        <div className="input-group">
+                                            <IconMail />
+                                            <input
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="Email address"
+                                                required
+                                                autoComplete="email"
+                                            />
+                                        </div>
+                                        <button type="submit" className="submit-btn" disabled={loading}>
+                                            {loading ? 'Sending...' : 'Send Reset Link'}
+                                        </button>
+                                        <p className="forgot-password" onClick={() => { setForgotPassword(false); setError(''); }}>
+                                            Back to Sign In
+                                        </p>
+                                    </>
+                                )}
                             </form>
                         ) : null}
 

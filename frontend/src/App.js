@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import SetPasswordModal from './components/SetPasswordModal';
 import Particles from './components/Particles';
 import './App.css';
 import './styles/buttons.css';
@@ -113,6 +116,8 @@ function App() {
 
   return (
     <Router>
+      <AuthProvider>
+      <FavoritesProvider>
       <ToastProvider>
         <div className="App">
           <script
@@ -131,6 +136,7 @@ function App() {
           />
           <Particles />
           <Header />
+          <SetPasswordModal />
           <React.Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -142,6 +148,8 @@ function App() {
           <Footer />
         </div>
       </ToastProvider>
+      </FavoritesProvider>
+      </AuthProvider>
     </Router>
   );
 }

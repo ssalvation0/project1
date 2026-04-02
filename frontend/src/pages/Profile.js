@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTransmogSet, generatePreviewUrl } from '../services/api';
 import { supabase } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 import TransmogCard from '../components/TransmogCard';
 import '../styles/Profile.css';
 
 const AVATAR_BUCKET = 'avatars';
-const CLASS_PREFERENCE_IDS = [
-  'warrior', 'paladin', 'hunter', 'rogue', 'priest', 'deathknight',
-  'shaman', 'mage', 'warlock', 'monk', 'druid', 'demonhunter', 'evoker',
-];
 const STYLE_PREFERENCE_OPTIONS = [
   { id: 'plate', label: 'Plate', icon: '🛡️' },
   { id: 'mail', label: 'Mail', icon: '⛓️' },
@@ -35,9 +33,8 @@ const CLASS_PREFERENCE_OPTIONS = [
 ];
 
 function Profile() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState([]);
+  const { user, loading, signOut, updateProfile } = useAuth();
+  const { favorites, toggleFavorite } = useFavorites();
   const [favoriteTransmogs, setFavoriteTransmogs] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -50,41 +47,10 @@ function Profile() {
   const [editError, setEditError] = useState('');
   const navigate = useNavigate();
 
+  // Redirect if not logged in
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        navigate('/');
-        return;
-      }
-      const u = session.user;
-      const legacyPrefs = u.user_metadata?.preferences || [];
-      const stylePreferences = u.user_metadata?.style_preferences
-        || legacyPrefs.filter((p) => !CLASS_PREFERENCE_IDS.includes(p));
-      const classPreferences = u.user_metadata?.class_preferences
-        || legacyPrefs.filter((p) => CLASS_PREFERENCE_IDS.includes(p));
-      setUser({
-        id: u.id,
-        name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
-        email: u.email,
-        stylePreferences,
-        classPreferences,
-        preferences: [...stylePreferences, ...classPreferences],
-        createdAt: u.created_at,
-        avatarUrl: u.user_metadata?.avatar_url || null,
-      });
-      setLoading(false);
-    });
-  }, [navigate]);
-
-  // Load favorite transmog IDs from localStorage
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
-      setFavorites(stored);
-    } catch {
-      setFavorites([]);
-    }
-  }, []);
+    if (!loading && !user) navigate('/');
+  }, [loading, user, navigate]);
 
   // Fetch transmog details for each favorite ID
   useEffect(() => {
@@ -100,7 +66,6 @@ function Profile() {
           .filter(r => r.status === 'fulfilled' && r.value)
           .map(r => {
             const transmog = r.value;
-            // Ensure previewUrl is always present (fallback to generated URL if missing)
             if (!transmog.previewUrl) {
               transmog.previewUrl = generatePreviewUrl(transmog.id);
             }
@@ -111,18 +76,8 @@ function Profile() {
       .finally(() => setFavoritesLoading(false));
   }, [favorites]);
 
-  const toggleFavorite = useCallback((transmogId) => {
-    setFavorites(prev => {
-      const newFavs = prev.includes(transmogId)
-        ? prev.filter(id => id !== transmogId)
-        : [...prev, transmogId];
-      localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavs));
-      return newFavs;
-    });
-  }, []);
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate('/');
   };
 
@@ -156,19 +111,14 @@ function Profile() {
   };
 
   const toggleEditStylePreference = (prefKey) => {
-    setEditStylePreferences((prev) => {
-      if (prev.includes(prefKey)) {
-        return prev.filter((p) => p !== prefKey);
-      }
-      return [...prev, prefKey];
-    });
+    setEditStylePreferences((prev) =>
+      prev.includes(prefKey) ? prev.filter((p) => p !== prefKey) : [...prev, prefKey]
+    );
   };
 
   const toggleEditClassPreference = (classKey) => {
     setEditClassPreferences((prev) => {
-      if (prev.includes(classKey)) {
-        return prev.filter((p) => p !== classKey);
-      }
+      if (prev.includes(classKey)) return prev.filter((p) => p !== classKey);
       if (prev.length >= 3) return prev;
       return [...prev, classKey];
     });
@@ -207,26 +157,13 @@ function Profile() {
         nextAvatar = publicData?.publicUrl || '';
       }
 
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          name: nextName,
-          style_preferences: editStylePreferences,
-          class_preferences: editClassPreferences,
-          preferences: [...editStylePreferences, ...editClassPreferences],
-          avatar_url: nextAvatar || null,
-        },
-      });
-
-      if (error) throw error;
-
-      setUser((prev) => ({
-        ...prev,
+      // Save to DB via AuthContext (writes to profiles table + user_metadata)
+      await updateProfile({
         name: nextName,
-        stylePreferences: editStylePreferences,
-        classPreferences: editClassPreferences,
-        preferences: [...editStylePreferences, ...editClassPreferences],
         avatarUrl: nextAvatar || null,
-      }));
+        classPreferences: editClassPreferences,
+        stylePreferences: editStylePreferences,
+      });
 
       setIsEditOpen(false);
     } catch (err) {
@@ -370,7 +307,7 @@ function Profile() {
                 <TransmogCard
                   key={transmog.id}
                   transmog={transmog}
-                  isFavorite={favorites.includes(transmog.id)}
+                  isFavorite={favorites.includes(String(transmog.id))}
                   onToggleFavorite={toggleFavorite}
                 />
               ))}

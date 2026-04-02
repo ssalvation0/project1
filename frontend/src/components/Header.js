@@ -1,54 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from './logo.png';
 import AuthModal from './AuthModal';
-import { supabase } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-
-  // Listen to Supabase auth state changes
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const u = session.user;
-        setUser({
-          name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
-          email: u.email,
-          preferences: u.user_metadata?.preferences || [],
-          createdAt: u.created_at,
-          avatarUrl: u.user_metadata?.avatar_url || null,
-        });
-      }
-    });
-
-    // Subscribe to auth changes (login, logout, Google OAuth redirect)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const u = session.user;
-        setUser({
-          name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
-          email: u.email,
-          preferences: u.user_metadata?.preferences || [],
-          createdAt: u.created_at,
-          avatarUrl: u.user_metadata?.avatar_url || null,
-        });
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleAuth = useCallback((userData) => {
-    setUser(userData);
-  }, []);
+  const { user } = useAuth();
 
   const handleProfileClick = () => {
     if (user) {
@@ -110,7 +71,6 @@ function Header() {
       <AuthModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAuth={handleAuth}
       />
     </>
   );

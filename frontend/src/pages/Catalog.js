@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../components/ToastProvider';
+import { useFavorites } from '../contexts/FavoritesContext';
 import RecentlyViewed from '../components/RecentlyViewed';
 import TransmogCard from '../components/TransmogCard';
 import '../styles/Catalog.css';
@@ -87,15 +88,7 @@ function Catalog() {
   // Debounce search query - wait 300ms after user stops typing
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  const [favorites, setFavorites] = useState(() => {
-    // Initialize from localStorage once
-    try {
-      return JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
-    } catch {
-      return [];
-    }
-  });
-
+  const { favorites, toggleFavorite: ctxToggleFavorite } = useFavorites();
   const { showToast } = useToast();
 
   const { data: filterOptions } = useQuery({
@@ -184,28 +177,17 @@ function Catalog() {
     setCurrentPage(0);
   }, []);
 
-  // Stable favorite toggle with optimistic update
+  // Favorite toggle via global context (syncs with Supabase when logged in)
   const toggleFavorite = useCallback((transmogId) => {
-    // Check current state before updating
-    const already = favorites.includes(transmogId);
-
-    setFavorites(prevFavorites => {
-      const newFavorites = already
-        ? prevFavorites.filter(favId => favId !== transmogId)
-        : [...prevFavorites, transmogId];
-
-      localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
-      return newFavorites;
-    });
-
-    // Show toast outside of state updater to avoid double-firing in StrictMode
+    const already = favorites.includes(String(transmogId));
+    ctxToggleFavorite(transmogId);
     showToast(already ? 'Removed from favorites' : 'Added to favorites', {
       type: already ? 'info' : 'success'
     });
-  }, [favorites, showToast]);
+  }, [favorites, ctxToggleFavorite, showToast]);
 
-  // Memoize favorites Set for O(1) lookup
-  const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
+  // Memoize favorites Set for O(1) lookup (IDs stored as strings in context)
+  const favoritesSet = useMemo(() => new Set(favorites.map(String)), [favorites]);
 
   // Filter and sort transmogs
   const processedTransmogs = useMemo(() => {
@@ -213,7 +195,7 @@ function Catalog() {
 
     // Filter by favorites if enabled
     if (showFavoritesOnly) {
-      result = result.filter(t => favoritesSet.has(t.id));
+      result = result.filter(t => favoritesSet.has(String(t.id)));
     }
 
     // Sort
@@ -442,7 +424,7 @@ function Catalog() {
               <MemoizedTransmogCard
                 key={transmog.id}
                 transmog={transmog}
-                isFavorite={favoritesSet.has(transmog.id)}
+                isFavorite={favoritesSet.has(String(transmog.id))}
                 onToggleFavorite={toggleFavorite}
               />
             ))}
