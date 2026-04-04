@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TransmogCard from './TransmogCard';
 import './FeaturedSection.css';
@@ -6,22 +6,44 @@ import './FeaturedSection.css';
 const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLink, onViewAll }) => {
     const scrollContainerRef = useRef(null);
     const navigate = useNavigate();
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+    const touchStartX = useRef(0);
 
     const handleViewAll = () => {
         if (onViewAll) onViewAll();
         else if (viewAllLink) navigate(viewAllLink);
     };
 
+    const updateScrollState = useCallback(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 4);
+        setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+    }, []);
+
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        el.addEventListener('scroll', updateScrollState, { passive: true });
+        updateScrollState();
+        return () => el.removeEventListener('scroll', updateScrollState);
+    }, [updateScrollState, items]);
+
     const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            const { current } = scrollContainerRef;
-            const scrollAmount = 350; // Approx card width + gap
-            if (direction === 'left') {
-                current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            } else {
-                current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
-        }
+        if (!scrollContainerRef.current) return;
+        const scrollAmount = 350;
+        scrollContainerRef.current.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth',
+        });
+    };
+
+    // Touch swipe
+    const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+    const handleTouchEnd = (e) => {
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) scroll(diff > 0 ? 'right' : 'left');
     };
 
     if (!items || items.length === 0) return null;
@@ -38,6 +60,7 @@ const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLi
                         className="control-btn prev"
                         onClick={() => scroll('left')}
                         aria-label="Scroll left"
+                        disabled={!canScrollLeft}
                     >
                         ←
                     </button>
@@ -45,19 +68,25 @@ const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLi
                         className="control-btn next"
                         onClick={() => scroll('right')}
                         aria-label="Scroll right"
+                        disabled={!canScrollRight}
                     >
                         →
                     </button>
                 </div>
             </div>
 
-            <div className="featured-scroll-container" ref={scrollContainerRef}>
+            <div
+                className="featured-scroll-container"
+                ref={scrollContainerRef}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
                 {items.map((item, index) => (
                     <div key={item.id || index} className="featured-item-wrapper">
                         <TransmogCard
                             transmog={item}
                             onToggleFavorite={(id) => console.log('Toggle fav', id)}
-                            isFavorite={false} // Mock for now
+                            isFavorite={false}
                         />
                     </div>
                 ))}

@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SetPasswordModal from './components/SetPasswordModal';
 import Particles from './components/Particles';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 import './styles/buttons.css';
 import './styles/tooltip.css';
@@ -138,6 +139,7 @@ function App() {
           <Particles />
           <Header />
           <SetPasswordModal />
+          <ErrorBoundary>
           <React.Suspense fallback={<LoadingFallback />}>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -147,6 +149,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </React.Suspense>
+          </ErrorBoundary>
           <Footer />
         </div>
       </ToastProvider>

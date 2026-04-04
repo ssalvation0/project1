@@ -67,13 +67,28 @@ const NewsCarousel = () => {
     };
 
     const handlePrev = (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         setActiveIndex((prev) => (prev === 0 ? newsItems.length - 1 : prev - 1));
+        setIsAutoPlaying(false);
+        setTimeout(() => setIsAutoPlaying(true), 10000);
     };
 
     const handleNext = (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         setActiveIndex((prev) => (prev === newsItems.length - 1 ? 0 : prev + 1));
+        setIsAutoPlaying(false);
+        setTimeout(() => setIsAutoPlaying(true), 10000);
+    };
+
+    // Touch swipe
+    const touchStartX = useRef(0);
+    const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+    const handleTouchEnd = (e) => {
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) handleNext();
+            else handlePrev();
+        }
     };
 
     const openModal = (newsItem) => {
@@ -93,7 +108,7 @@ const NewsCarousel = () => {
     return (
         <section className="news-carousel-section">
             <div className="carousel-container">
-                <div className="carousel-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+                <div className="carousel-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
                     {newsItems.map((item) => (
                         <div key={item.id} className="carousel-slide">
                             <div className="news-card">

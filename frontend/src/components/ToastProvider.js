@@ -31,7 +31,10 @@ export default function ToastProvider({ children }) {
       duration: typeof opts.duration === 'number' ? opts.duration : 2500,
       exiting: false,
     };
-    setToasts((prev) => [...prev, toast]);
+    setToasts((prev) => {
+      const next = [...prev, toast];
+      return next.length > 3 ? next.slice(-3) : next;
+    });
     if (toast.duration > 0) {
       setTimeout(() => startExit(id), toast.duration);
     }

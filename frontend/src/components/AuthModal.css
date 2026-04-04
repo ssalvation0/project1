@@ -228,6 +228,33 @@
     color: rgba(242, 230, 201, 0.7);
 }
 
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(242, 230, 201, 0.3);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    z-index: 1;
+}
+
+.password-toggle:hover {
+    color: rgba(242, 230, 201, 0.7);
+}
+
+.password-hint {
+    color: rgba(242, 230, 201, 0.35);
+    font-size: 0.72rem;
+    margin: 4px 0 0 2px;
+}
+
 .auth-form input,
 .stepper-content input {
     width: 100%;

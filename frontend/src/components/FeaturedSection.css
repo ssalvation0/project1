@@ -88,6 +88,12 @@
     transform: scale(0.95);
 }
 
+.control-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
 .featured-scroll-container {
     display: flex;
     gap: 24px;

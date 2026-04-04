@@ -31,8 +31,6 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
 
     // Deterministic mock data based on transmog ID
     const source = useMemo(() => transmog.source || SOURCES[Math.floor(seededRandom(transmog.id, 1) * SOURCES.length)], [transmog.source, transmog.id]);
-    const rating = useMemo(() => transmog.rating || (seededRandom(transmog.id, 2) * 2 + 3).toFixed(1), [transmog.rating, transmog.id]);
-    const ratingCount = useMemo(() => transmog.ratingCount || Math.floor(seededRandom(transmog.id, 3) * 100), [transmog.ratingCount, transmog.id]);
 
     const handleClick = useCallback(() => {
         navigate(`/transmog/${transmog.id}`);
@@ -104,12 +102,6 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                     <h3 className="transmog-name" style={{ color: qualityColor }}>
                         {transmog.name}
                     </h3>
-                </div>
-
-                <div className="card-rating-row">
-                    <span className="star-icon">★</span>
-                    <span className="rating-value">{rating}</span>
-                    <span className="rating-count">({ratingCount})</span>
                 </div>
 
                 <div className="transmog-meta">

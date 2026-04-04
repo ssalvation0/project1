@@ -202,6 +202,59 @@
   transform: scale(0.98);
 }
 
+/* Class badges in header */
+.profile-class-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.profile-class-badge {
+  display: inline-flex;
+}
+
+.profile-class-badge-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(200, 160, 40, 0.4);
+  object-fit: cover;
+}
+
+/* Settings link */
+.profile-settings-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(229, 211, 179, 0.25);
+  background: rgba(35, 25, 12, 0.7);
+  color: rgba(229, 211, 179, 0.8);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.profile-settings-link:hover {
+  color: #f2e6c9;
+  border-color: rgba(200, 160, 40, 0.5);
+  background: rgba(50, 36, 16, 0.8);
+}
+
+.profile-header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 56px;
+  justify-content: space-between;
+}
+
 /* Sections */
 .profile-section {
   margin-bottom: 32px;

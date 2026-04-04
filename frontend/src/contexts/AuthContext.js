@@ -90,7 +90,10 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = () => {
+    localStorage.removeItem('favoriteTransmogs');
+    return supabase.auth.signOut();
+  };
 
   const setNewPassword = async (password) => {
     const { error } = await supabase.auth.updateUser({ password });
