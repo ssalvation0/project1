@@ -38,37 +38,50 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
+  // raw Supabase user — set synchronously inside onAuthStateChange (no async)
+  const [rawUser, setRawUser] = useState(undefined);
+
+  // Load profile asynchronously whenever rawUser changes
+  useEffect(() => {
+    if (rawUser === undefined) return; // not yet initialized
+    if (!rawUser) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getProfile(rawUser.id)
+      .then(profile => {
+        if (!cancelled) {
+          setUser(buildUser(rawUser, profile));
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(buildUser(rawUser, null));
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [rawUser]);
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadSession() {
-      const { data: { session } } = await supabase.auth.getSession();
+    // Initial session — kick off by reading session synchronously-ish
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
+      setRawUser(session?.user ?? null);
+    });
 
-      if (session?.user) {
-        let profile = null;
-        try { profile = await getProfile(session.user.id); } catch {}
-        if (mounted) setUser(buildUser(session.user, profile));
-      }
-      if (mounted) setLoading(false);
-    }
-
-    loadSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // onAuthStateChange must NOT await anything — would deadlock with updateUser
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
       if (event === 'PASSWORD_RECOVERY') {
         setPasswordRecovery(true);
       }
-      if (session?.user) {
-        let profile = null;
-        try { profile = await getProfile(session.user.id); } catch {}
-        setUser(buildUser(session.user, profile));
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+      setRawUser(session?.user ?? null);
     });
 
     return () => {

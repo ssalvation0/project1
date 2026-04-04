@@ -17,6 +17,7 @@ const Home = React.lazy(() => import('./pages/Home'));
 const Catalog = React.lazy(() => import('./pages/Catalog'));
 const TransmogDetail = React.lazy(() => import('./pages/TransmogDetail'));
 const Profile = React.lazy(() => import('./pages/Profile'));
+const Settings = React.lazy(() => import('./pages/Settings'));
 
 // Loading fallback component - uses skeleton cards for better UX
 const LoadingFallback = React.memo(() => (
@@ -143,6 +144,7 @@ function App() {
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/transmog/:id" element={<TransmogDetail />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
           </React.Suspense>
           <Footer />

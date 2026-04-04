@@ -102,6 +102,19 @@ body {
   padding: 0 36px;
 }
 
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .small-logo {
   width: 182px;
   height: auto;
@@ -116,8 +129,7 @@ body {
 }
 
 .global-search-form {
-  flex: 1;
-  max-width: 400px;
+  flex: 0 1 400px;
   margin: 0 20px;
   position: relative;
 }
@@ -212,6 +224,113 @@ body {
 .login-btn--profile:active {
   background: rgba(35, 25, 10, 0.76);
   transform: scale(0.9);
+}
+
+.login-btn-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dropdown menu */
+.header-right {
+  position: relative;
+}
+
+.header-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background: rgba(22, 16, 8, 0.96);
+  border: 1px solid rgba(200, 160, 40, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(200, 160, 40, 0.06) inset;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  z-index: 1100;
+  animation: header-menu-in 0.18s ease-out;
+}
+
+@keyframes header-menu-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.header-menu-user {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-menu-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f2e6c9;
+}
+
+.header-menu-email {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(229, 211, 179, 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-menu-divider {
+  height: 1px;
+  background: rgba(229, 211, 179, 0.12);
+  margin: 2px 0;
+}
+
+.header-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: #e5d3b3;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.header-menu-item:hover {
+  background: rgba(200, 160, 40, 0.12);
+}
+
+.header-menu-item svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.header-menu-item--danger {
+  color: #e5a0a0;
+}
+
+.header-menu-item--danger:hover {
+  background: rgba(180, 50, 50, 0.15);
+}
+
+.login-btn-initials {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f2e6c9;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
