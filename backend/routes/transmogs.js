@@ -3,8 +3,14 @@ const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
 const blizzardService = require('../utils/blizzardService');
+const { generateSetGuide } = require('../utils/geminiService');
+const { fetchAllItemSets, fetchSetDetails } = require('../utils/wowheadService');
 
 const CACHE_FILE = path.join(__dirname, '../data/blizzard_transmogs_cache.json');
+const GUIDES_FILE = path.join(__dirname, '../data/guides_cache.json');
+
+// In-memory guide cache: { [setId]: { content, generatedAt } }
+let guidesCache = {};
 
 // In-memory storage
 let cachedSets = [];
@@ -68,110 +74,125 @@ async function hydrateCache() {
   isHydrating = true;
 
   try {
-    console.log('🔄 Starting Blizzard data hydration...');
+    console.log('🔄 Starting hydration (Wowhead + Blizzard)...');
 
-    // 1. Get Index
-    const index = await blizzardService.getItemSetsIndex();
-    const allSets = index.item_sets;
-    console.log(`📋 Found ${allSets.length} sets in Blizzard index`);
+    // ── Step 1: Get full set list from Wowhead (has expansion field!) ──
+    let wowheadSets = [];
+    try {
+      wowheadSets = await fetchAllItemSets();
+      console.log(`📋 Wowhead: ${wowheadSets.length} item sets`);
+    } catch (err) {
+      console.warn(`⚠️ Wowhead fetch failed, falling back to Blizzard index: ${err.message}`);
+      // Fallback: use Blizzard index
+      const index = await blizzardService.getItemSetsIndex();
+      wowheadSets = index.item_sets.map(s => ({ id: s.id, name: s.name, expansion: 'Unknown', quality: 'Unknown', icon: null }));
+      console.log(`📋 Blizzard fallback: ${wowheadSets.length} sets`);
+    }
 
-    // 2. Filter out sets we already have details for
-    // OR sets that have "Unknown" expansion/classes (re-fetch them to improve data)
-    const setsToProcess = allSets.filter(s => {
-      const existing = cachedSets.find(c => c.id === s.id);
+    // ── Step 2: Determine which sets need enrichment from Blizzard ──
+    const setsToEnrich = wowheadSets.filter(wh => {
+      const existing = cachedSets.find(c => c.id === wh.id);
       if (!existing) return true;
-      // If we have it but it's incomplete, re-fetch
-      if (existing.expansion === 'Unknown' || existing.classes.length === 0 || existing.classes[0] === 'All') return true;
+      // Re-enrich if items list is missing
+      if (!existing.items || existing.items.length === 0) return true;
       return false;
     });
 
-    console.log(`⚡ Need to process ${setsToProcess.length} sets`);
+    console.log(`⚡ Need to enrich ${setsToEnrich.length} sets with Blizzard item data`);
 
-    // Shuffle array to get a mix of expansions immediately
-    for (let i = setsToProcess.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [setsToProcess[i], setsToProcess[j]] = [setsToProcess[j], setsToProcess[i]];
+    // Update expansion/quality on already-cached sets using Wowhead data
+    let updatedFromWowhead = 0;
+    for (const wh of wowheadSets) {
+      const idx = cachedSets.findIndex(c => c.id === wh.id);
+      if (idx >= 0 && wh.expansion !== 'Unknown') {
+        cachedSets[idx].expansion = wh.expansion;
+        cachedSets[idx].quality = wh.quality !== 'Unknown' ? wh.quality : cachedSets[idx].quality;
+        updatedFromWowhead++;
+      }
+    }
+    if (updatedFromWowhead > 0) {
+      console.log(`✨ Updated expansion/quality for ${updatedFromWowhead} cached sets from Wowhead`);
+      await saveCache();
     }
 
-    // 3. Fetch details in batches
+    // ── Step 3: Enrich new/incomplete sets with Blizzard API ──
     const BATCH_SIZE = 3;
-    for (let i = 0; i < setsToProcess.length; i += BATCH_SIZE) {
-      const batch = setsToProcess.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < setsToEnrich.length; i += BATCH_SIZE) {
+      const batch = setsToEnrich.slice(i, i + BATCH_SIZE);
 
-      await Promise.all(batch.map(async (setMeta) => {
+      await Promise.all(batch.map(async (wh) => {
         try {
-          // Fetch Set Details
-          const details = await blizzardService.getItemSet(setMeta.id);
+          const details = await blizzardService.getItemSet(wh.id);
 
           let classes = [];
-          let expansion = 'Unknown';
-          let quality = 'Unknown';
+          let expansion = wh.expansion; // prefer Wowhead expansion
+          let quality = wh.quality;
 
-          // Fetch First Item Details to extract metadata
           if (details.items && details.items.length > 0) {
             try {
               const firstItem = await blizzardService.getItem(details.items[0].id);
 
-              // 1. Extract Classes
-              // Check explicit requirements first (Tier Sets)
+              // Extract Classes
               if (firstItem.preview_item?.requirements?.playable_classes?.links) {
                 classes = firstItem.preview_item.requirements.playable_classes.links.map(l => l.name);
-              }
-              // Fallback to Armor Type (Generic Sets)
-              else if (firstItem.item_subclass?.name) {
+              } else if (firstItem.item_subclass?.name) {
                 classes = getClassesForArmorType(firstItem.item_subclass.name);
               }
 
-              // 2. Extract Expansion from Item ID
-              if (firstItem.id) {
+              // Only use Blizzard expansion if Wowhead didn't give us one
+              if (expansion === 'Unknown' && firstItem.id) {
                 expansion = inferExpansion(firstItem.id);
               }
 
-              // 3. Extract Quality
-              if (firstItem.quality) {
+              if (quality === 'Unknown' && firstItem.quality) {
                 quality = firstItem.quality.name;
               }
-
-            } catch (itemErr) {
-              // Ignore item fetch error, keep defaults
+            } catch {
+              // Keep defaults on item fetch error
             }
           }
 
-          // Transform to our format
           const transformedSet = {
             id: details.id,
-            name: details.name,
+            name: details.name || wh.name,
             classes: classes.length > 0 ? classes : ['All'],
-            expansion: expansion,
-            quality: quality,
-            items: details.items ? details.items.map(item => ({
-              id: item.id,
-              name: item.name
-            })) : []
+            expansion,
+            quality,
+            items: details.items
+              ? details.items.map(item => ({ id: item.id, name: item.name }))
+              : [],
           };
 
-          // Update or Add to Cache
-          const existingIndex = cachedSets.findIndex(s => s.id === details.id);
-          if (existingIndex >= 0) {
-            cachedSets[existingIndex] = transformedSet;
+          const existingIdx = cachedSets.findIndex(s => s.id === details.id);
+          if (existingIdx >= 0) {
+            cachedSets[existingIdx] = transformedSet;
           } else {
             cachedSets.push(transformedSet);
           }
 
         } catch (err) {
-          console.error(`⚠️ Failed to fetch set ${setMeta.id}:`, err.message);
+          // Blizzard failed — still add set with Wowhead data only
+          console.warn(`⚠️ Blizzard enrichment failed for set ${wh.id}: ${err.message}`);
+          const existingIdx = cachedSets.findIndex(s => s.id === wh.id);
+          if (existingIdx < 0) {
+            cachedSets.push({
+              id: wh.id,
+              name: wh.name,
+              classes: ['All'],
+              expansion: wh.expansion,
+              quality: wh.quality,
+              items: [],
+            });
+          }
         }
       }));
 
-      // Save periodically
-      if (i % 10 === 0) await saveCache();
-
-      // Rate limiting pause
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (i % 30 === 0 && i > 0) await saveCache();
+      await new Promise(resolve => setTimeout(resolve, 800));
     }
 
     await saveCache();
-    console.log('✅ Blizzard hydration complete!');
+    console.log(`✅ Hydration complete! Total sets: ${cachedSets.length}`);
 
   } catch (error) {
     console.error('❌ Hydration failed:', error);
@@ -180,10 +201,30 @@ async function hydrateCache() {
   }
 }
 
+// Load guides cache from disk
+async function loadGuidesCache() {
+  try {
+    const data = await fs.readFile(GUIDES_FILE, 'utf-8');
+    guidesCache = JSON.parse(data);
+    console.log(`📖 Loaded ${Object.keys(guidesCache).length} guides from cache`);
+  } catch {
+    guidesCache = {};
+  }
+}
+
+async function saveGuidesCache() {
+  try {
+    await fs.writeFile(GUIDES_FILE, JSON.stringify(guidesCache, null, 2));
+  } catch (err) {
+    console.error('❌ Error saving guides cache:', err);
+  }
+}
+
 // Initialize
 loadCache().then(() => {
   hydrateCache();
 });
+loadGuidesCache();
 
 // Generate Wowhead model viewer preview URL for a transmog set
 function getSetPreviewUrl(setId) {
@@ -338,6 +379,35 @@ router.get('/:id', async (req, res) => {
     previewUrl: getSetPreviewUrl(set.id),
     wowheadLink: `https://www.wowhead.com/item-set=${set.id}`
   });
+});
+
+// Guide generation endpoint
+router.get('/:id/guide', async (req, res) => {
+  const setId = parseInt(req.params.id);
+  if (isNaN(setId)) return res.status(400).json({ error: 'Invalid set ID' });
+
+  // Return cached guide if exists
+  if (guidesCache[setId]) {
+    return res.json({ guide: guidesCache[setId].content, cached: true });
+  }
+
+  // Find set in transmog cache
+  const set = cachedSets.find(s => s.id === setId);
+  if (!set) return res.status(404).json({ error: 'Set not found' });
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'Guide generation not configured' });
+  }
+
+  try {
+    const content = await generateSetGuide(set);
+    guidesCache[setId] = { content, generatedAt: new Date().toISOString() };
+    await saveGuidesCache();
+    res.json({ guide: content, cached: false });
+  } catch (err) {
+    console.error(`❌ Guide generation failed for set ${setId}:`, err.message);
+    res.status(500).json({ error: 'Failed to generate guide' });
+  }
 });
 
 module.exports = router;

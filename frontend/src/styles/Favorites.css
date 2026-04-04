@@ -1,0 +1,117 @@
+.favorites-page {
+  min-height: 100vh;
+  padding: 120px 20px 60px;
+}
+
+.favorites-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.favorites-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.favorites-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #f2e6c9;
+  margin: 0;
+  text-shadow: none;
+}
+
+.favorites-count {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(242, 230, 201, 0.4);
+  font-weight: 500;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Skeleton */
+.favorites-skeleton {
+  height: 350px;
+  border-radius: 16px;
+  background: linear-gradient(90deg,
+    rgba(30, 25, 15, 0.6) 0%,
+    rgba(50, 40, 20, 0.6) 50%,
+    rgba(30, 25, 15, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Empty state */
+.favorites-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.favorites-empty-icon {
+  font-size: 3rem;
+  color: rgba(242, 230, 201, 0.15);
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.favorites-empty h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: rgba(242, 230, 201, 0.6);
+  margin: 0 0 8px;
+}
+
+.favorites-empty p {
+  font-family: 'Raleway', sans-serif;
+  color: rgba(242, 230, 201, 0.35);
+  font-size: 0.9rem;
+  margin: 0 0 24px;
+  max-width: 300px;
+}
+
+.favorites-browse-btn {
+  display: inline-block;
+  padding: 11px 28px;
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.12), rgba(242, 230, 201, 0.06));
+  border: 1px solid rgba(242, 230, 201, 0.2);
+  border-radius: 12px;
+  color: #f2e6c9;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.favorites-browse-btn:hover {
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.18), rgba(242, 230, 201, 0.1));
+  border-color: rgba(242, 230, 201, 0.35);
+  box-shadow: 0 4px 20px rgba(242, 230, 201, 0.1);
+}
+
+@media (max-width: 768px) {
+  .favorites-page {
+    padding: 100px 16px 40px;
+  }
+
+  .favorites-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .favorites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}

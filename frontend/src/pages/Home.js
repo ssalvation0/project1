@@ -5,6 +5,7 @@ import NewsCarousel from '../components/NewsCarousel';
 import OnboardingWizard from '../components/OnboardingWizard';
 import FeaturedSection from '../components/FeaturedSection';
 import PatchNotes from '../components/PatchNotes';
+import { Helmet } from 'react-helmet-async';
 import '../styles/Home.css';
 
 const imagesContext = require.context('../images', false, /\.(png|jpe?g|svg)$/);
@@ -289,6 +290,12 @@ function Home() {
 
   return (
     <div className="home-bg">
+      <Helmet>
+        <title>TransmogVault — WoW Transmog Sets</title>
+        <meta name="description" content="Browse and explore World of Warcraft transmog sets. Find inspiration for your character's style with curated sets from every expansion." />
+        <meta property="og:title" content="TransmogVault — WoW Transmog Sets" />
+        <meta property="og:description" content="Browse and explore World of Warcraft transmog sets from every expansion." />
+      </Helmet>
       <section className="hero-section" ref={heroRef}>
         <div className="hero-content">
           <h1 className="hero-title">

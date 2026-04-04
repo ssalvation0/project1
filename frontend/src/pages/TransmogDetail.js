@@ -2,9 +2,21 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '../components/ToastProvider';
+import ReactMarkdown from 'react-markdown';
+import { Helmet } from 'react-helmet-async';
+import RatingWidget from '../components/RatingWidget';
+import CommentsSection from '../components/CommentsSection';
+import AddToCollectionModal from '../components/AddToCollectionModal';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/TransmogDetail.css';
 
 const API_URL = '/api/transmogs';
+
+async function fetchGuide(id) {
+  const res = await fetch(`${API_URL}/${id}/guide`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
 
 async function fetchTransmogById(id) {
   const res = await fetch(`${API_URL}/${id}`);
@@ -181,9 +193,11 @@ function TransmogDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
 
   // Initialize favorite state and update history
   useEffect(() => {
@@ -216,6 +230,15 @@ function TransmogDetail() {
     queryFn: () => fetchTransmogById(id),
     enabled: Boolean(id),
     staleTime: 60000 // Cache for 1 minute
+  });
+
+  // Fetch AI guide
+  const { data: guideData, isLoading: guideLoading } = useQuery({
+    queryKey: ['guide', id],
+    queryFn: () => fetchGuide(id),
+    enabled: Boolean(id),
+    staleTime: Infinity, // guides are generated once and cached
+    retry: false
   });
 
   // Fetch similar sets
@@ -324,8 +347,27 @@ function TransmogDetail() {
     );
   }
 
+  const seoTitle = transmog ? `${transmog.name} - TransmogVault` : 'TransmogVault';
+  const seoDescription = transmog
+    ? `${transmog.name} transmog set for ${classesList.join(', ')} from ${transmog.expansion}. ${transmog.items?.length || 0} pieces. Farm guide and tips.`
+    : 'World of Warcraft transmog set details.';
+  const seoImage = transmog?.previewUrl || transmog?.iconUrl || '';
+
   return (
     <div className="transmog-detail-page">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:type" content="article" />
+        {seoImage && <meta property="og:image" content={seoImage} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        {seoImage && <meta name="twitter:image" content={seoImage} />}
+      </Helmet>
+
       {/* Background Blur Effect */}
       <div className="detail-bg-blur" style={bgStyle}></div>
 
@@ -398,6 +440,8 @@ function TransmogDetail() {
                 )}
               </div>
 
+              <RatingWidget setId={parseInt(id)} />
+
               <div className="detail-meta-clean">
                 <div className="meta-row-clean">
                   <span className="meta-label-clean">Classes:</span>
@@ -437,6 +481,14 @@ function TransmogDetail() {
                 >
                   {linkCopied ? '✓ Copied!' : '🔗 Share'}
                 </button>
+                {user && (
+                  <button
+                    className="save-collection-button"
+                    onClick={() => setShowCollectionModal(true)}
+                  >
+                    📚 Save to Collection
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -465,6 +517,23 @@ function TransmogDetail() {
               </div>
             </div>
           )}
+
+          {/* AI Guide Section */}
+          <div className="guide-section">
+            <h2>📖 Set Guide</h2>
+            {guideLoading ? (
+              <div className="guide-loading">
+                <div className="guide-loading-spinner"></div>
+                <span>Generating guide with AI...</span>
+              </div>
+            ) : guideData?.guide ? (
+              <div className="guide-content">
+                <ReactMarkdown>{guideData.guide}</ReactMarkdown>
+              </div>
+            ) : (
+              <p className="guide-unavailable">Guide not available for this set.</p>
+            )}
+          </div>
 
           <div className="detail-items-section">
             <h2>⚔️ Set Components</h2>
@@ -510,6 +579,8 @@ function TransmogDetail() {
           </div>
 
           {/* Similar Sets Section */}
+          <CommentsSection setId={parseInt(id)} />
+
           {similarSets.length > 0 && (
             <div className="similar-sets-section">
               <h2>🎭 Similar Sets from {transmog.expansion}</h2>
@@ -547,6 +618,13 @@ function TransmogDetail() {
           )}
         </div>
       </div>
+    {showCollectionModal && transmog && (
+      <AddToCollectionModal
+        setId={parseInt(id)}
+        setName={transmog.name}
+        onClose={() => setShowCollectionModal(false)}
+      />
+    )}
     </div>
   );
 }

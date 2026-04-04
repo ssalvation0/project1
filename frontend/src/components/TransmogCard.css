@@ -258,6 +258,50 @@
   border-color: rgba(51, 147, 127, 0.3);
 }
 
+/* Card Compare Button */
+.card-compare-button {
+  position: absolute;
+  top: 12px;
+  right: 58px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+  padding: 0;
+}
+
+.card-compare-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  color: #f2e6c9;
+  transform: scale(1.1);
+  border-color: rgba(242, 230, 201, 0.4);
+}
+
+.card-compare-button.in-compare {
+  color: #f2e6c9;
+  background: rgba(30, 25, 10, 0.85);
+  border-color: rgba(242, 230, 201, 0.4);
+}
+
+.card-compare-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.card-compare-button svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Card Favorite Button */
 .card-favorite-button {
   position: absolute;

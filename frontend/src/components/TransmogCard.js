@@ -28,7 +28,6 @@ const SOURCES = ['Raid', 'PvP', 'Dungeon', 'Crafted'];
 const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
-
     // Deterministic mock data based on transmog ID
     const source = useMemo(() => transmog.source || SOURCES[Math.floor(seededRandom(transmog.id, 1) * SOURCES.length)], [transmog.source, transmog.id]);
 

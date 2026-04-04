@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import Header from './components/Header';
@@ -18,7 +19,10 @@ const Home = React.lazy(() => import('./pages/Home'));
 const Catalog = React.lazy(() => import('./pages/Catalog'));
 const TransmogDetail = React.lazy(() => import('./pages/TransmogDetail'));
 const Profile = React.lazy(() => import('./pages/Profile'));
-const Settings = React.lazy(() => import('./pages/Settings'));
+const Settings = React.lazy(() => import('./pages/Settings'))
+const Favorites = React.lazy(() => import('./pages/Favorites'))
+const Collections = React.lazy(() => import('./pages/Collections'));
+const CollectionDetail = React.lazy(() => import('./pages/CollectionDetail'));
 
 // Loading fallback component - uses skeleton cards for better UX
 const LoadingFallback = React.memo(() => (
@@ -117,6 +121,7 @@ function App() {
   }), [scrollOpacity]);
 
   return (
+    <HelmetProvider>
     <Router>
       <AuthProvider>
       <FavoritesProvider>
@@ -147,6 +152,9 @@ function App() {
               <Route path="/transmog/:id" element={<TransmogDetail />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="/collections/:id" element={<CollectionDetail />} />
             </Routes>
           </React.Suspense>
           </ErrorBoundary>
@@ -156,6 +164,7 @@ function App() {
       </FavoritesProvider>
       </AuthProvider>
     </Router>
+    </HelmetProvider>
   );
 }
 

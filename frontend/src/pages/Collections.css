@@ -1,0 +1,165 @@
+.collections-page {
+  min-height: 100vh;
+  padding: 120px 20px 60px;
+}
+
+.collections-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.collections-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.collections-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: #f2e6c9;
+  margin: 0;
+}
+
+.collections-back-btn {
+  background: transparent;
+  border: 1px solid rgba(242, 230, 201, 0.15);
+  border-radius: 10px;
+  color: rgba(242, 230, 201, 0.6);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: unset;
+  min-width: unset;
+  text-decoration: none;
+}
+
+.collections-back-btn:hover {
+  border-color: rgba(242, 230, 201, 0.3);
+  color: #f2e6c9;
+}
+
+/* Grid */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.collection-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: rgba(20, 15, 10, 0.6);
+  border: 1px solid rgba(242, 230, 201, 0.1);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.collection-card:hover {
+  background: rgba(30, 22, 12, 0.75);
+  border-color: rgba(242, 230, 201, 0.22);
+  transform: translateY(-2px);
+}
+
+.collection-card-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.collection-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.collection-card-info h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  color: #f2e6c9;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.collection-card-count {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(242, 230, 201, 0.35);
+}
+
+.collection-card-arrow {
+  font-size: 1rem;
+  color: rgba(242, 230, 201, 0.25);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.collection-card:hover .collection-card-arrow {
+  color: rgba(242, 230, 201, 0.6);
+  transform: translateX(3px);
+}
+
+/* Skeleton */
+.collection-card-skeleton {
+  height: 80px;
+  border-radius: 14px;
+  background: linear-gradient(90deg,
+    rgba(30, 25, 15, 0.5) 0%,
+    rgba(50, 40, 20, 0.5) 50%,
+    rgba(30, 25, 15, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Empty state */
+.collections-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.collections-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.collections-empty-state h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: #f2e6c9;
+  margin: 0 0 8px;
+}
+
+.collections-empty-state p {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(242, 230, 201, 0.4);
+  margin: 0 0 24px;
+  max-width: none;
+}
+
+.collections-browse-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.12), rgba(242, 230, 201, 0.06));
+  border: 1px solid rgba(242, 230, 201, 0.2);
+  border-radius: 10px;
+  color: #f2e6c9;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.collections-browse-btn:hover {
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.18), rgba(242, 230, 201, 0.1));
+  border-color: rgba(242, 230, 201, 0.35);
+}

@@ -1,0 +1,225 @@
+.comments-section {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(242, 230, 201, 0.1);
+}
+
+.comments-section h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  color: #f2e6c9;
+  margin: 0 0 24px;
+}
+
+.comments-count {
+  font-size: 1rem;
+  color: rgba(242, 230, 201, 0.4);
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+}
+
+/* Login hint */
+.comments-login-hint {
+  color: rgba(242, 230, 201, 0.35);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  font-style: italic;
+  margin: 0 0 24px;
+  max-width: none;
+}
+
+/* Comment form */
+.comment-form {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 28px;
+  align-items: flex-start;
+}
+
+.comment-form-avatar,
+.comment-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(242, 230, 201, 0.1);
+  border: 1px solid rgba(242, 230, 201, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #f2e6c9;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.comment-form-avatar img,
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-form-right {
+  flex: 1;
+}
+
+.comment-form textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(242, 230, 201, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #e8dcc8;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.comment-form textarea:focus {
+  border-color: rgba(242, 230, 201, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comment-form textarea::placeholder {
+  color: rgba(242, 230, 201, 0.25);
+}
+
+.comment-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.comment-char-count {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(242, 230, 201, 0.25);
+}
+
+.comment-submit-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.12), rgba(242, 230, 201, 0.06));
+  border: 1px solid rgba(242, 230, 201, 0.2);
+  border-radius: 10px;
+  color: #f2e6c9;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: unset;
+  min-width: unset;
+}
+
+.comment-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(242, 230, 201, 0.18), rgba(242, 230, 201, 0.1));
+  border-color: rgba(242, 230, 201, 0.35);
+}
+
+.comment-submit-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.comment-error {
+  color: #ff6b6b;
+  font-size: 0.78rem;
+  font-family: 'Raleway', sans-serif;
+  margin: 4px 0 0;
+  max-width: none;
+}
+
+/* Comments list */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comment-skeleton {
+  height: 70px;
+  border-radius: 12px;
+  background: linear-gradient(90deg,
+    rgba(30, 25, 15, 0.5) 0%,
+    rgba(50, 40, 20, 0.5) 50%,
+    rgba(30, 25, 15, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.comments-empty {
+  color: rgba(242, 230, 201, 0.3);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  font-style: italic;
+  max-width: none;
+}
+
+.comment-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.comment-body {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(242, 230, 201, 0.07);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.comment-author {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f2e6c9;
+}
+
+.comment-time {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(242, 230, 201, 0.3);
+}
+
+.comment-delete-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(242, 230, 201, 0.25);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  min-width: unset;
+  min-height: unset;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.comment-delete-btn:hover { color: #ff6b6b; }
+
+.comment-content {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  color: rgba(242, 230, 201, 0.75);
+  line-height: 1.6;
+  margin: 0;
+  max-width: none;
+}

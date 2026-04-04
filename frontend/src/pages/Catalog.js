@@ -5,6 +5,7 @@ import { useToast } from '../components/ToastProvider';
 import { useFavorites } from '../contexts/FavoritesContext';
 import RecentlyViewed from '../components/RecentlyViewed';
 import TransmogCard from '../components/TransmogCard';
+import { Helmet } from 'react-helmet-async';
 import '../styles/Catalog.css';
 
 const API_URL = '/api/transmogs';
@@ -245,6 +246,12 @@ function Catalog() {
 
   return (
     <div className="catalog-page">
+      <Helmet>
+        <title>Transmog Catalog — TransmogVault</title>
+        <meta name="description" content="Browse hundreds of World of Warcraft transmog sets. Filter by class, expansion, quality and find the perfect look for your character." />
+        <meta property="og:title" content="Transmog Catalog — TransmogVault" />
+        <meta property="og:description" content="Browse hundreds of World of Warcraft transmog sets filtered by class, expansion and quality." />
+      </Helmet>
       <RecentlyViewed limit={5} />
 
       <div className="catalog-header">
