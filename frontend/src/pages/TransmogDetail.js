@@ -430,8 +430,8 @@ function TransmogDetail() {
                     </div>
                   ))}
                 </div>
-              );
-            })()}
+              )}
+            </div>
           </div>
 
           {/* Similar Sets Section */}
