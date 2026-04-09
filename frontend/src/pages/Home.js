@@ -15,22 +15,6 @@ const imagesMap = imagesContext.keys().reduce((map, filePath) => {
   return map;
 }, {});
 
-// Mock data generator for showcases
-const generateMockTransmogs = (count, baseId, type) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: baseId + i,
-    name: `${type} Set ${i + 1}`,
-    class: ['Warrior', 'Paladin', 'Mage', 'Rogue'][i % 4],
-    stars: 4 + (i % 2) * 0.5,
-    votes: 10 + i * 5,
-    image: imagesMap[['warrior', 'paladin', 'mage', 'rogue'][i % 4]] || process.env.PUBLIC_URL + '/images/warrior.jpg',
-    source: i % 2 === 0 ? 'Raid' : 'PvP',
-    expansion: 'Dragonflight'
-  }));
-};
-
-const FEATURED_ITEMS = generateMockTransmogs(6, 100, 'Featured');
-const TRENDING_ITEMS = generateMockTransmogs(6, 200, 'Trending');
 
 const CLASS_METADATA = {
   'Death Knight': {
@@ -164,6 +148,8 @@ function Home() {
   const [animateNews, setAnimateNews] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [featuredSets, setFeaturedSets] = useState([]);
+  const [trendingSets, setTrendingSets] = useState([]);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
   const newsRef = useRef(null);
@@ -174,6 +160,23 @@ function Home() {
 
   useEffect(() => {
     setShowCards(true);
+  }, []);
+
+  // Fetch real sets for Featured and Trending sections
+  useEffect(() => {
+    // Featured: random page from first half of catalog
+    const featuredPage = Math.floor(Math.random() * 20);
+    fetch(`/api/transmogs?page=${featuredPage}&limit=8`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.transmogs?.length) setFeaturedSets(d.transmogs); })
+      .catch(() => {});
+
+    // Trending: different random page
+    const trendingPage = Math.floor(Math.random() * 20) + 30;
+    fetch(`/api/transmogs?page=${trendingPage}&limit=8`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.transmogs?.length) setTrendingSets(d.transmogs); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -331,8 +334,8 @@ function Home() {
             <FeaturedSection
               title="Featured This Week"
               tagline="Curated sets from the community"
-              items={FEATURED_ITEMS}
-              viewAllLink="/catalog?sort=featured"
+              items={featuredSets}
+              viewAllLink="/catalog"
             />
           </div>
 
@@ -387,8 +390,8 @@ function Home() {
             <FeaturedSection
               title="Trending Now"
               tagline="Highest rated by the community"
-              items={TRENDING_ITEMS}
-              viewAllLink="/catalog?sort=top_rated"
+              items={trendingSets}
+              viewAllLink="/catalog"
             />
           </div>
 

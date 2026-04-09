@@ -1,24 +1,75 @@
 :root {
+  /* Brand / Gold palette */
   --color-gold: #f2e6c9;
   --color-gold-bright: #ffcc00;
   --color-gold-dim: rgba(242, 230, 201, 0.7);
   --color-gold-muted: rgba(242, 230, 201, 0.4);
   --color-gold-faint: rgba(242, 230, 201, 0.15);
+
+  /* Backgrounds */
   --color-bg-dark: rgba(18, 18, 22, 0.95);
   --color-bg-card: rgba(20, 15, 10, 0.6);
   --color-bg-hover: rgba(255, 255, 255, 0.06);
+
+  /* Borders */
   --color-border: rgba(242, 230, 201, 0.12);
   --color-border-hover: rgba(242, 230, 201, 0.25);
+
+  /* Text */
   --color-text: #e8dcc8;
   --color-text-muted: rgba(242, 230, 201, 0.5);
+
+  /* Semantic */
   --color-error: #ff6b6b;
   --color-success: #8ade7e;
+
+  /* Fonts */
   --font-display: 'Cinzel', serif;
   --font-body: 'Raleway', sans-serif;
+
+  /* Border radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+  --radius-pill: 30px;
+
+  /* Blur tokens */
+  --blur-sm: 4px;
+  --blur-md: 10px;
+  --blur-lg: 20px;
+  --blur-xl: 40px;
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 60px;
+
+  /* WoW Class Colors */
+  --class-warrior: #C79C6E;
+  --class-paladin: #F58CBA;
+  --class-hunter: #ABD473;
+  --class-rogue: #FFF569;
+  --class-priest: #FFFFFF;
+  --class-deathknight: #C41F3B;
+  --class-shaman: #0070DE;
+  --class-mage: #40C7EB;
+  --class-warlock: #8787ED;
+  --class-monk: #00FF96;
+  --class-druid: #FF7D0A;
+  --class-demonhunter: #A330C9;
+  --class-evoker: #33937F;
+
+  /* Item Quality Colors */
+  --quality-poor: #9d9d9d;
+  --quality-common: #ffffff;
+  --quality-uncommon: #1eff00;
+  --quality-rare: #0070dd;
+  --quality-epic: #a335ee;
+  --quality-legendary: #ff8000;
 }
 
 * {

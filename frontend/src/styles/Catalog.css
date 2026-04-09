@@ -50,7 +50,7 @@
   padding: 12px 20px;
   background: rgba(40, 30, 20, 0.7);
   border: 2px solid rgba(229, 211, 179, 0.3);
-  border-radius: 25px;
+  border-radius: var(--radius-pill);
   color: #e5d3b3;
   font-family: 'Raleway', sans-serif;
   font-size: 0.95rem;
@@ -182,7 +182,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 25px;
+  border-radius: var(--radius-pill);
   backdrop-filter: blur(10px);
   letter-spacing: 0.02em;
 }
@@ -203,6 +203,7 @@
     inset 0 0 20px rgba(229, 211, 179, 0.1);
 }
 
+
 .reset-filters-btn {
   padding: 12px 24px;
   background: rgba(40, 30, 20, 0.7);
@@ -212,7 +213,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   /* Pill shape */
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -398,70 +399,19 @@
 }
 
 /* Кольори класів WoW */
-.class-badge.warrior {
-  border-color: #c79c6e;
-  color: #c79c6e;
-}
-
-.class-badge.paladin {
-  border-color: #f58cba;
-  color: #f58cba;
-}
-
-.class-badge.hunter {
-  border-color: #abd473;
-  color: #abd473;
-}
-
-.class-badge.rogue {
-  border-color: #fff569;
-  color: #fff569;
-}
-
-.class-badge.priest {
-  border-color: #ffffff;
-  color: #ffffff;
-}
-
-.class-badge.deathknight {
-  border-color: #c41f3b;
-  color: #c41f3b;
-}
-
-.class-badge.shaman {
-  border-color: #0070de;
-  color: #0070de;
-}
-
-.class-badge.mage {
-  border-color: #69ccf0;
-  color: #69ccf0;
-}
-
-.class-badge.warlock {
-  border-color: #9482c9;
-  color: #9482c9;
-}
-
-.class-badge.monk {
-  border-color: #00ff96;
-  color: #00ff96;
-}
-
-.class-badge.druid {
-  border-color: #ff7d0a;
-  color: #ff7d0a;
-}
-
-.class-badge.demonhunter {
-  border-color: #a330c9;
-  color: #a330c9;
-}
-
-.class-badge.evoker {
-  border-color: #33937f;
-  color: #33937f;
-}
+.class-badge.warrior   { border-color: var(--class-warrior);     color: var(--class-warrior); }
+.class-badge.paladin   { border-color: var(--class-paladin);     color: var(--class-paladin); }
+.class-badge.hunter    { border-color: var(--class-hunter);      color: var(--class-hunter); }
+.class-badge.rogue     { border-color: var(--class-rogue);       color: var(--class-rogue); }
+.class-badge.priest    { border-color: var(--class-priest);      color: var(--class-priest); }
+.class-badge.deathknight { border-color: var(--class-deathknight); color: var(--class-deathknight); }
+.class-badge.shaman    { border-color: var(--class-shaman);      color: var(--class-shaman); }
+.class-badge.mage      { border-color: var(--class-mage);        color: var(--class-mage); }
+.class-badge.warlock   { border-color: var(--class-warlock);     color: var(--class-warlock); }
+.class-badge.monk      { border-color: var(--class-monk);        color: var(--class-monk); }
+.class-badge.druid     { border-color: var(--class-druid);       color: var(--class-druid); }
+.class-badge.demonhunter { border-color: var(--class-demonhunter); color: var(--class-demonhunter); }
+.class-badge.evoker    { border-color: var(--class-evoker);      color: var(--class-evoker); }
 
 /* Кнопка улюблених */
 .favorite-button {
@@ -612,7 +562,7 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  border-radius: 25px;
+  border-radius: var(--radius-pill);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   letter-spacing: 0.02em;

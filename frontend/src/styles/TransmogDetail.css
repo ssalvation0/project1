@@ -40,7 +40,7 @@
   color: #e5d3b3;
   padding: 0 24px;
   height: 46px;
-  border-radius: 30px;
+  border-radius: var(--radius-pill);
   font-family: 'Raleway', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
@@ -67,7 +67,7 @@
   color: #e5d3b3;
   padding: 0 24px;
   height: 46px;
-  border-radius: 30px;
+  border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -204,28 +204,28 @@
 }
 
 .quality-badge.epic {
-  color: #a335ee;
-  border-color: #a335ee;
+  color: var(--quality-epic);
+  border-color: var(--quality-epic);
 }
 
 .quality-badge.rare {
-  color: #0070dd;
-  border-color: #0070dd;
+  color: var(--quality-rare);
+  border-color: var(--quality-rare);
 }
 
 .quality-badge.uncommon {
-  color: #1eff00;
-  border-color: #1eff00;
+  color: var(--quality-uncommon);
+  border-color: var(--quality-uncommon);
 }
 
 .quality-badge.common {
-  color: #ffffff;
-  border-color: #ffffff;
+  color: var(--quality-common);
+  border-color: var(--quality-common);
 }
 
 .quality-badge.poor {
-  color: #9d9d9d;
-  border-color: #9d9d9d;
+  color: var(--quality-poor);
+  border-color: var(--quality-poor);
 }
 
 .expansion-badge-detail {
@@ -286,68 +286,68 @@
 
 /* Class Colors */
 .class-badge-detail.deathknight {
-  color: #c41f3b;
-  border-color: rgba(196, 31, 59, 0.4);
+  color: var(--class-deathknight);
+  border-color: color-mix(in srgb, var(--class-deathknight) 40%, transparent);
 }
 
 .class-badge-detail.demonhunter {
-  color: #a330c9;
-  border-color: rgba(163, 48, 201, 0.4);
+  color: var(--class-demonhunter);
+  border-color: color-mix(in srgb, var(--class-demonhunter) 40%, transparent);
 }
 
 .class-badge-detail.druid {
-  color: #ff7d0a;
-  border-color: rgba(255, 125, 10, 0.4);
+  color: var(--class-druid);
+  border-color: color-mix(in srgb, var(--class-druid) 40%, transparent);
 }
 
 .class-badge-detail.evoker {
-  color: #33937f;
-  border-color: rgba(51, 147, 127, 0.4);
+  color: var(--class-evoker);
+  border-color: color-mix(in srgb, var(--class-evoker) 40%, transparent);
 }
 
 .class-badge-detail.hunter {
-  color: #abd473;
-  border-color: rgba(171, 212, 115, 0.4);
+  color: var(--class-hunter);
+  border-color: color-mix(in srgb, var(--class-hunter) 40%, transparent);
 }
 
 .class-badge-detail.mage {
-  color: #69ccf0;
-  border-color: rgba(105, 204, 240, 0.4);
+  color: var(--class-mage);
+  border-color: color-mix(in srgb, var(--class-mage) 40%, transparent);
 }
 
 .class-badge-detail.monk {
-  color: #00ff96;
-  border-color: rgba(0, 255, 150, 0.4);
+  color: var(--class-monk);
+  border-color: color-mix(in srgb, var(--class-monk) 40%, transparent);
 }
 
 .class-badge-detail.paladin {
-  color: #f58cba;
-  border-color: rgba(245, 140, 186, 0.4);
+  color: var(--class-paladin);
+  border-color: color-mix(in srgb, var(--class-paladin) 40%, transparent);
 }
 
 .class-badge-detail.priest {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--class-priest);
+  border-color: color-mix(in srgb, var(--class-priest) 40%, transparent);
 }
 
 .class-badge-detail.rogue {
-  color: #fff569;
-  border-color: rgba(255, 245, 105, 0.4);
+  color: var(--class-rogue);
+  border-color: color-mix(in srgb, var(--class-rogue) 40%, transparent);
 }
 
 .class-badge-detail.shaman {
-  color: #0070de;
-  border-color: rgba(0, 112, 222, 0.4);
+  color: var(--class-shaman);
+  border-color: color-mix(in srgb, var(--class-shaman) 40%, transparent);
 }
 
 .class-badge-detail.warlock {
-  color: #9482c9;
-  border-color: rgba(148, 130, 201, 0.4);
+  color: var(--class-warlock);
+  border-color: color-mix(in srgb, var(--class-warlock) 40%, transparent);
 }
 
 .class-badge-detail.warrior {
-  color: #c79c6e;
-  border-color: rgba(199, 156, 110, 0.4);
+  color: var(--class-warrior);
+  border-color: color-mix(in srgb, var(--class-warrior) 40%, transparent);
 }
 
 .id-value-clean {

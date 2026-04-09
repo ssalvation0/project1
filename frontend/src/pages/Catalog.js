@@ -13,11 +13,9 @@ const API_URL = '/api/transmogs';
 const MOCK_FILTER_OPTIONS = {
   armor: ['Cloth', 'Leather', 'Mail', 'Plate', 'Cosmetic'],
   source: ['Raid', 'PvP', 'Dungeon', 'Quest', 'Crafted', 'Trading Post', 'Store'],
-  color: ['Dark', 'Light', 'Red', 'Blue', 'Green', 'Gold', 'Purple'],
-  difficulty: ['LFR', 'Normal', 'Heroic', 'Mythic']
 };
 
-async function fetchTransmogsRequest({ page, filter, expansion, quality, armor, source, color, difficulty, search }) {
+async function fetchTransmogsRequest({ page, filter, expansion, quality, armor, source, search }) {
   const params = new URLSearchParams({
     page,
     limit: 20,
@@ -26,8 +24,6 @@ async function fetchTransmogsRequest({ page, filter, expansion, quality, armor, 
     quality,
     armor,
     source,
-    color,
-    difficulty,
     search
   });
 
@@ -78,8 +74,6 @@ function Catalog() {
   // New Filters
   const [armorFilter, setArmorFilter] = useState(searchParams.get('armor') || 'all');
   const [sourceFilter, setSourceFilter] = useState(searchParams.get('source') || 'all');
-  const [colorFilter, setColorFilter] = useState(searchParams.get('color') || 'all');
-  const [difficultyFilter, setDifficultyFilter] = useState(searchParams.get('difficulty') || 'all');
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '0', 10));
@@ -100,7 +94,7 @@ function Catalog() {
 
   // Fetch transmogs - uses debounced search
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['transmogs', currentPage, filter, expansionFilter, qualityFilter, armorFilter, sourceFilter, colorFilter, difficultyFilter, debouncedSearch],
+    queryKey: ['transmogs', currentPage, filter, expansionFilter, qualityFilter, armorFilter, sourceFilter, debouncedSearch],
     queryFn: () => fetchTransmogsRequest({
       page: currentPage,
       filter,
@@ -108,8 +102,6 @@ function Catalog() {
       quality: qualityFilter,
       armor: armorFilter,
       source: sourceFilter,
-      color: colorFilter,
-      difficulty: difficultyFilter,
       search: debouncedSearch
     }),
     keepPreviousData: true,
@@ -125,8 +117,6 @@ function Catalog() {
 
     if (armorFilter !== 'all') params.set('armor', armorFilter);
     if (sourceFilter !== 'all') params.set('source', sourceFilter);
-    if (colorFilter !== 'all') params.set('color', colorFilter);
-    if (difficultyFilter !== 'all') params.set('difficulty', difficultyFilter);
 
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (currentPage > 0) params.set('page', currentPage.toString());
@@ -134,7 +124,7 @@ function Catalog() {
     if (sortBy !== 'name-asc') params.set('sort', sortBy);
 
     setSearchParams(params, { replace: true });
-  }, [filter, expansionFilter, qualityFilter, armorFilter, sourceFilter, colorFilter, difficultyFilter, debouncedSearch, currentPage, showFavoritesOnly, sortBy, setSearchParams]);
+  }, [filter, expansionFilter, qualityFilter, armorFilter, sourceFilter, debouncedSearch, currentPage, showFavoritesOnly, sortBy, setSearchParams]);
 
   // Reset page when search changes
   useEffect(() => {
@@ -153,8 +143,6 @@ function Catalog() {
 
     if (type === 'armor') setArmorFilter(value);
     if (type === 'source') setSourceFilter(value);
-    if (type === 'color') setColorFilter(value);
-    if (type === 'difficulty') setDifficultyFilter(value);
 
     if (type === 'sort') setSortBy(value);
   }, []);
@@ -165,8 +153,6 @@ function Catalog() {
     setQualityFilter('all');
     setArmorFilter('all');
     setSourceFilter('all');
-    setColorFilter('all');
-    setDifficultyFilter('all');
     setSearchQuery('');
     setSortBy('name-asc');
     setCurrentPage(0);
@@ -257,8 +243,7 @@ function Catalog() {
       <div className="catalog-header">
         <div className="catalog-title-row">
           <h1>Transmog Catalog</h1>
-          {/* Reset Filters Button */}
-          {(filter !== 'all' || expansionFilter !== 'all' || qualityFilter !== 'all' || armorFilter !== 'all' || sourceFilter !== 'all' || colorFilter !== 'all' || difficultyFilter !== 'all' || searchQuery) && (
+          {(filter !== 'all' || expansionFilter !== 'all' || qualityFilter !== 'all' || armorFilter !== 'all' || sourceFilter !== 'all' || searchQuery) && (
             <button className="reset-filters-btn" onClick={resetFilters}>
               Reset Filters
             </button>
@@ -359,36 +344,6 @@ function Catalog() {
               <option value="all">All Qualities</option>
               {filterOptions?.qualities?.filter(q => q !== 'All').map(q => (
                 <option key={q} value={q}>{q}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Color Filter */}
-          <div className="filter-group">
-            <span className="filter-label">Color:</span>
-            <select
-              value={colorFilter}
-              onChange={(e) => handleFilterChange('color', e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Colors</option>
-              {MOCK_FILTER_OPTIONS.color.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Difficulty Filter */}
-          <div className="filter-group">
-            <span className="filter-label">Mode:</span>
-            <select
-              value={difficultyFilter}
-              onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">Any Mode</option>
-              {MOCK_FILTER_OPTIONS.difficulty.map(d => (
-                <option key={d} value={d}>{d}</option>
               ))}
             </select>
           </div>

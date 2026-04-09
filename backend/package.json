@@ -5,13 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --ignore 'data/' server.js",
     "setup:kaggle": "node scripts/processKaggleData.js",
     "setup:images": "node scripts/downloadImages.js",
     "setup:all": "npm run setup:kaggle && npm run setup:images",
     "populate": "node scripts/populateTransmogs.js",
     "improve": "node scripts/improveTransmogs.js",
-    "update-images": "node scripts/updateWowheadImages.js"
+    "update-images": "node scripts/updateWowheadImages.js",
+    "guides": "node scripts/generateAllGuides.js"
   },
   "keywords": [],
   "author": "",

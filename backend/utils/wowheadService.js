@@ -1,128 +1,155 @@
 const axios = require('axios');
 
-// Wowhead uses numeric expansion IDs
-const EXPANSION_NAMES = {
-  0: 'Classic',
-  1: 'Burning Crusade',
-  2: 'Wrath of the Lich King',
-  3: 'Cataclysm',
-  4: 'Mists of Pandaria',
-  5: 'Warlords of Draenor',
-  6: 'Legion',
-  7: 'Battle for Azeroth',
-  8: 'Shadowlands',
-  9: 'Dragonflight',
-  10: 'The War Within',
-  11: 'Midnight'
-};
-
 const QUALITY_NAMES = {
   0: 'Poor', 1: 'Common', 2: 'Uncommon',
   3: 'Rare', 4: 'Epic', 5: 'Legendary', 6: 'Artifact'
 };
 
-const HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Cache-Control': 'no-cache',
+const ARMOR_TYPES = { 1: 'Cloth', 2: 'Leather', 3: 'Mail', 4: 'Plate' };
+
+const CLASS_NAMES = {
+  1: 'Warrior', 2: 'Paladin', 3: 'Hunter', 4: 'Rogue', 5: 'Priest',
+  6: 'Death Knight', 7: 'Shaman', 8: 'Mage', 9: 'Warlock', 10: 'Monk',
+  11: 'Druid', 12: 'Demon Hunter', 13: 'Evoker'
 };
 
-/**
- * Extract balanced array [ ... ] starting at position `from` in the string
- */
-function extractBalancedArray(str, from) {
-  let depth = 0;
-  let i = from;
-  while (i < str.length) {
-    if (str[i] === '[') depth++;
-    else if (str[i] === ']') {
-      depth--;
-      if (depth === 0) return str.substring(from, i + 1);
-    }
-    i++;
-  }
-  throw new Error('Unbalanced array in HTML');
-}
+const SET_TOOLTIP_BASE  = 'https://nether.wowhead.com/tooltip/transmog-set';
+const ITEM_TOOLTIP_BASE = 'https://nether.wowhead.com/tooltip/item';
+const MAX_ID = 13500;
+const CONCURRENCY = 15;
+const REQUEST_DELAY_MS = 30; // tiny delay between launches to be polite
+
+// Map item subclass IDs (item_class=4 Armor) to readable names
+const ARMOR_SUBCLASS = { 1: 'Cloth', 2: 'Leather', 3: 'Mail', 4: 'Plate', 5: 'Cosmetic', 6: 'Shield' };
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /**
- * Parse Wowhead item-sets list page and extract all sets.
- * Returns array of { id, name, expansion, quality, icon }
+ * Fetch a single transmog-set from Wowhead's JSON tooltip endpoint.
+ * Returns null for non-existent IDs (404) or invalid responses.
  */
-async function fetchAllItemSets() {
-  console.log('🌐 Fetching item sets list from Wowhead...');
-  const response = await axios.get('https://www.wowhead.com/item-sets', {
-    headers: HEADERS,
-    timeout: 30000,
-  });
-
-  const html = response.data;
-
-  // Wowhead embeds: new Listview({..., id: 'lv-itemsets', ..., data: [...], ...})
-  // Find 'lv-itemsets' anchor point
-  const anchorIdx = html.indexOf('lv-itemsets');
-  if (anchorIdx === -1) throw new Error('Could not find lv-itemsets in Wowhead page');
-
-  // Find 'data:' after anchor (within 2000 chars)
-  const searchWindow = html.substring(anchorIdx, anchorIdx + 3000);
-  const dataKeyMatch = searchWindow.match(/[,{]\s*data\s*:/);
-  if (!dataKeyMatch) throw new Error('Could not find data: key in Listview');
-
-  const dataKeyPos = anchorIdx + dataKeyMatch.index + dataKeyMatch[0].length;
-
-  // Skip whitespace to find '['
-  let bracketPos = dataKeyPos;
-  while (bracketPos < html.length && html[bracketPos] !== '[') bracketPos++;
-
-  const rawArray = extractBalancedArray(html, bracketPos);
-  const sets = JSON.parse(rawArray);
-
-  console.log(`✅ Wowhead returned ${sets.length} item sets`);
-
-  return sets.map(s => ({
-    id: s.id,
-    name: s.name,
-    expansion: typeof s.expansion === 'number'
-      ? (EXPANSION_NAMES[s.expansion] ?? 'Unknown')
-      : 'Unknown',
-    quality: typeof s.quality === 'number'
-      ? (QUALITY_NAMES[s.quality] ?? 'Unknown')
-      : (s.quality || 'Unknown'),
-    icon: s.icon || null,
-  }));
-}
-
-/**
- * Fetch details for a single set from Wowhead tooltip API.
- * Returns { id, name, expansion, quality, items: [{id, name}] } or null
- */
-async function fetchSetDetails(setId) {
+async function fetchOneSet(id) {
   try {
-    const url = `https://nether.wowhead.com/tooltip/item-set/${setId}?dataEnv=4&locale=0`;
-    const response = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-    const data = response.data;
+    const r = await axios.get(`${SET_TOOLTIP_BASE}/${id}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 TransmogVault/1.0' },
+      validateStatus: s => s === 200 || s === 404,
+      timeout: 15000,
+    });
+    if (r.status !== 200 || !r.data || !r.data.name) return null;
 
-    if (!data || !data.name) return null;
+    const d = r.data;
 
-    // Items are in data.set.items or data.items depending on version
-    const items = (data.set?.items || data.items || []).map(item =>
-      typeof item === 'object' ? { id: item.id, name: item.name } : { id: item, name: '' }
-    );
+    // Quality from tooltip HTML class: q1=poor … q5=legendary
+    let qualityNum = 4; // default Epic
+    const m = (d.tooltip || '').match(/class="q(\d)"/);
+    if (m) qualityNum = parseInt(m[1], 10);
+
+    // Pieces: completionData is { slot: [itemId, ...] }
+    const pieces = [];
+    if (d.completionData && typeof d.completionData === 'object') {
+      for (const slotIds of Object.values(d.completionData)) {
+        if (Array.isArray(slotIds)) {
+          for (const itemId of slotIds) {
+            if (typeof itemId === 'number' && !pieces.includes(itemId)) pieces.push(itemId);
+          }
+        }
+      }
+    }
 
     return {
-      id: setId,
-      name: data.name,
-      expansion: typeof data.expansion === 'number'
-        ? (EXPANSION_NAMES[data.expansion] ?? 'Unknown')
-        : 'Unknown',
-      quality: typeof data.quality === 'number'
-        ? (QUALITY_NAMES[data.quality] ?? 'Unknown')
-        : 'Unknown',
-      items,
+      id,
+      name: d.name,
+      quality: QUALITY_NAMES[qualityNum] || 'Epic',
+      armorType: null, // not in tooltip data — derived later from first piece
+      classes: ['All'], // refined later from Blizzard item data
+      pieces,
+      icon: d.icon || null,
     };
   } catch {
     return null;
   }
 }
 
-module.exports = { fetchAllItemSets, fetchSetDetails, EXPANSION_NAMES };
+/**
+ * Fetch a single item from Wowhead's JSON tooltip endpoint.
+ * Returns { id, name, icon, quality, armorType, restrictedClasses } or null.
+ */
+async function fetchOneItem(id) {
+  try {
+    const r = await axios.get(`${ITEM_TOOLTIP_BASE}/${id}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 TransmogVault/1.0' },
+      validateStatus: s => s === 200 || s === 404,
+      timeout: 15000,
+    });
+    if (r.status !== 200 || !r.data) return null;
+    const d = r.data;
+    const tooltip = d.tooltip || '';
+
+    // Armor subclass: <!--scstart4:N--> where 4=item_class Armor, N=subclass
+    let armorType = null;
+    const sc = tooltip.match(/<!--scstart4:(\d+)-->/);
+    if (sc) armorType = ARMOR_SUBCLASS[parseInt(sc[1], 10)] || null;
+
+    // Class restrictions: text "Classes: Priest, Mage" inside tooltip
+    let restrictedClasses = null;
+    const cls = tooltip.match(/Classes:\s*([^<]+)/);
+    if (cls) {
+      restrictedClasses = cls[1].split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    return {
+      id,
+      name: d.name || `Item ${id}`,
+      icon: d.icon || null,
+      quality: d.quality ?? null,
+      armorType,
+      restrictedClasses,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Iterate IDs 1..MAX_ID via the JSON tooltip endpoint with concurrency.
+ * Returns all valid transmog sets found (~3000+ expected).
+ */
+async function fetchAllTransmogSets() {
+  console.log(`🌐 Fetching transmog sets from Wowhead (IDs 1-${MAX_ID}, concurrency ${CONCURRENCY})...`);
+  const t0 = Date.now();
+
+  const results = [];
+  let processed = 0;
+  let found = 0;
+
+  // Worker pool pattern
+  let nextId = 1;
+  async function worker() {
+    while (true) {
+      const id = nextId++;
+      if (id > MAX_ID) return;
+      const set = await fetchOneSet(id);
+      processed++;
+      if (set) {
+        results.push(set);
+        found++;
+      }
+      if (processed % 500 === 0) {
+        const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
+        console.log(`  …processed ${processed}/${MAX_ID} (${found} found, ${elapsed}s)`);
+      }
+      if (REQUEST_DELAY_MS > 0) await sleep(REQUEST_DELAY_MS);
+    }
+  }
+
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+
+  // Sort by id for stable ordering
+  results.sort((a, b) => a.id - b.id);
+
+  const elapsed = ((Date.now() - t0) / 1000).toFixed(0);
+  console.log(`✅ Wowhead total: ${results.length} transmog sets (${elapsed}s)`);
+  return results;
+}
+
+module.exports = { fetchAllTransmogSets, fetchOneSet, fetchOneItem, QUALITY_NAMES, ARMOR_TYPES, CLASS_NAMES };

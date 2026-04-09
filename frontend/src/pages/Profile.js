@@ -42,14 +42,6 @@ function Profile() {
       .finally(() => setFavoritesLoading(false));
   }, [favorites]);
 
-  const handleCloseProfile = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-    navigate('/');
-  };
-
   if (loading && !user) {
     return (
       <div className="profile-page">
@@ -98,16 +90,6 @@ function Profile() {
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <button
-          type="button"
-          className="profile-close-btn"
-          onClick={handleCloseProfile}
-          aria-label="Close profile"
-          title="Close profile"
-        >
-          ×
-        </button>
-
         {/* Header Section */}
         <div className="profile-header-section">
           <div className="profile-avatar">

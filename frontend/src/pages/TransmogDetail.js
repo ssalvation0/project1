@@ -24,169 +24,24 @@ async function fetchTransmogById(id) {
   return res.json();
 }
 
-// Fetch similar sets (same expansion, different ID)
-async function fetchSimilarSets(expansion, currentId) {
-  const params = new URLSearchParams({ expansion, limit: 6 });
+// Fetch similar sets (same expansion + source if possible, fall back to expansion only)
+async function fetchSimilarSets(expansion, currentId, source) {
+  // Try same expansion + same source first
+  if (source) {
+    const params = new URLSearchParams({ expansion, source, limit: 8 });
+    const res = await fetch(`${API_URL}?${params.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      const filtered = (data.transmogs || []).filter(t => t.id !== currentId);
+      if (filtered.length >= 2) return filtered.slice(0, 4);
+    }
+  }
+  // Fall back to same expansion
+  const params = new URLSearchParams({ expansion, limit: 8 });
   const res = await fetch(`${API_URL}?${params.toString()}`);
   if (!res.ok) return [];
   const data = await res.json();
   return (data.transmogs || []).filter(t => t.id !== currentId).slice(0, 4);
-}
-
-// Helper: Get acquisition info based on expansion and quality
-function getAcquisitionInfo(expansion, quality, classes) {
-  const info = {
-    source: '',
-    description: '',
-    tips: [],
-    difficulty: 'Medium'
-  };
-
-  // Expansion-specific sources
-  const expansionSources = {
-    'Classic': {
-      source: 'Classic Raids & Dungeons',
-      description: 'These sets were originally obtained from Molten Core, Blackwing Lair, Onyxia\'s Lair, and other Classic-era content.',
-      tips: [
-        'Most Classic raids are now easily soloable at max level',
-        'Check Auction House for BoE pieces',
-        'Some sets have look-alike alternatives from quests'
-      ],
-      difficulty: 'Easy'
-    },
-    'Burning Crusade': {
-      source: 'Outland Raids & Heroics',
-      description: 'Originally from Karazhan, Serpentshrine Cavern, Tempest Keep, Black Temple and more.',
-      tips: [
-        'All TBC raids are soloable at level 70+',
-        'Some pieces drop from heroic dungeons',
-        'Tier tokens need to be exchanged in Shattrath'
-      ],
-      difficulty: 'Easy'
-    },
-    'Wrath of the Lich King': {
-      source: 'Northrend Raids',
-      description: 'From iconic raids like Naxxramas, Ulduar, Trial of the Crusader, and Icecrown Citadel.',
-      tips: [
-        'ICC has some of the most iconic tier sets',
-        'Ulduar hard modes drop unique visuals',
-        'Check for 10-man and 25-man color variants'
-      ],
-      difficulty: 'Easy'
-    },
-    'Cataclysm': {
-      source: 'Cataclysm Raids',
-      description: 'Obtained from Blackwing Descent, Bastion of Twilight, Firelands, and Dragon Soul.',
-      tips: [
-        'Firelands has stunning fire-themed armor',
-        'Dragon Soul drops Raid Finder color variants',
-        'Some sets have heroic recolors'
-      ],
-      difficulty: 'Easy'
-    },
-    'Mists of Pandaria': {
-      source: 'Pandaria Raids',
-      description: 'From Mogu\'shan Vaults, Heart of Fear, Terrace of Endless Spring, Throne of Thunder, and Siege of Orgrimmar.',
-      tips: [
-        'Throne of Thunder has highly detailed sets',
-        'Challenge Mode appearances are no longer obtainable',
-        'LFR, Normal, Heroic have different colors'
-      ],
-      difficulty: 'Easy'
-    },
-    'Warlords of Draenor': {
-      source: 'Draenor Raids & Garrison',
-      description: 'From Highmaul, Blackrock Foundry, and Hellfire Citadel. Some sets from garrison missions.',
-      tips: [
-        'Mythic Hellfire Citadel has unique fel-corrupted looks',
-        'Some sets available from Garrison Salvage Yard',
-        'Ashran PvP sets share models with raid gear'
-      ],
-      difficulty: 'Easy'
-    },
-    'Legion': {
-      source: 'Legion Raids & World Content',
-      description: 'From Emerald Nightmare, Nighthold, Tomb of Sargeras, and Antorus.',
-      tips: [
-        'Tier sets are class-specific with unique themes',
-        'Antorus has the final "tier" armor designs',
-        'Some appearances tied to Mage Tower (limited)'
-      ],
-      difficulty: 'Easy'
-    },
-    'Battle for Azeroth': {
-      source: 'BfA Raids & Warfronts',
-      description: 'From Uldir, Battle of Dazar\'alor, Crucible of Storms, Eternal Palace, and Ny\'alotha.',
-      tips: [
-        'Warfront sets are faction-specific',
-        'Heritage armor requires reputation grinding',
-        'Island Expedition drops unique transmog pieces'
-      ],
-      difficulty: 'Medium'
-    },
-    'Shadowlands': {
-      source: 'Shadowlands Raids & Covenants',
-      description: 'From Castle Nathria, Sanctum of Domination, and Sepulcher of the First Ones.',
-      tips: [
-        'Covenant armor requires specific covenant membership',
-        'Mythic raids have unique color variants',
-        'Some sets from Torghast or Maw activities'
-      ],
-      difficulty: 'Medium'
-    },
-    'Dragonflight': {
-      source: 'Dragon Isles Raids',
-      description: 'From Vault of the Incarnates, Aberrus, and Amirdrassil.',
-      tips: [
-        'Tier sets return with set bonuses',
-        'Catalyst system converts gear to tier appearance',
-        'Revival Catalyst unlocks weekly'
-      ],
-      difficulty: 'Medium'
-    },
-    'The War Within': {
-      source: 'Khaz Algar Raids',
-      description: 'From Nerub-ar Palace and other War Within content.',
-      tips: [
-        'Most War Within raids are now easily farmable',
-        'Check group finder for raid groups',
-        'Catalyst system converts gear to tier appearance'
-      ],
-      difficulty: 'Medium'
-    },
-    'Midnight': {
-      source: 'Current Content — Quel\'Thalas Raids',
-      description: 'From The Voidspire, The Dreamrift, and March on Quel\'Danas — the Season 1 raids of Midnight.',
-      tips: [
-        'Current tier - actively dropping from raids',
-        'Tier tokens drop from Vorasius, Salhadaar, Vaelgor & Ezzorak, and Lightblinded Vanguard',
-        'Use the Matrix Catalyst to convert gear to tier appearance',
-        'Great Vault also rewards tier pieces weekly'
-      ],
-      difficulty: 'Hard'
-    }
-  };
-
-  const expInfo = expansionSources[expansion] || {
-    source: 'Various Sources',
-    description: 'This set can be obtained from various in-game activities.',
-    tips: ['Check Wowhead for specific drop locations'],
-    difficulty: 'Unknown'
-  };
-
-  // Quality-specific modifications
-  if (quality === 'Epic') {
-    expInfo.tips.push('Epic quality typically drops from raid bosses');
-  } else if (quality === 'Rare') {
-    expInfo.tips.push('Rare items often come from dungeons or world drops');
-  }
-
-  // Class-specific tip
-  if (classes && classes.length === 1 && classes[0] !== 'All') {
-    expInfo.tips.unshift(`This is a ${classes[0]}-specific set`);
-  }
-
-  return expInfo;
 }
 
 function TransmogDetail() {
@@ -237,14 +92,23 @@ function TransmogDetail() {
     queryKey: ['guide', id],
     queryFn: () => fetchGuide(id),
     enabled: Boolean(id),
-    staleTime: Infinity, // guides are generated once and cached
-    retry: false
+    staleTime: Infinity,
+    retry: false,
+    gcTime: Infinity,
   });
+
+  // Track how long guide has been loading
+  const [guideLoadingTooLong, setGuideLoadingTooLong] = useState(false);
+  useEffect(() => {
+    if (!guideLoading) { setGuideLoadingTooLong(false); return; }
+    const t = setTimeout(() => setGuideLoadingTooLong(true), 30000);
+    return () => clearTimeout(t);
+  }, [guideLoading, id]);
 
   // Fetch similar sets
   const { data: similarSets = [] } = useQuery({
-    queryKey: ['similarSets', transmog?.expansion, id],
-    queryFn: () => fetchSimilarSets(transmog?.expansion, parseInt(id)),
+    queryKey: ['similarSets', transmog?.expansion, transmog?.source, id],
+    queryFn: () => fetchSimilarSets(transmog?.expansion, parseInt(id), transmog?.source),
     enabled: Boolean(transmog?.expansion),
     staleTime: 60000
   });
@@ -313,11 +177,6 @@ function TransmogDetail() {
     backgroundImage: transmog?.iconUrl ? `url(${transmog.iconUrl})` : 'none'
   }), [transmog?.iconUrl]);
 
-  // Get acquisition info
-  const acquisitionInfo = useMemo(() => {
-    if (!transmog) return null;
-    return getAcquisitionInfo(transmog.expansion, transmog.quality, transmog.classes);
-  }, [transmog]);
 
   if (isLoading) {
     return (
@@ -468,7 +327,7 @@ function TransmogDetail() {
 
               <div className="detail-actions">
                 <a
-                  href={`https://www.wowhead.com/item-set=${transmog.id}`}
+                  href={`https://www.wowhead.com/transmog-set=${transmog.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="wowhead-button"
@@ -493,38 +352,13 @@ function TransmogDetail() {
             </div>
           </div>
 
-          {/* How to Obtain Section */}
-          {acquisitionInfo && (
-            <div className="acquisition-section">
-              <h2>📍 How to Obtain</h2>
-              <div className="acquisition-content">
-                <div className="acquisition-header">
-                  <span className="acquisition-source">{acquisitionInfo.source}</span>
-                  <span className={`difficulty-badge ${acquisitionInfo.difficulty.toLowerCase()}`}>
-                    {acquisitionInfo.difficulty}
-                  </span>
-                </div>
-                <p className="acquisition-description">{acquisitionInfo.description}</p>
-
-                <div className="acquisition-tips">
-                  <h3>💡 Tips</h3>
-                  <ul>
-                    {acquisitionInfo.tips.map((tip, index) => (
-                      <li key={index}>{tip}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* AI Guide Section */}
           <div className="guide-section">
             <h2>📖 Set Guide</h2>
             {guideLoading ? (
               <div className="guide-loading">
                 <div className="guide-loading-spinner"></div>
-                <span>Generating guide with AI...</span>
+                <span>{guideLoadingTooLong ? 'Still generating... this can take up to a minute.' : 'Generating guide with AI...'}</span>
               </div>
             ) : guideData?.guide ? (
               <div className="guide-content">
@@ -537,45 +371,67 @@ function TransmogDetail() {
 
           <div className="detail-items-section">
             <h2>⚔️ Set Components</h2>
-            <div className="detail-items-grid">
-              {transmog.items && transmog.items.length > 0 ? (
-                transmog.items.map((item, index) => (
-                  <div key={item.id || index} className="detail-item-card">
+            {(() => {
+              const namedItems = (transmog.items || []).filter(i => i.name && !i.name.startsWith('Item '));
+              const hasRealItems = namedItems.length > 0;
+              if (!hasRealItems) {
+                return (
+                  <div className="items-wowhead-redirect">
+                    <p>View the full piece list on Wowhead:</p>
                     <a
-                      href={`https://www.wowhead.com/item=${item.id}`}
+                      href={`https://www.wowhead.com/transmog-set=${transmog.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="item-card-link"
+                      className="wowhead-button"
                     >
-                      <div className="item-card-inner">
-                        <div className="item-icon-wrapper">
-                          {item.iconUrl ? (
-                            <img
-                              src={item.iconUrl}
-                              alt={item.name}
-                              loading="lazy"
-                              decoding="async"
-                              width="64"
-                              height="64"
-                            />
-                          ) : (
-                            <div className="item-placeholder">?</div>
-                          )}
-                        </div>
-                        <div className="item-details">
-                          <h4>{item.name}</h4>
-                          {item.slot && <span className="item-slot">{item.slot}</span>}
-                        </div>
-                      </div>
+                      Open on Wowhead ↗
                     </a>
                   </div>
-                ))
-              ) : (
-                <div className="no-items-message">
-                  <p>Item details are currently being updated by the server.</p>
+                );
+              }
+              return (
+                <div className="detail-items-grid">
+                  {namedItems.map((item, index) => (
+                    <div key={item.id || index} className="detail-item-card">
+                      <a
+                        href={`https://www.wowhead.com/item=${item.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="item-card-link"
+                      >
+                        <div className="item-card-inner">
+                          <div className="item-icon-wrapper">
+                            {item.iconUrl ? (
+                              <img
+                                src={item.iconUrl}
+                                alt={item.name}
+                                loading="lazy"
+                                decoding="async"
+                                width="64"
+                                height="64"
+                              />
+                            ) : (
+                              <div className="item-placeholder">
+                                <img
+                                  src={`https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg`}
+                                  alt="?"
+                                  width="64"
+                                  height="64"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className="item-details">
+                            <h4>{item.name}</h4>
+                            {item.slot && <span className="item-slot">{item.slot}</span>}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
 
           {/* Similar Sets Section */}
