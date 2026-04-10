@@ -8,6 +8,10 @@ import RatingWidget from '../components/RatingWidget';
 import CommentsSection from '../components/CommentsSection';
 import AddToCollectionModal from '../components/AddToCollectionModal';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  Sword, BookOpenText, Link as LinkIcon, Check, Bookmarks,
+  SquaresFour
+} from '@phosphor-icons/react';
 import '../styles/TransmogDetail.css';
 
 const API_URL = '/api/transmogs';
@@ -281,7 +285,7 @@ function TransmogDetail() {
                 />
               ) : (
                 <div className="detail-icon-placeholder">
-                  <span>⚔️</span>
+                  <Sword size={48} opacity={0.4} />
                 </div>
               )}
               <div className="detail-image-glow"></div>
@@ -345,14 +349,14 @@ function TransmogDetail() {
                   className={`share-button ${linkCopied ? 'copied' : ''}`}
                   onClick={copyLink}
                 >
-                  {linkCopied ? '✓ Copied!' : '🔗 Share'}
+                  {linkCopied ? <><Check size={16} /> Copied!</> : <><LinkIcon size={16} /> Share</>}
                 </button>
                 {user && (
                   <button
                     className="save-collection-button"
                     onClick={() => setShowCollectionModal(true)}
                   >
-                    📚 Save to Collection
+                    <Bookmarks size={16} /> Save to Collection
                   </button>
                 )}
               </div>
@@ -361,7 +365,7 @@ function TransmogDetail() {
 
           {/* AI Guide Section */}
           <div className="guide-section">
-            <h2>📖 Set Guide</h2>
+            <h2><BookOpenText size={24} weight="bold" /> Set Guide</h2>
             {guideLoading ? (
               <div className="guide-loading">
                 <div className="guide-loading-spinner"></div>
@@ -377,7 +381,7 @@ function TransmogDetail() {
           </div>
 
           <div className="detail-items-section">
-            <h2>⚔️ Set Components</h2>
+            <h2><Sword size={24} weight="bold" /> Set Components</h2>
             {(() => {
               const namedItems = (transmog.items || []).filter(i => i.name && !i.name.startsWith('Item '));
               const hasRealItems = namedItems.length > 0;
@@ -446,7 +450,7 @@ function TransmogDetail() {
 
           {similarSets.length > 0 && (
             <div className="similar-sets-section">
-              <h2>🎭 Similar Sets from {transmog.expansion}</h2>
+              <h2><SquaresFour size={22} /> Similar Sets from {transmog.expansion}</h2>
               <div className="similar-sets-grid">
                 {similarSets.map(set => (
                   <Link
@@ -463,7 +467,7 @@ function TransmogDetail() {
                           decoding="async"
                         />
                       ) : (
-                        <div className="similar-set-placeholder">⚔️</div>
+                        <div className="similar-set-placeholder"><Sword size={32} opacity={0.3} /></div>
                       )}
                     </div>
                     <div className="similar-set-info">

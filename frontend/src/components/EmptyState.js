@@ -1,14 +1,8 @@
 import React from 'react';
+import { Tray } from '@phosphor-icons/react';
 import './EmptyState.css';
 
-/**
- * EmptyState - Component for displaying when no data is available
- * @param {string} icon - Emoji or icon character to display
- * @param {string} title - Main heading text
- * @param {string} message - Supporting description text
- * @param {React.ReactNode} children - Optional action buttons or content
- */
-const EmptyState = ({ icon = '📭', title = 'No Results', message = 'Nothing to display', children }) => {
+const EmptyState = ({ icon = <Tray size={40} opacity={0.4} />, title = 'No Results', message = 'Nothing to display', children }) => {
     return (
         <div className="empty-state">
             <div className="empty-state-icon">{icon}</div>

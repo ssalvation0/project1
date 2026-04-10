@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import TransmogCard from '../components/TransmogCard';
+import { PencilSimple, Trash } from '@phosphor-icons/react';
 import './CollectionDetail.css';
 
 async function fetchCollection(id) {
@@ -138,14 +139,14 @@ function CollectionDetail() {
                   className="col-action-btn"
                   onClick={() => { setRenaming(true); setNewName(collection.name); }}
                 >
-                  ✏️ Rename
+                  <PencilSimple size={15} /> Rename
                 </button>
                 <button
                   className="col-action-btn col-action-btn--danger"
                   onClick={handleDelete}
                   disabled={deleting}
                 >
-                  🗑 Delete
+                  <Trash size={15} /> Delete
                 </button>
               </>
             )}

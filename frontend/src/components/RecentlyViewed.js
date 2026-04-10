@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sword } from '@phosphor-icons/react';
 import './RecentlyViewed.css';
 
 const API_URL = '/api/transmogs';
@@ -106,7 +107,7 @@ function RecentlyViewed({ limit = 5 }) {
               decoding="async"
             />
           ) : (
-            <div className="recently-viewed-placeholder">⚔️</div>
+            <div className="recently-viewed-placeholder"><Sword size={32} opacity={0.3} /></div>
           )}
         </div>
         <div className="recently-viewed-info">

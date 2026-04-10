@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { ChatCircle } from '@phosphor-icons/react';
 import './CommentsSection.css';
 
 function timeAgo(iso) {
@@ -64,7 +65,7 @@ function CommentsSection({ setId }) {
 
   return (
     <div className="comments-section">
-      <h2>💬 Comments <span className="comments-count">{comments.length > 0 ? comments.length : ''}</span></h2>
+      <h2><ChatCircle size={22} /> Comments <span className="comments-count">{comments.length > 0 ? comments.length : ''}</span></h2>
 
       {user ? (
         <form className="comment-form" onSubmit={handlePost}>

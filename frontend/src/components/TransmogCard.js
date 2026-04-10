@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sword } from '@phosphor-icons/react';
 import './TransmogCard.css';
 
 // Quality color map - defined outside component to prevent recreation
@@ -75,7 +76,7 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
             <div className="transmog-card-image-container">
                 {showPlaceholder ? (
                     <div className="transmog-card-placeholder">
-                        <span className="placeholder-icon">⚔️</span>
+                        <Sword size={40} opacity={0.3} />
                     </div>
                 ) : (
                     <img

@@ -378,6 +378,12 @@
 }
 
 /* Items Grid */
+.detail-items-section {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(229, 211, 179, 0.1);
+}
+
 .detail-items-section h2 {
   font-family: 'Cinzel', serif;
   font-size: 1.8rem;
@@ -584,6 +590,13 @@
   margin-top: 40px;
   padding-top: 40px;
   border-top: 1px solid rgba(229, 211, 179, 0.1);
+}
+
+.guide-section h2,
+.detail-items-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .guide-section h2 {

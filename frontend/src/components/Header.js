@@ -66,8 +66,6 @@ function Header() {
                 src={logo}
                 alt="TransmogVault"
                 className="small-logo"
-                width="40"
-                height="40"
                 decoding="async"
               />
             </Link>
