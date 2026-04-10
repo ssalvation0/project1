@@ -1,21 +1,26 @@
 .comments-section {
-  margin-top: 40px;
-  padding-top: 40px;
-  border-top: 1px solid rgba(242, 230, 201, 0.1);
+  padding: 32px 36px;
+  border-top: 1px solid rgba(229, 211, 179, 0.07);
 }
 
 .comments-section h2 {
-  font-family: 'Cinzel', serif;
-  font-size: 1.8rem;
-  color: #f2e6c9;
-  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(229, 211, 179, 0.45);
+  margin: 0 0 20px;
 }
 
 .comments-count {
-  font-size: 1rem;
-  color: rgba(242, 230, 201, 0.4);
+  font-size: 0.78rem;
+  color: rgba(229, 211, 179, 0.3);
   font-family: 'Raleway', sans-serif;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 /* Login hint */
@@ -102,23 +107,25 @@
 }
 
 .comment-submit-btn {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, rgba(242, 230, 201, 0.12), rgba(242, 230, 201, 0.06));
-  border: 1px solid rgba(242, 230, 201, 0.2);
-  border-radius: 10px;
-  color: #f2e6c9;
+  height: 34px;
+  padding: 0 18px;
+  background: rgba(229, 211, 179, 0.06);
+  border: 1px solid rgba(229, 211, 179, 0.18);
+  border-radius: var(--radius-md);
+  color: rgba(229, 211, 179, 0.8);
   font-family: 'Raleway', sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
   min-height: unset;
   min-width: unset;
 }
 
 .comment-submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(242, 230, 201, 0.18), rgba(242, 230, 201, 0.1));
-  border-color: rgba(242, 230, 201, 0.35);
+  background: rgba(229, 211, 179, 0.12);
+  border-color: rgba(229, 211, 179, 0.35);
+  color: #e5d3b3;
 }
 
 .comment-submit-btn:disabled {
@@ -153,12 +160,16 @@
   animation: shimmer 1.5s infinite;
 }
 
+.comments-section p,
+.comments-section li {
+  max-width: none;
+}
+
 .comments-empty {
   color: rgba(242, 230, 201, 0.3);
   font-family: 'Raleway', sans-serif;
   font-size: 0.88rem;
   font-style: italic;
-  max-width: none;
 }
 
 .comment-item {
