@@ -451,6 +451,20 @@
   height: 100%;
 }
 
+/* Hide Wowhead inline icon injected by power.js */
+.detail-items-grid .icon-hoverover,
+.detail-items-grid a[data-wowhead] > img:first-child,
+.detail-items-grid h4[data-wowhead] > img,
+.detail-items-grid h4[data-wowhead]::before {
+  display: none !important;
+}
+
+/* Hide wowhead injected icon span */
+.detail-items-section span.icon-hoverover,
+.detail-items-section div.icon-hoverover {
+  display: none !important;
+}
+
 
 
 /* Responsive */

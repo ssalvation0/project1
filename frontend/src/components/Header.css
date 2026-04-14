@@ -1,37 +1,32 @@
-.header {
+/* Single source of truth — both `.header` and `.header.wide-capsule` resolve here */
+.header,
+.header.wide-capsule {
   position: fixed;
-  top: 20px;
+  top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: 75%;
-  height: 90px;
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border-radius: 50px;
+  width: min(95vw, 1240px);
+  height: 64px;
+  padding: 0 24px;
+  background: rgba(18, 14, 8, 0.78);
+  backdrop-filter: blur(var(--blur-md)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(140%);
+  border: 1px solid rgba(242, 230, 201, 0.08);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elevation-2);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   z-index: 1000;
 }
 
 .header-content {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* логотип ліворуч, кнопка праворуч */
-  width: 100%;
-}
-
-.small-logo {
-  width: 200px;
-  height: auto;
-  margin-left: 100px;
-}
-
-.logo-link {
-  display: flex;
-  align-items: center;
+  gap: 24px;
 }
 
 body {
@@ -44,62 +39,6 @@ body {
 .header-buttons {
   display: flex;
   align-items: center;
-}
-
-.profile-button {
-  width: 50px;
-  /* кругла кнопка */
-  height: 50px;
-  border-radius: 50%;
-  /* робимо її круглою */
-  border: none;
-  /* без обвідки */
-  background-color: #ff8c00;
-  /* базовий колір */
-  cursor: pointer;
-  /* курсор при наведенні */
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-right: 30px;
-}
-
-.profile-button:hover {
-  background-color: #ffa733;
-  /* підсвічування */
-  transform: scale(1.1);
-  /* легке збільшення */
-}
-
-.profile-button:active {
-  transform: scale(0.99);
-  /* кнопка трохи зменшується при натисканні */
-  background-color: #e57b00;
-  /* можна змінити колір під час натискання */
-}
-
-.header.wide-capsule {
-  position: fixed;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 93vw;
-  max-width: 1200px;
-  height: 78px;
-  background: rgba(28, 20, 8, 0.87);
-  border-radius: 38px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 1.5px 12px rgba(240, 178, 52, 0.07) inset;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.2px solid rgba(200, 160, 40, 0.13);
-}
-
-.header-content {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 36px;
 }
 
 .header-left {
@@ -116,10 +55,10 @@ body {
 }
 
 .small-logo {
-  width: 182px;
+  width: 156px;
   height: auto;
   margin: 0 16px 0 0;
-  max-height: 65px;
+  max-height: 48px;
 }
 
 .logo-link {
@@ -136,17 +75,16 @@ body {
 
 .global-search-input {
   width: 100%;
-  padding: 10px 16px;
-  padding-left: 36px;
-  /* Space for icon */
-  border-radius: 20px;
-  border: 1px solid rgba(229, 211, 179, 0.2);
+  height: 40px;
+  padding: 0 16px 0 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
   background: rgba(0, 0, 0, 0.3);
-  color: #e5d3b3;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  backdrop-filter: blur(var(--blur-sm));
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e5d3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: 10px center;
@@ -172,46 +110,41 @@ body {
 }
 
 .login-btn {
-  display: inline-block;
-  min-width: 120px;
-  padding: 11px 32px;
-  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  min-width: 100px;
+  padding: 0 20px;
+  border-radius: var(--radius-md);
   background: rgba(40, 28, 15, 0.68);
-  color: #f2e6c9;
-  font-family: 'Cinzel', serif;
+  color: var(--color-gold);
+  font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.07rem;
-  border: 1.5px solid rgba(240, 216, 120, 0.31);
-  box-shadow: none;
+  font-size: 0.875rem;
+  border: 1px solid rgba(240, 216, 120, 0.28);
   cursor: pointer;
-  transition: background 0.25s, color 0.22s, border-color 0.19s, box-shadow 0.2s, transform 0.16s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
   outline: none;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 .login-btn--profile {
   min-width: auto;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .login-btn:hover {
   color: #ffe9b0;
-  border-color: #fff7c2;
+  border-color: rgba(255, 247, 194, 0.5);
   background: rgba(70, 52, 28, 0.86);
-  box-shadow: 0 0 14px 1.5px #ffc70033, 0 3px 12px #855d1b17 inset;
-  transform: translateY(-1.5px) scale(1.050);
 }
 
 .login-btn--profile:hover {
   background: rgba(70, 52, 28, 0.86);
-  box-shadow: 0 0 14px 1.5px #ffc70033, 0 3px 12px #855d1b17 inset;
-  transform: scale(1.15);
 }
 
 .login-btn:active {

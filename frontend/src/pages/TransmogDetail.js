@@ -80,6 +80,13 @@ function TransmogDetail() {
     }
   }, [id]);
 
+  // Re-bind Wowhead tooltips after items render
+  useEffect(() => {
+    if (typeof window.WH !== 'undefined' && typeof window.WH.bindLinks === 'function') {
+      window.WH.bindLinks();
+    }
+  });
+
   const { data: transmog, isLoading, error, refetch } = useQuery({
     queryKey: ['transmog', id],
     queryFn: () => fetchTransmogById(id),
@@ -361,7 +368,7 @@ function TransmogDetail() {
                 <span>{guideLoadingTooLong ? 'Still generating... this can take up to a minute.' : 'Generating guide with AI...'}</span>
               </div>
             ) : guideData?.guide ? (
-              <div className="guide-content">
+              <div className="guide-content" data-nowh="true">
                 <ReactMarkdown>{guideData.guide}</ReactMarkdown>
               </div>
             ) : (
@@ -397,7 +404,7 @@ function TransmogDetail() {
                         href={`https://www.wowhead.com/item=${item.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="item-card-link"
+                        className="item-card-link nwh"
                       >
                         <div className="item-card-inner">
                           <div className="item-icon-wrapper">
@@ -422,7 +429,7 @@ function TransmogDetail() {
                             )}
                           </div>
                           <div className="item-details">
-                            <h4>{item.name}</h4>
+                            <h4 data-wowhead={`item=${item.id}`}>{item.name}</h4>
                             {item.slot && <span className="item-slot">{item.slot}</span>}
                           </div>
                         </div>
