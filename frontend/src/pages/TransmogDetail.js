@@ -248,6 +248,18 @@ function TransmogDetail() {
           </button>
         </div>
 
+        <nav className="detail-breadcrumbs" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
+          <span aria-hidden="true">/</span>
+          <Link to={`/catalog${transmog.expansion ? `?expansion=${encodeURIComponent(transmog.expansion)}` : ''}`}>
+            {transmog.expansion || 'Catalog'}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="detail-breadcrumbs-current" aria-current="page">
+            {transmog.name}
+          </span>
+        </nav>
+
         <div className="transmog-detail-content-card">
           <div className="detail-top-section">
             <div className="detail-image-wrapper">
@@ -376,7 +388,22 @@ function TransmogDetail() {
                 <ReactMarkdown>{guideData.guide}</ReactMarkdown>
               </div>
             ) : (
-              <p className="guide-unavailable">Guide not available for this set.</p>
+              <div className="guide-unavailable">
+                <BookOpenText size={28} weight="light" />
+                <h4>Guide coming soon</h4>
+                <p>
+                  Farming guides are AI-generated in batches. This one isn't ready yet —
+                  check back in a few days, or request priority generation.
+                </p>
+                <a
+                  href="https://t.me/ssalvation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="td-btn td-btn--ghost"
+                >
+                  Request via Telegram
+                </a>
+              </div>
             )}
           </div>
 

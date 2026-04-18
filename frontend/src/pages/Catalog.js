@@ -333,20 +333,22 @@ function Catalog() {
             </select>
           </div>
 
-          {/* Quality Filter */}
-          <div className="filter-group">
-            <span className="filter-label">Quality:</span>
-            <select
-              value={qualityFilter}
-              onChange={(e) => handleFilterChange('quality', e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Qualities</option>
-              {filterOptions?.qualities?.filter(q => q !== 'All').map(q => (
-                <option key={q} value={q}>{q}</option>
-              ))}
-            </select>
-          </div>
+          {/* Quality Filter — hidden when the catalog exposes only 1-2 qualities */}
+          {filterOptions?.qualities?.filter(q => q !== 'All').length > 2 && (
+            <div className="filter-group">
+              <span className="filter-label">Quality:</span>
+              <select
+                value={qualityFilter}
+                onChange={(e) => handleFilterChange('quality', e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Qualities</option>
+                {filterOptions?.qualities?.filter(q => q !== 'All').map(q => (
+                  <option key={q} value={q}>{q}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Sort */}
           <div className="filter-group">
@@ -365,6 +367,51 @@ function Catalog() {
             </select>
           </div>
         </div>
+
+        {/* Active filter chips + result count */}
+        {(() => {
+          const active = [
+            filter !== 'all' && { key: 'class', label: `Class: ${filter}`, clear: () => handleFilterChange('class', 'all') },
+            armorFilter !== 'all' && { key: 'armor', label: `Armor: ${armorFilter}`, clear: () => handleFilterChange('armor', 'all') },
+            sourceFilter !== 'all' && { key: 'source', label: `Source: ${sourceFilter}`, clear: () => handleFilterChange('source', 'all') },
+            expansionFilter !== 'all' && { key: 'expansion', label: `Expansion: ${expansionFilter}`, clear: () => handleFilterChange('expansion', 'all') },
+            qualityFilter !== 'all' && { key: 'quality', label: `Quality: ${qualityFilter}`, clear: () => handleFilterChange('quality', 'all') },
+            showFavoritesOnly && { key: 'fav', label: 'Favorites only', clear: () => toggleFavoritesOnly() },
+          ].filter(Boolean);
+
+          if (active.length === 0 && isLoading) return null;
+
+          return (
+            <div className="catalog-results-bar">
+              <span className="catalog-results-count">
+                {isLoading ? 'Loading…' : `${totalItems} results`}
+              </span>
+              {active.length > 0 && (
+                <div className="catalog-chips">
+                  {active.map(chip => (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      className="catalog-chip"
+                      onClick={chip.clear}
+                      aria-label={`Remove filter: ${chip.label}`}
+                    >
+                      {chip.label}
+                      <span aria-hidden="true" className="catalog-chip-x">×</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="catalog-chip catalog-chip--reset"
+                    onClick={resetFilters}
+                  >
+                    Clear all
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {isLoading ? (

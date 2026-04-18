@@ -70,6 +70,35 @@ body {
   text-decoration: none;
 }
 
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: 8px;
+}
+
+.header-nav-link {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(229, 211, 179, 0.75);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.header-nav-link:hover,
+.header-nav-link:focus-visible {
+  color: var(--color-gold);
+  background: rgba(242, 230, 201, 0.06);
+}
+
+@media (max-width: 900px) {
+  .header-nav { display: none; }
+}
+
 .global-search-form {
   flex: 0 1 400px;
   margin: 0 20px;

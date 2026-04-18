@@ -69,6 +69,10 @@ function Header() {
                 decoding="async"
               />
             </Link>
+            <nav className="header-nav" aria-label="Primary">
+              <Link to="/catalog" className="header-nav-link">Catalog</Link>
+              <Link to="/collections" className="header-nav-link">Collections</Link>
+            </nav>
           </div>
 
           <form className="global-search-form" onSubmit={handleSearchSubmit} role="search">

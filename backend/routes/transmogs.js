@@ -481,33 +481,18 @@ router.get('/:id', async (req, res) => {
   });
 });
 
-// Guide generation endpoint
-router.get('/:id/guide', async (req, res) => {
+// Guide endpoint — cache-only. All guides are pre-generated via
+// `npm run guides`. On-the-fly generation is intentionally disabled so
+// clients never see minute-long hangs waiting for Gemini.
+router.get('/:id/guide', (req, res) => {
   const setId = parseInt(req.params.id);
   if (isNaN(setId)) return res.status(400).json({ error: 'Invalid set ID' });
 
-  // Return cached guide if exists
   if (guidesCache[setId]) {
     return res.json({ guide: guidesCache[setId].content, cached: true });
   }
 
-  // Find set in transmog cache
-  const set = cachedSets.find(s => s.id === setId);
-  if (!set) return res.status(404).json({ error: 'Set not found' });
-
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(503).json({ error: 'Guide generation not configured' });
-  }
-
-  try {
-    const content = await generateSetGuide(set);
-    guidesCache[setId] = { content, generatedAt: new Date().toISOString() };
-    await saveGuidesCache();
-    res.json({ guide: content, cached: false });
-  } catch (err) {
-    console.error(`❌ Guide generation failed for set ${setId}:`, err.message);
-    res.status(500).json({ error: 'Failed to generate guide' });
-  }
+  return res.status(404).json({ error: 'Guide not available' });
 });
 
 module.exports = router;

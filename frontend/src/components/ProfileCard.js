@@ -57,7 +57,7 @@ const ProfileCardComponent = ({
   roles = [], // Array of role strings: 'Tank', 'Healer', 'Damage'
   specs = [], // Array of strings or objects representing specs
   bestSources = [], // Array of strings
-  contactText = 'View Sets',
+  contactText,
   showUserInfo = true,
   onContactClick,
   onClick,
@@ -260,7 +260,7 @@ const ProfileCardComponent = ({
           {title && <p>{title}</p>}
         </div>
 
-        {showUserInfo && (
+        {showUserInfo && contactText && (
           <div className="pc-user-info">
             <button
               className="pc-contact-btn"
