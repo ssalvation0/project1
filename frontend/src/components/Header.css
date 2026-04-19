@@ -55,16 +55,48 @@ body {
 }
 
 .small-logo {
-  width: 156px;
-  height: auto;
+  width: auto;
+  height: 44px;
+  max-width: 160px;
+  object-fit: contain;
   margin: 0 16px 0 0;
-  max-height: 48px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-left: 8px;
+}
+
+.header-nav-link {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(229, 211, 179, 0.75);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.header-nav-link:hover,
+.header-nav-link:focus-visible {
+  color: var(--color-gold);
+  background: rgba(242, 230, 201, 0.06);
+}
+
+@media (max-width: 900px) {
+  .header-nav { display: none; }
 }
 
 .global-search-form {
@@ -273,7 +305,8 @@ body {
   }
 
   .small-logo {
-    width: 150px;
+    height: 40px;
+    max-width: 150px;
   }
 }
 
@@ -290,8 +323,8 @@ body {
   }
 
   .small-logo {
-    width: 120px;
-    max-height: 50px;
+    height: 38px;
+    max-width: 120px;
   }
 
   .login-btn {
@@ -308,7 +341,8 @@ body {
   }
 
   .small-logo {
-    width: 76px;
+    height: 32px;
+    max-width: 90px;
   }
 
   .login-btn {

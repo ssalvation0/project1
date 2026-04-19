@@ -8,6 +8,10 @@ import RatingWidget from '../components/RatingWidget';
 import CommentsSection from '../components/CommentsSection';
 import AddToCollectionModal from '../components/AddToCollectionModal';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  Sword, BookOpenText, Link as LinkIcon, Check, Bookmarks,
+  SquaresFour
+} from '@phosphor-icons/react';
 import '../styles/TransmogDetail.css';
 
 const API_URL = '/api/transmogs';
@@ -239,34 +243,22 @@ function TransmogDetail() {
 
       <div className="transmog-detail-container">
         <div className="transmog-detail-header">
-          <button
-            className="back-button detail-btn-base"
-            onClick={navigateToCatalog}
-          >
+          <button className="back-button" onClick={navigateToCatalog}>
             ← Back to Catalog
           </button>
-
-          <button
-            className={`detail-favorite-button detail-btn-base ${isFavorite ? 'favorited' : ''} ${isAnimating ? 'animating' : ''}`}
-            onClick={toggleFavorite}
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          >
-            <span className="favorite-icon-wrapper">
-              <svg
-                className="heart-icon"
-                viewBox="0 0 24 24"
-                fill={isFavorite ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </span>
-            <span className="favorite-button-text">
-              {isFavorite ? 'Favorited' : 'Add to Favorites'}
-            </span>
-          </button>
         </div>
+
+        <nav className="detail-breadcrumbs" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
+          <span aria-hidden="true">/</span>
+          <Link to={`/catalog${transmog.expansion ? `?expansion=${encodeURIComponent(transmog.expansion)}` : ''}`}>
+            {transmog.expansion || 'Catalog'}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="detail-breadcrumbs-current" aria-current="page">
+            {transmog.name}
+          </span>
+        </nav>
 
         <div className="transmog-detail-content-card">
           <div className="detail-top-section">
@@ -281,13 +273,14 @@ function TransmogDetail() {
                 />
               ) : (
                 <div className="detail-icon-placeholder">
-                  <span>⚔️</span>
+                  <Sword size={48} opacity={0.4} />
                 </div>
               )}
               <div className="detail-image-glow"></div>
             </div>
 
             <div className="detail-info-wrapper">
+              <div className="detail-info-top">
               <h1 className="detail-title">{transmog.name}</h1>
 
               <div className="detail-badges">
@@ -323,36 +316,59 @@ function TransmogDetail() {
                     )}
                   </div>
                 </div>
+              </div>
+              </div>
 
-                {transmog.id && (
-                  <div className="meta-row-clean">
-                    <span className="meta-label-clean">Set ID:</span>
-                    <span className="id-value-clean">{transmog.id}</span>
+              <div className="detail-stats-center">
+                {(transmog.items?.length > 0 || transmog.source) && (
+                  <div className="detail-stats-grid">
+                    {transmog.items?.length > 0 && (
+                      <div className="detail-stat">
+                        <span className="detail-stat-value">{transmog.items.length}</span>
+                        <span className="detail-stat-label">Pieces</span>
+                      </div>
+                    )}
+                    {transmog.source && (
+                      <div className="detail-stat">
+                        <span className="detail-stat-value">{transmog.source}</span>
+                        <span className="detail-stat-label">Source</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
               <div className="detail-actions">
+                <button
+                  className={`td-btn td-btn--fav ${isFavorite ? 'is-favorited' : ''} ${isAnimating ? 'animating' : ''}`}
+                  onClick={toggleFavorite}
+                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  {isFavorite ? 'Favorited' : 'Favorite'}
+                </button>
                 <a
                   href={`https://www.wowhead.com/transmog-set=${transmog.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="wowhead-button"
+                  className="td-btn td-btn--wowhead"
                 >
                   View on Wowhead <span className="external-icon">↗</span>
                 </a>
                 <button
-                  className={`share-button ${linkCopied ? 'copied' : ''}`}
+                  className={`td-btn ${linkCopied ? 'td-btn--success' : ''}`}
                   onClick={copyLink}
                 >
-                  {linkCopied ? '✓ Copied!' : '🔗 Share'}
+                  {linkCopied ? <><Check size={16} /> Copied!</> : <><LinkIcon size={16} /> Share</>}
                 </button>
                 {user && (
                   <button
-                    className="save-collection-button"
+                    className="td-btn"
                     onClick={() => setShowCollectionModal(true)}
                   >
-                    📚 Save to Collection
+                    <Bookmarks size={16} /> Save to Collection
                   </button>
                 )}
               </div>
@@ -361,7 +377,7 @@ function TransmogDetail() {
 
           {/* AI Guide Section */}
           <div className="guide-section">
-            <h2>📖 Set Guide</h2>
+            <h3><BookOpenText size={16} weight="bold" /> Set Guide</h3>
             {guideLoading ? (
               <div className="guide-loading">
                 <div className="guide-loading-spinner"></div>
@@ -372,12 +388,27 @@ function TransmogDetail() {
                 <ReactMarkdown>{guideData.guide}</ReactMarkdown>
               </div>
             ) : (
-              <p className="guide-unavailable">Guide not available for this set.</p>
+              <div className="guide-unavailable">
+                <BookOpenText size={28} weight="light" />
+                <h4>Guide coming soon</h4>
+                <p>
+                  Farming guides are AI-generated in batches. This one isn't ready yet —
+                  check back in a few days, or request priority generation.
+                </p>
+                <a
+                  href="https://t.me/ssalvation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="td-btn td-btn--ghost"
+                >
+                  Request via Telegram
+                </a>
+              </div>
             )}
           </div>
 
           <div className="detail-items-section">
-            <h2>⚔️ Set Components</h2>
+            <h3><Sword size={16} weight="bold" /> Set Components</h3>
             {(() => {
               const namedItems = (transmog.items || []).filter(i => i.name && !i.name.startsWith('Item '));
               const hasRealItems = namedItems.length > 0;
@@ -389,7 +420,7 @@ function TransmogDetail() {
                       href={`https://www.wowhead.com/transmog-set=${transmog.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="wowhead-button"
+                      className="td-btn td-btn--wowhead"
                     >
                       Open on Wowhead ↗
                     </a>
@@ -400,38 +431,17 @@ function TransmogDetail() {
                 <div className="detail-items-grid">
                   {namedItems.map((item, index) => (
                     <div key={item.id || index} className="detail-item-card">
-                      <a
-                        href={`https://www.wowhead.com/item=${item.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="item-card-link nwh"
-                      >
-                        <div className="item-card-inner">
-                          <div className="item-icon-wrapper">
-                            {item.iconUrl ? (
-                              <img
-                                src={item.iconUrl}
-                                alt={item.name}
-                                loading="lazy"
-                                decoding="async"
-                                width="64"
-                                height="64"
-                              />
-                            ) : (
-                              <div className="item-placeholder">
-                                <img
-                                  src={`https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg`}
-                                  alt="?"
-                                  width="64"
-                                  height="64"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="item-details">
-                            <h4 data-wowhead={`item=${item.id}`}>{item.name}</h4>
-                            {item.slot && <span className="item-slot">{item.slot}</span>}
-                          </div>
+                      <a href={`https://www.wowhead.com/item=${item.id}`} target="_blank" rel="noopener noreferrer" className="item-card-link nwh">
+                        <div className="item-icon-wrapper">
+                          {item.iconUrl ? (
+                            <img src={item.iconUrl} alt={item.name} loading="lazy" decoding="async" width="40" height="40" />
+                          ) : (
+                            <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg" alt="?" width="40" height="40" />
+                          )}
+                        </div>
+                        <div className="item-info">
+                          <h4 data-wowhead={`item=${item.id}`}>{item.name}</h4>
+                          {item.slot && <span className="item-slot">{item.slot}</span>}
                         </div>
                       </a>
                     </div>
@@ -441,12 +451,12 @@ function TransmogDetail() {
             </div>
           </div>
 
-          {/* Similar Sets Section */}
+          {/* Comments Section */}
           <CommentsSection setId={parseInt(id)} />
 
           {similarSets.length > 0 && (
             <div className="similar-sets-section">
-              <h2>🎭 Similar Sets from {transmog.expansion}</h2>
+              <h3><SquaresFour size={16} /> Similar Sets from {transmog.expansion}</h3>
               <div className="similar-sets-grid">
                 {similarSets.map(set => (
                   <Link
@@ -463,7 +473,7 @@ function TransmogDetail() {
                           decoding="async"
                         />
                       ) : (
-                        <div className="similar-set-placeholder">⚔️</div>
+                        <div className="similar-set-placeholder"><Sword size={32} opacity={0.3} /></div>
                       )}
                     </div>
                     <div className="similar-set-info">

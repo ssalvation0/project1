@@ -4,6 +4,11 @@ import { getTransmogSet, generatePreviewUrl } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import TransmogCard from '../components/TransmogCard';
+import {
+  Shield, Link as LinkIcon, CoatHanger, MagicWand, Sword, Crown,
+  Star, Target, Knife, Skull, Lightning,
+  Leaf, Eye, Flame, Heart, Tree
+} from '@phosphor-icons/react';
 import '../styles/Profile.css';
 
 function Profile() {
@@ -64,25 +69,25 @@ function Profile() {
     : 'Unknown';
 
   const preferenceLabels = {
-    plate: { label: 'Plate', icon: '🛡️' },
-    mail: { label: 'Mail', icon: '⛓️' },
-    leather: { label: 'Leather', icon: '🦊' },
-    cloth: { label: 'Cloth', icon: '🧙' },
-    weapons: { label: 'Weapons', icon: '⚔️' },
-    sets: { label: 'Full Sets', icon: '👑' },
-    warrior: { label: 'Warrior', icon: '⚔️' },
-    paladin: { label: 'Paladin', icon: '🔆' },
-    hunter: { label: 'Hunter', icon: '🏹' },
-    rogue: { label: 'Rogue', icon: '🗡️' },
-    priest: { label: 'Priest', icon: '✨' },
-    deathknight: { label: 'Death Knight', icon: '💀' },
-    shaman: { label: 'Shaman', icon: '🌩️' },
-    mage: { label: 'Mage', icon: '🔮' },
-    warlock: { label: 'Warlock', icon: '🟣' },
-    monk: { label: 'Monk', icon: '🍃' },
-    druid: { label: 'Druid', icon: '🐾' },
-    demonhunter: { label: 'Demon Hunter', icon: '👁️' },
-    evoker: { label: 'Evoker', icon: '🐉' },
+    plate:       { label: 'Plate',        icon: <Shield size={14} /> },
+    mail:        { label: 'Mail',         icon: <LinkIcon size={14} /> },
+    leather:     { label: 'Leather',      icon: <CoatHanger size={14} /> },
+    cloth:       { label: 'Cloth',        icon: <MagicWand size={14} /> },
+    weapons:     { label: 'Weapons',      icon: <Sword size={14} /> },
+    sets:        { label: 'Full Sets',    icon: <Crown size={14} /> },
+    warrior:     { label: 'Warrior',      icon: <Sword size={14} /> },
+    paladin:     { label: 'Paladin',      icon: <Star size={14} /> },
+    hunter:      { label: 'Hunter',       icon: <Target size={14} /> },
+    rogue:       { label: 'Rogue',        icon: <Knife size={14} /> },
+    priest:      { label: 'Priest',       icon: <Star size={14} /> },
+    deathknight: { label: 'Death Knight', icon: <Skull size={14} /> },
+    shaman:      { label: 'Shaman',       icon: <Lightning size={14} /> },
+    mage:        { label: 'Mage',         icon: <MagicWand size={14} /> },
+    warlock:     { label: 'Warlock',      icon: <Eye size={14} /> },
+    monk:        { label: 'Monk',         icon: <Leaf size={14} /> },
+    druid:       { label: 'Druid',        icon: <Tree size={14} /> },
+    demonhunter: { label: 'Demon Hunter', icon: <Eye size={14} /> },
+    evoker:      { label: 'Evoker',       icon: <Flame size={14} /> },
   };
 
   const visiblePreferences = user.preferences || [];
@@ -136,7 +141,7 @@ function Profile() {
             <h2 className="profile-section-title">Your Preferences</h2>
             <div className="profile-preferences">
               {visiblePreferences.map((pref) => {
-                const info = preferenceLabels[pref] || { label: pref, icon: '✨' };
+                const info = preferenceLabels[pref] || { label: pref, icon: <Star size={14} /> };
                 return (
                   <div key={pref} className="profile-pref-tag">
                     <span className="profile-pref-icon">{info.icon}</span>
@@ -174,7 +179,7 @@ function Profile() {
             </div>
           ) : (
             <div className="profile-favorites-empty">
-              <span className="profile-favorites-empty-icon">❤️</span>
+              <span className="profile-favorites-empty-icon"><Heart size={40} opacity={0.4} /></span>
               <p>No favorites yet</p>
               <p className="profile-favorites-empty-hint">
                 Browse the catalog and click the heart icon to save your favorite transmog sets

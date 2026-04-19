@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
-import NewsCarousel from '../components/NewsCarousel';
 import OnboardingWizard from '../components/OnboardingWizard';
 import FeaturedSection from '../components/FeaturedSection';
-import PatchNotes from '../components/PatchNotes';
 import { Helmet } from 'react-helmet-async';
 import '../styles/Home.css';
 
@@ -145,18 +143,15 @@ const classImageMap = {
 function Home() {
   const [showCards, setShowCards] = useState(false);
   const [animateCards, setAnimateCards] = useState(false);
-  const [animateNews, setAnimateNews] = useState(false);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [featuredSets, setFeaturedSets] = useState([]);
   const [trendingSets, setTrendingSets] = useState([]);
   const navigate = useNavigate();
   const cardsRef = useRef(null);
-  const newsRef = useRef(null);
   const heroRef = useRef(null);
 
   // Track if animations have been triggered (only animate once)
-  const animationsTriggeredRef = useRef({ cards: false, news: false });
+  const animationsTriggeredRef = useRef({ cards: false });
 
   useEffect(() => {
     setShowCards(true);
@@ -189,9 +184,6 @@ function Home() {
 
       if (!ticking) {
         rafId = requestAnimationFrame(() => {
-          // Update scroll indicator
-          setShowScrollIndicator(lastScrollY <= 100);
-
           // Parallax effect
           if (heroRef.current) {
             heroRef.current.style.setProperty('--hero-parallax', `${lastScrollY}`);
@@ -203,15 +195,6 @@ function Home() {
             if (rect.top < window.innerHeight * 0.75) {
               animationsTriggeredRef.current.cards = true;
               setAnimateCards(true);
-            }
-          }
-
-          // News animation - only check if not yet triggered
-          if (!animationsTriggeredRef.current.news && newsRef.current) {
-            const rect = newsRef.current.getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.8) {
-              animationsTriggeredRef.current.news = true;
-              setAnimateNews(true);
             }
           }
 
@@ -234,10 +217,6 @@ function Home() {
     const randomId = Math.floor(Math.random() * 13) + 1;
     navigate(`/transmog/${randomId}`);
   }, [navigate]);
-
-  const scrollToCards = useCallback(() => {
-    cardsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
 
   const navigateToCatalog = useCallback(() => {
     navigate('/catalog');
@@ -269,7 +248,6 @@ function Home() {
             avatarUrl={src}
             name={cls.name}
             title={meta.title || cls.name}
-            contactText="View Sets"
             showUserInfo={true}
             enableTilt={true}
             enableMobileTilt={false}
@@ -301,28 +279,30 @@ function Home() {
       </Helmet>
       <section className="hero-section" ref={heroRef}>
         <div className="hero-content">
+          <span className="hero-eyebrow">WoW Transmog Catalog</span>
           <h1 className="hero-title">
-            Explore epic transmogs that
+            Every WoW transmog set,
             <br />
-            define your style
+            in one place.
           </h1>
+          <p className="hero-subtitle">
+            Browse 3,800+ sets across every expansion. Save collections,
+            rate your favorites, and get AI-generated farming guides for each set.
+          </p>
           <div className="hero-buttons">
-            <button className="hero-btn primary btn-ripple btn-ripple-dark" onClick={openWizard}>
-              Find Sets by Class
+            <button className="hero-btn primary btn-ripple btn-ripple-dark" onClick={navigateToCatalog}>
+              Explore Catalog
             </button>
-            <button className="hero-btn secondary btn-ripple btn-ripple-gold" onClick={navigateToCatalog}>
-              Browse All Sets
+            <button className="hero-btn secondary btn-ripple btn-ripple-gold" onClick={openWizard}>
+              Find by Class
             </button>
           </div>
-        </div>
-        <div
-          className={`scroll-indicator ${!showScrollIndicator ? 'hidden' : ''}`}
-          onClick={scrollToCards}
-        >
-          <span>SCROLL TO EXPLORE</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ul className="hero-stats" aria-label="Site stats">
+            <li><strong>3,800+</strong><span>Sets</span></li>
+            <li><strong>21</strong><span>Expansions</span></li>
+            <li><strong>AI</strong><span>Farming guides</span></li>
+            <li><strong>Free</strong><span>Forever</span></li>
+          </ul>
         </div>
       </section>
 
@@ -393,15 +373,6 @@ function Home() {
               items={trendingSets}
               viewAllLink="/catalog"
             />
-          </div>
-
-          <PatchNotes />
-
-          <div
-            ref={newsRef}
-            className={`news-section-wrapper ${animateNews ? 'animate' : ''}`}
-          >
-            <NewsCarousel />
           </div>
         </main>
       )}

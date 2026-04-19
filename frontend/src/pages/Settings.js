@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { Shield, Link as LinkIcon, CoatHanger, MagicWand, Sword, Crown } from '@phosphor-icons/react';
 import '../styles/Settings.css';
 
 const AVATAR_BUCKET = 'avatars';
 
 const STYLE_PREFERENCE_OPTIONS = [
-  { id: 'plate', label: 'Plate', icon: '🛡️' },
-  { id: 'mail', label: 'Mail', icon: '⛓️' },
-  { id: 'leather', label: 'Leather', icon: '🦊' },
-  { id: 'cloth', label: 'Cloth', icon: '🧙' },
-  { id: 'weapons', label: 'Weapons', icon: '⚔️' },
-  { id: 'sets', label: 'Full Sets', icon: '👑' },
+  { id: 'plate',   label: 'Plate',     icon: <Shield size={14} /> },
+  { id: 'mail',    label: 'Mail',      icon: <LinkIcon size={14} /> },
+  { id: 'leather', label: 'Leather',   icon: <CoatHanger size={14} /> },
+  { id: 'cloth',   label: 'Cloth',     icon: <MagicWand size={14} /> },
+  { id: 'weapons', label: 'Weapons',   icon: <Sword size={14} /> },
+  { id: 'sets',    label: 'Full Sets', icon: <Crown size={14} /> },
 ];
 
 const CLASS_PREFERENCE_OPTIONS = [

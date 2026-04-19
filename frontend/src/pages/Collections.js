@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { Books, FolderOpen, Folder } from '@phosphor-icons/react';
 import './Collections.css';
 
 async function fetchUserCollections(userId) {
@@ -29,7 +30,7 @@ function Collections() {
     return (
       <div className="collections-page">
         <div className="collections-empty-state">
-          <div className="collections-empty-icon">📚</div>
+          <div className="collections-empty-icon"><Books size={48} opacity={0.4} /></div>
           <h2>Log in to view your collections</h2>
           <p>Create collections to organize your favourite transmog sets.</p>
         </div>
@@ -55,7 +56,7 @@ function Collections() {
           </div>
         ) : collections.length === 0 ? (
           <div className="collections-empty-state">
-            <div className="collections-empty-icon">📂</div>
+            <div className="collections-empty-icon"><FolderOpen size={48} opacity={0.4} /></div>
             <h2>No collections yet</h2>
             <p>Open any transmog set and save it to a new collection.</p>
             <Link to="/catalog" className="collections-browse-btn">Browse Catalog</Link>
@@ -68,7 +69,7 @@ function Collections() {
                 to={`/collections/${col.id}`}
                 className="collection-card"
               >
-                <div className="collection-card-icon">📁</div>
+                <div className="collection-card-icon"><Folder size={32} /></div>
                 <div className="collection-card-info">
                   <h3>{col.name}</h3>
                   <span className="collection-card-count">
