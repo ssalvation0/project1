@@ -70,13 +70,17 @@ export function FavoritesProvider({ children }) {
         } else {
           await addFavorite(user.id, id);
         }
-      } catch {
-        // Rollback on failure
-        setFavorites(prev => {
-          const rolled = isCurrentlyFav ? [...prev, id] : prev.filter(f => f !== id);
-          setLocalFavorites(rolled);
-          return rolled;
-        });
+      } catch (err) {
+        console.error('[favorites] sync failed, refetching authoritative list', err);
+        // Refetch from server instead of blind rollback — safer for rapid toggles
+        try {
+          const fresh = await getFavorites(user.id);
+          const freshIds = fresh.map(String);
+          setLocalFavorites(freshIds);
+          setFavorites(freshIds);
+        } catch {
+          // DB unreachable — keep optimistic state, localStorage will resync next time
+        }
       }
     }
   }, [favorites, user]);

@@ -12,11 +12,15 @@ function RatingWidget({ setId }) {
   const [saving, setSaving] = useState(false);
 
   const loadRatings = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('ratings')
       .select('score, user_id')
       .eq('set_id', setId);
 
+    if (error) {
+      console.warn('[ratings] load failed', error);
+      return;
+    }
     if (!data || data.length === 0) { setAverage(null); setCount(0); return; }
     const avg = data.reduce((s, r) => s + r.score, 0) / data.length;
     setAverage(avg.toFixed(1));
@@ -27,16 +31,23 @@ function RatingWidget({ setId }) {
     }
   }, [setId, user]);
 
-  useEffect(() => { loadRatings(); }, [loadRatings]);
+  // Cancel stale loadRatings when setId changes — otherwise switching between
+  // sets quickly can let an older response overwrite the current one.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => { if (!cancelled) await loadRatings(); })();
+    return () => { cancelled = true; };
+  }, [loadRatings]);
 
   const handleRate = async (score) => {
     if (!user || saving) return;
     setSaving(true);
     setUserScore(score);
-    await supabase.from('ratings').upsert(
+    const { error } = await supabase.from('ratings').upsert(
       { set_id: setId, user_id: user.id, score },
       { onConflict: 'set_id,user_id' }
     );
+    if (error) console.warn('[ratings] upsert failed', error);
     await loadRatings();
     setSaving(false);
   };

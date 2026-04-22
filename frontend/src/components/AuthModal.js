@@ -153,14 +153,18 @@ function AuthModal({ isOpen, onClose }) {
                     return;
                 }
 
-                // Save profile to DB
+                // Save profile to DB. AuthContext will bootstrap from metadata
+                // if this fails (e.g. RLS delay), so we only log here — the
+                // account still works on next login.
                 try {
                     await upsertProfile(data.user.id, {
                         name,
                         class_preferences: preferences,
                         style_preferences: [],
                     });
-                } catch {}
+                } catch (profileErr) {
+                    console.warn('[auth] profile upsert on signup failed', profileErr);
+                }
 
                 // AuthContext picks up the session automatically
                 onClose();
@@ -231,7 +235,7 @@ function AuthModal({ isOpen, onClose }) {
                         src={`${process.env.PUBLIC_URL}/images/logreg_pic.jpg`}
                         alt="World of Warcraft"
                         className="auth-modal-image"
-                        onError={(e) => console.error('Image failed to load:', e)}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         width="400"
                         height="600"
                         loading="lazy"
@@ -424,9 +428,13 @@ function AuthModal({ isOpen, onClose }) {
                                     {loading ? 'Signing in...' : 'Sign In'}
                                 </button>
 
-                                <p className="forgot-password" onClick={() => { setForgotPassword(true); setError(''); }}>
+                                <button
+                                    type="button"
+                                    className="forgot-password link-button"
+                                    onClick={() => { setForgotPassword(true); setError(''); }}
+                                >
                                     Forgot password?
-                                </p>
+                                </button>
                             </form>
                         ) : null}
 
@@ -458,9 +466,13 @@ function AuthModal({ isOpen, onClose }) {
                                         <button type="submit" className="submit-btn" disabled={loading}>
                                             {loading ? 'Sending...' : 'Send Reset Link'}
                                         </button>
-                                        <p className="forgot-password" onClick={() => { setForgotPassword(false); setError(''); }}>
+                                        <button
+                                            type="button"
+                                            className="forgot-password link-button"
+                                            onClick={() => { setForgotPassword(false); setError(''); }}
+                                        >
                                             Back to Sign In
-                                        </p>
+                                        </button>
                                     </>
                                 )}
                             </form>
@@ -468,9 +480,9 @@ function AuthModal({ isOpen, onClose }) {
 
                         <p className="toggle-mode">
                             {isLogin ? "Don't have an account? " : "Already have an account? "}
-                            <span onClick={toggleMode}>
+                            <button type="button" className="link-button toggle-mode-link" onClick={toggleMode}>
                                 {isLogin ? 'Sign Up' : 'Sign In'}
-                            </span>
+                            </button>
                         </p>
                     </div>
                 </div>

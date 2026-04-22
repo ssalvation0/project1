@@ -157,21 +157,27 @@ function Home() {
     setShowCards(true);
   }, []);
 
-  // Fetch real sets for Featured and Trending sections
+  // Fetch real sets for Featured and Trending sections.
+  // AbortController ensures we don't setState on an unmounted component if the
+  // user navigates away mid-flight.
   useEffect(() => {
-    // Featured: random page from first half of catalog
+    const controller = new AbortController();
     const featuredPage = Math.floor(Math.random() * 20);
-    fetch(`/api/transmogs?page=${featuredPage}&limit=8`)
+    const trendingPage = Math.floor(Math.random() * 20) + 30;
+
+    const opts = { signal: controller.signal };
+
+    fetch(`/api/transmogs?page=${featuredPage}&limit=8`, opts)
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.transmogs?.length) setFeaturedSets(d.transmogs); })
-      .catch(() => {});
+      .catch(err => { if (err.name !== 'AbortError') console.warn('[home] featured fetch failed', err); });
 
-    // Trending: different random page
-    const trendingPage = Math.floor(Math.random() * 20) + 30;
-    fetch(`/api/transmogs?page=${trendingPage}&limit=8`)
+    fetch(`/api/transmogs?page=${trendingPage}&limit=8`, opts)
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.transmogs?.length) setTrendingSets(d.transmogs); })
-      .catch(() => {});
+      .catch(err => { if (err.name !== 'AbortError') console.warn('[home] trending fetch failed', err); });
+
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -213,10 +219,18 @@ function Home() {
     };
   }, []); // Empty deps - scroll handler doesn't need to re-register
 
+  // Pick a random set from what we've actually loaded, not from IDs 1-13 which
+  // mostly 404 (real Wowhead transmog-set IDs start in the hundreds). Fall back
+  // to the catalog if nothing is loaded yet.
   const handleRandomTransmog = useCallback(() => {
-    const randomId = Math.floor(Math.random() * 13) + 1;
-    navigate(`/transmog/${randomId}`);
-  }, [navigate]);
+    const pool = [...featuredSets, ...trendingSets];
+    if (pool.length === 0) {
+      navigate('/catalog');
+      return;
+    }
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    navigate(`/transmog/${pick.id}`);
+  }, [navigate, featuredSets, trendingSets]);
 
   const navigateToCatalog = useCallback(() => {
     navigate('/catalog');

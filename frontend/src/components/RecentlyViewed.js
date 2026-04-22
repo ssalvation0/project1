@@ -22,6 +22,9 @@ function RecentlyViewed({ limit = 5 }) {
 
   useEffect(() => {
     let isMounted = true;
+    // Single controller used by both branches so unmount/limit change cancels
+    // in-flight requests (not just their state updates).
+    const controller = new AbortController();
 
     const loadRecentlyViewed = async () => {
       try {
@@ -32,27 +35,30 @@ function RecentlyViewed({ limit = 5 }) {
           return;
         }
 
-        // Take only needed IDs
         const idsToFetch = recentlyViewed.slice(0, limit).map(item => item.id);
 
-        // OPTIMIZATION: Single batch request instead of N separate requests
-        // Try batch endpoint first, fallback to individual requests
+        // OPTIMIZATION: Single batch request instead of N separate requests.
+        // Try batch endpoint first, fallback to individual requests.
         try {
-          const batchRes = await fetch(`${API_URL}/batch?ids=${idsToFetch.join(',')}`);
+          const batchRes = await fetch(`${API_URL}/batch?ids=${idsToFetch.join(',')}`, { signal: controller.signal });
           if (batchRes.ok) {
             const transmogs = await batchRes.json();
+            // Preserve the recently-viewed order — the batch endpoint doesn't
+            // guarantee it. Filter out any 404s (null/missing entries).
+            const byId = new Map((transmogs || []).map(t => [t.id, t]));
+            const ordered = idsToFetch.map(id => byId.get(id)).filter(Boolean);
             if (isMounted) {
-              setRecentTransmogs(transmogs);
+              setRecentTransmogs(ordered);
               setLoading(false);
             }
             return;
           }
-        } catch {
-          // Batch endpoint doesn't exist, use fallback
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          // Batch endpoint failed (not aborted) — fall through to per-id
         }
 
-        // Fallback: Use Promise.all but with AbortController for cleanup
-        const controller = new AbortController();
+        // Fallback path
         const transmogPromises = idsToFetch.map(id =>
           fetch(`${API_URL}/${id}`, { signal: controller.signal })
             .then(res => res.ok ? res.json() : null)
@@ -67,6 +73,7 @@ function RecentlyViewed({ limit = 5 }) {
           setLoading(false);
         }
       } catch (error) {
+        if (error.name === 'AbortError') return;
         console.error('Error loading recently viewed:', error);
         if (isMounted) setLoading(false);
       }
@@ -76,6 +83,7 @@ function RecentlyViewed({ limit = 5 }) {
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [limit]);
 

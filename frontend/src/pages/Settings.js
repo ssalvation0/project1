@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -187,6 +187,13 @@ function Settings() {
     stylePreferences: user.stylePreferences || [],
   });
 
+  // Track the blob URL separately so we can revoke it without also nuking
+  // avatarPreview when it's the user's remote avatarUrl (http/https).
+  const blobUrlRef = useRef(null);
+  useEffect(() => () => {
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+  }, []);
+
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,7 +201,12 @@ function Settings() {
     if (file.size > 3 * 1024 * 1024) { setFeedback('avatar', 'error', 'Max 3MB.'); return; }
     setRowError(prev => ({ ...prev, avatar: '' }));
     setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+    // Revoke the previous blob (if any) before creating a new one to avoid
+    // leaking memory on each file pick.
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    const nextUrl = URL.createObjectURL(file);
+    blobUrlRef.current = nextUrl;
+    setAvatarPreview(nextUrl);
   };
 
   if (loading || !user) {

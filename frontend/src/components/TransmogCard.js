@@ -18,19 +18,14 @@ const getQualityColor = (quality) => {
     return QUALITY_COLORS[quality?.toLowerCase()] || '#ffffff';
 };
 
-// Stable pseudo-random based on transmog ID (deterministic)
-const seededRandom = (id, salt = 0) => {
-    const x = Math.sin(id * 9301 + salt * 49297 + 49297) * 49297;
-    return x - Math.floor(x);
-};
-
-const SOURCES = ['Raid', 'PvP', 'Dungeon', 'Crafted'];
-
 const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
-    // Deterministic mock data based on transmog ID
-    const source = useMemo(() => transmog.source || SOURCES[Math.floor(seededRandom(transmog.id, 1) * SOURCES.length)], [transmog.source, transmog.id]);
+    // Only show source/type when the backend actually provides them.
+    // Previously we faked "Raid"/"Plate" via a seeded RNG, which labelled
+    // cloth PvP sets as "Plate Raid" and confused users.
+    const source = transmog.source || null;
+    const type = transmog.type || null;
 
     const handleClick = useCallback(() => {
         navigate(`/transmog/${transmog.id}`);
@@ -66,12 +61,14 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
         return null;
     }, [transmog.classes]);
 
+    const metaLine = [type, source].filter(Boolean).join(' • ') || transmog.name;
+
     return (
         <div
             className="transmog-card"
             onClick={handleClick}
             style={cardStyle}
-            title={`${transmog.type || 'Plate'} • ${source} • ${transmog.difficulty || 'Mythic'}`} // Simple tooltip
+            title={metaLine}
         >
             <div className="transmog-card-image-container">
                 {showPlaceholder ? (
@@ -91,7 +88,7 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
 
                 <div className="transmog-card-overlay">
                     <div className="card-overlay-content">
-                        <p className="overlay-meta">{transmog.type || 'Plate'} • {source}</p>
+                        {(type || source) && <p className="overlay-meta">{[type, source].filter(Boolean).join(' • ')}</p>}
                         <span className="view-details-btn">Details</span>
                     </div>
                 </div>
@@ -110,7 +107,7 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
                             {classBadge.text}
                         </span>
                     )}
-                    <span className="expansion-badge source-badge">{source}</span>
+                    {source && <span className="expansion-badge source-badge">{source}</span>}
                 </div>
             </div>
 

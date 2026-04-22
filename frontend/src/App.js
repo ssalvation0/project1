@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import Header from './components/Header';
@@ -23,6 +23,16 @@ const Settings = React.lazy(() => import('./pages/Settings'))
 const Favorites = React.lazy(() => import('./pages/Favorites'))
 const Collections = React.lazy(() => import('./pages/Collections'));
 const CollectionDetail = React.lazy(() => import('./pages/CollectionDetail'));
+
+// Scrolls to top on every route change. React Router v6 doesn't do this by default;
+// without it, navigating from Catalog (scrolled down) to TransmogDetail lands mid-page.
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }, [pathname]);
+  return null;
+}
 
 // Loading fallback component - uses skeleton cards for better UX
 const LoadingFallback = React.memo(() => (
@@ -127,10 +137,10 @@ function App() {
       <FavoritesProvider>
       <ToastProvider>
         <div className="App">
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-          />
+          <Helmet>
+            <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+          </Helmet>
+          <ScrollToTop />
           <div
             className="background-image"
             style={backgroundStyle}

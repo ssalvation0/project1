@@ -46,20 +46,7 @@ export const getItemMedia = (id) => apiRequest(`/items/${id}/media`);
 
 export const clearCache = () => apiRequest('/cache/clear', { method: 'POST' });
 
-// Auth API
-export const register = (data) => apiRequest('/auth/register', {
-  method: 'POST',
-  body: JSON.stringify(data)
-});
-
-export const login = (data) => apiRequest('/auth/login', {
-  method: 'POST',
-  body: JSON.stringify(data)
-});
-
-export const getMe = () => {
-  const token = localStorage.getItem('token');
-  return apiRequest('/auth/me', {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-};
+// Auth lives entirely in Supabase now (see services/supabase.js + AuthContext).
+// Legacy /auth/register, /auth/login, /auth/me stubs were dead code — they
+// referenced a non-existent `localStorage.getItem('token')` scheme that we
+// never used against our backend, and nothing imported them.

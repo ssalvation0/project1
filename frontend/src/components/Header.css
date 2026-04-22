@@ -131,7 +131,7 @@ body {
 }
 
 .global-search-input::placeholder {
-  color: rgba(229, 211, 179, 0.5);
+  color: rgba(229, 211, 179, 0.68);
 }
 
 @media (max-width: 768px) {
@@ -237,6 +237,10 @@ body {
   font-size: 0.95rem;
   font-weight: 700;
   color: #f2e6c9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .header-menu-email {
@@ -246,6 +250,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .header-menu-divider {

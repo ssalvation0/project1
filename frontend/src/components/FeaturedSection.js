@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TransmogCard from './TransmogCard';
+import { useFavorites } from '../contexts/FavoritesContext';
 import './FeaturedSection.css';
 
 const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLink, onViewAll }) => {
+    const { isFavorite, toggleFavorite } = useFavorites();
     const scrollContainerRef = useRef(null);
     const navigate = useNavigate();
     const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -85,8 +87,8 @@ const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLi
                     <div key={item.id || index} className="featured-item-wrapper">
                         <TransmogCard
                             transmog={item}
-                            onToggleFavorite={(id) => console.log('Toggle fav', id)}
-                            isFavorite={false}
+                            onToggleFavorite={toggleFavorite}
+                            isFavorite={isFavorite(item.id)}
                         />
                     </div>
                 ))}

@@ -16,9 +16,15 @@ async function fetchFavoriteTransmogs(ids) {
 function Favorites() {
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
-  const numericIds = useMemo(() => favorites.map(Number).filter(Boolean), [favorites]);
+  // Number.isFinite instead of Boolean: the latter would drop id=0. Sort so the
+  // queryKey stays stable when the user adds favorites in a different order —
+  // otherwise every toggle busts the cache.
+  const numericIds = useMemo(() => {
+    const nums = favorites.map(Number).filter(n => Number.isFinite(n));
+    return [...nums].sort((a, b) => a - b);
+  }, [favorites]);
 
-  const { data: transmogs = [], isLoading } = useQuery({
+  const { data: transmogs = [], isLoading, error } = useQuery({
     queryKey: ['favorites-batch', numericIds.join(',')],
     queryFn: () => fetchFavoriteTransmogs(numericIds),
     enabled: numericIds.length > 0,
@@ -45,6 +51,12 @@ function Favorites() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className="favorites-skeleton" />
             ))}
+          </div>
+        ) : error ? (
+          <div className="favorites-empty">
+            <div className="favorites-empty-icon">!</div>
+            <h2>Couldn't load favorites</h2>
+            <p>Please check your connection and try again.</p>
           </div>
         ) : favorites.length === 0 ? (
           <div className="favorites-empty">

@@ -8,6 +8,7 @@ import RatingWidget from '../components/RatingWidget';
 import CommentsSection from '../components/CommentsSection';
 import AddToCollectionModal from '../components/AddToCollectionModal';
 import { useAuth } from '../contexts/AuthContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 import {
   Sword, BookOpenText, Link as LinkIcon, Check, Bookmarks,
   SquaresFour
@@ -53,24 +54,15 @@ function TransmogDetail() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user } = useAuth();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite: isFavoriteFn, toggleFavorite: ctxToggleFavorite } = useFavorites();
+  const isFavorite = isFavoriteFn(id);
   const [isAnimating, setIsAnimating] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [showCollectionModal, setShowCollectionModal] = useState(false);
 
-  // Initialize favorite state and update history
+  // Update recently-viewed history when set changes
   useEffect(() => {
-    const transmogId = parseInt(id);
-
-    // Check favorites
-    try {
-      const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
-      setIsFavorite(favorites.includes(transmogId));
-    } catch {
-      setIsFavorite(false);
-    }
-
-    // Add to history
+    const transmogId = parseInt(id, 10);
     try {
       const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewedTransmogs') || '[]');
       const filtered = recentlyViewed.filter(item => item.id !== transmogId);
@@ -83,13 +75,6 @@ function TransmogDetail() {
       // Ignore localStorage errors
     }
   }, [id]);
-
-  // Re-bind Wowhead tooltips after items render
-  useEffect(() => {
-    if (typeof window.WH !== 'undefined' && typeof window.WH.bindLinks === 'function') {
-      window.WH.bindLinks();
-    }
-  });
 
   const { data: transmog, isLoading, error, refetch } = useQuery({
     queryKey: ['transmog', id],
@@ -116,6 +101,13 @@ function TransmogDetail() {
     return () => clearTimeout(t);
   }, [guideLoading, id]);
 
+  // Re-bind Wowhead tooltips after items render
+  useEffect(() => {
+    if (typeof window.WH !== 'undefined' && typeof window.WH.bindLinks === 'function') {
+      window.WH.bindLinks();
+    }
+  }, [transmog?.items?.length]);
+
   // Fetch similar sets
   const { data: similarSets = [] } = useQuery({
     queryKey: ['similarSets', transmog?.expansion, transmog?.source, id],
@@ -130,47 +122,39 @@ function TransmogDetail() {
     }
   }, [error, showToast]);
 
+  // Stash the most recent animation timer in a ref so we can clear it on unmount
+  // or when the user double-taps fav (avoids a setState on unmounted component).
+  const animTimerRef = React.useRef(null);
+  useEffect(() => () => { if (animTimerRef.current) clearTimeout(animTimerRef.current); }, []);
+
   const toggleFavorite = useCallback(() => {
-    const transmogId = parseInt(id);
-
     setIsAnimating(true);
-    const timeoutId = setTimeout(() => setIsAnimating(false), 500);
+    if (animTimerRef.current) clearTimeout(animTimerRef.current);
+    animTimerRef.current = setTimeout(() => setIsAnimating(false), 500);
 
-    setIsFavorite(prevIsFavorite => {
-      const newIsFavorite = !prevIsFavorite;
-
-      try {
-        const favorites = JSON.parse(localStorage.getItem('favoriteTransmogs') || '[]');
-        const newFavorites = newIsFavorite
-          ? [...favorites, transmogId]
-          : favorites.filter(favId => favId !== transmogId);
-        localStorage.setItem('favoriteTransmogs', JSON.stringify(newFavorites));
-      } catch {
-        // Ignore localStorage errors
-      }
-
-      showToast(
-        newIsFavorite ? 'Added to favorites' : 'Removed from favorites',
-        { type: newIsFavorite ? 'success' : 'info' }
-      );
-
-      return newIsFavorite;
-    });
-
-    return () => clearTimeout(timeoutId);
-  }, [id, showToast]);
+    const wasFavorite = isFavoriteFn(id);
+    ctxToggleFavorite(id);
+    showToast(
+      wasFavorite ? 'Removed from favorites' : 'Added to favorites',
+      { type: wasFavorite ? 'info' : 'success' }
+    );
+  }, [id, showToast, isFavoriteFn, ctxToggleFavorite]);
 
   const navigateToCatalog = useCallback(() => {
     navigate('/catalog');
   }, [navigate]);
 
   // Copy link to clipboard
+  const copyTimerRef = React.useRef(null);
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
+
   const copyLink = useCallback(() => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
       setLinkCopied(true);
       showToast('Link copied to clipboard!', { type: 'success' });
-      setTimeout(() => setLinkCopied(false), 2000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setLinkCopied(false), 2000);
     }).catch(() => {
       showToast('Failed to copy link', { type: 'error' });
     });

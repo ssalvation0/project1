@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { getTransmogSet, generatePreviewUrl } from '../services/api';
+import { generatePreviewUrl } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import TransmogCard from '../components/TransmogCard';
@@ -23,31 +23,41 @@ function Profile() {
     if (!loading && !user) navigate('/');
   }, [loading, user, navigate]);
 
-  // Fetch transmog details for each favorite ID
+  // Fetch transmog details for all favorites in a single batch request.
+  // Previously did N separate /transmogs/:id calls; the batch endpoint halves
+  // latency for anyone with more than a couple of favorites.
   useEffect(() => {
     if (favorites.length === 0) {
       setFavoriteTransmogs([]);
       return;
     }
 
+    const numericIds = favorites.map(Number).filter(n => Number.isFinite(n));
+    if (numericIds.length === 0) {
+      setFavoriteTransmogs([]);
+      return;
+    }
+
+    const controller = new AbortController();
     setFavoritesLoading(true);
-    Promise.allSettled(favorites.map(id => getTransmogSet(id)))
-      .then(results => {
-        const loaded = results
-          .filter(r => r.status === 'fulfilled' && r.value)
-          .map(r => {
-            const transmog = r.value;
-            if (!transmog.previewUrl) {
-              transmog.previewUrl = generatePreviewUrl(transmog.id);
-            }
-            return transmog;
-          });
-        setFavoriteTransmogs(loaded);
+    fetch(`/api/transmogs/batch?ids=${numericIds.join(',')}`, { signal: controller.signal })
+      .then(r => r.ok ? r.json() : [])
+      .then(list => {
+        const withPreviews = (Array.isArray(list) ? list : []).map(t => (
+          t.previewUrl ? t : { ...t, previewUrl: generatePreviewUrl(t.id) }
+        ));
+        setFavoriteTransmogs(withPreviews);
       })
+      .catch(err => { if (err.name !== 'AbortError') console.warn('[profile] favorites batch failed', err); })
       .finally(() => setFavoritesLoading(false));
+
+    return () => controller.abort();
   }, [favorites]);
 
-  if (loading && !user) {
+  // While auth is still resolving (refresh on profile page), show spinner
+  // regardless of whether `user` is populated yet — otherwise we render null
+  // momentarily between loading→false and the redirect effect firing.
+  if (loading || !user) {
     return (
       <div className="profile-page">
         <div className="profile-loading">
@@ -57,8 +67,6 @@ function Profile() {
       </div>
     );
   }
-
-  if (!user) return null;
 
   const initials = user.name
     ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)

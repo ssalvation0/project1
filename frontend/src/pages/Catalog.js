@@ -131,6 +131,20 @@ function Catalog() {
     setCurrentPage(0);
   }, [debouncedSearch]);
 
+  // Keep the local `searchQuery` state in sync when the URL's `search` param
+  // changes from the outside (e.g. global header search submitting to /catalog
+  // while we're already on /catalog). Without this, the input would keep
+  // showing the stale query while the results reflect the new one.
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    // Only overwrite if it differs AND isn't in flight from our own typing —
+    // comparing against debouncedSearch avoids fighting the debounce.
+    if (urlSearch !== debouncedSearch && urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const handleSearchChange = useCallback((e) => {
     setSearchQuery(e.target.value);
   }, []);

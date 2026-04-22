@@ -20,9 +20,11 @@ function CommentsSection({ setId }) {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
 
-  const loadComments = useCallback(async () => {
+  // Guard with a cancel flag so switching sets quickly can't have the old
+  // response overwrite comments on the new page.
+  const loadComments = useCallback(async ({ signal } = {}) => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error: loadErr } = await supabase
       .from('comments')
       .select(`
         id, content, created_at, user_id,
@@ -31,15 +33,28 @@ function CommentsSection({ setId }) {
       .eq('set_id', setId)
       .order('created_at', { ascending: false });
 
+    if (signal?.aborted) return;
+    if (loadErr) {
+      console.error('[comments] load failed', loadErr);
+      setError('Failed to load comments');
+    }
     setComments(data || []);
     setLoading(false);
   }, [setId]);
 
-  useEffect(() => { loadComments(); }, [loadComments]);
+  useEffect(() => {
+    const controller = new AbortController();
+    loadComments({ signal: controller.signal });
+    return () => controller.abort();
+  }, [loadComments]);
 
   const handlePost = async (e) => {
     e.preventDefault();
     if (!text.trim() || posting) return;
+    if (!user?.id) {
+      setError('Please log in to post a comment');
+      return;
+    }
     setPosting(true);
     setError('');
 
@@ -59,7 +74,16 @@ function CommentsSection({ setId }) {
   };
 
   const handleDelete = async (commentId) => {
-    await supabase.from('comments').delete().eq('id', commentId);
+    if (!user?.id) return;
+    if (!window.confirm('Delete this comment?')) return;
+    // Scope by user_id so a broken RLS policy can't let one user delete another's.
+    const { error: delErr } = await supabase
+      .from('comments').delete().eq('id', commentId).eq('user_id', user.id);
+    if (delErr) {
+      console.error('[comments] delete failed', delErr);
+      setError('Failed to delete comment');
+      return;
+    }
     setComments(prev => prev.filter(c => c.id !== commentId));
   };
 

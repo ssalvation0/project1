@@ -358,7 +358,7 @@
     margin: 20px 0 0 0;
 }
 
-.toggle-mode span {
+.toggle-mode .toggle-mode-link {
     color: #f2e6c9;
     cursor: pointer;
     font-weight: 600;
@@ -366,12 +366,32 @@
     transition: opacity 0.2s;
 }
 
-.toggle-mode span:hover {
+.toggle-mode .toggle-mode-link:hover {
     opacity: 0.7;
+}
+
+/* Shared reset for buttons that should look like inline links
+   (keyboard/a11y-friendly replacement for the old <p onClick>/<span onClick>). */
+.link-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: inline;
+}
+.link-button:focus-visible {
+    outline: 2px solid rgba(242, 230, 201, 0.5);
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
 /* Forgot Password */
 .forgot-password {
+    display: block;
+    width: 100%;
     text-align: center;
     color: rgba(242, 230, 201, 0.5);
     font-size: 0.78rem;

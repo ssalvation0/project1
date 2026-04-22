@@ -8,11 +8,17 @@ import { PencilSimple, Trash } from '@phosphor-icons/react';
 import './CollectionDetail.css';
 
 async function fetchCollection(id) {
-  const { data } = await supabase
+  // maybeSingle() returns data:null on 0 rows instead of throwing PGRST116 —
+  // cleaner "not found" handling without distinguishing error codes in the caller.
+  const { data, error } = await supabase
     .from('collections')
     .select('id, name, set_ids, created_at, user_id')
     .eq('id', id)
-    .single();
+    .maybeSingle();
+  if (error) {
+    console.error('[collection] fetch failed', error);
+    throw error;
+  }
   return data;
 }
 
@@ -48,19 +54,37 @@ function CollectionDetail() {
 
   const isOwner = user && collection && user.id === collection.user_id;
 
+  // Belt-and-braces: always defer to RLS, but the extra `.eq('user_id', user.id)`
+  // and client-side `isOwner` guard make the intent obvious and keep buttons from
+  // firing requests that RLS will reject anyway.
   const handleDelete = async () => {
+    if (!isOwner) return;
     if (!window.confirm(`Delete collection "${collection?.name}"?`)) return;
     setDeleting(true);
-    await supabase.from('collections').delete().eq('id', id);
+    const { error: delErr } = await supabase
+      .from('collections').delete().eq('id', id).eq('user_id', user.id);
+    if (delErr) {
+      console.error('[collection] delete failed', delErr);
+      alert('Failed to delete. Please try again.');
+      setDeleting(false);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['collections', user?.id] });
     navigate('/collections');
   };
 
   const handleRename = async (e) => {
     e.preventDefault();
+    if (!isOwner) return;
     if (!newName.trim()) return;
     setSavingName(true);
-    await supabase.from('collections').update({ name: newName.trim() }).eq('id', id);
+    const { error: renameErr } = await supabase
+      .from('collections').update({ name: newName.trim() }).eq('id', id).eq('user_id', user.id);
+    if (renameErr) {
+      console.error('[collection] rename failed', renameErr);
+      setSavingName(false);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['collection', id] });
     queryClient.invalidateQueries({ queryKey: ['collections', user?.id] });
     setRenaming(false);
@@ -69,8 +93,14 @@ function CollectionDetail() {
   };
 
   const handleRemoveSet = async (setId) => {
+    if (!isOwner) return;
     const newIds = (collection.set_ids || []).filter(s => s !== setId);
-    await supabase.from('collections').update({ set_ids: newIds }).eq('id', id);
+    const { error: updateErr } = await supabase
+      .from('collections').update({ set_ids: newIds }).eq('id', id).eq('user_id', user.id);
+    if (updateErr) {
+      console.error('[collection] remove set failed', updateErr);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['collection', id] });
   };
 

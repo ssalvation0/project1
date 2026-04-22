@@ -30,11 +30,13 @@ export async function removeFavorite(userId, transmogId) {
 // ─── PROFILES ─────────────────────────────────────────────────
 
 export async function getProfile(userId) {
+  // maybeSingle() returns data:null instead of throwing on 0 rows — cleaner
+  // than distinguishing PGRST116 from real errors in the caller.
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
