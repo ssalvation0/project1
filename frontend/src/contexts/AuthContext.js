@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { getProfile, upsertProfile } from '../services/db';
@@ -53,6 +53,16 @@ const CLASS_IDS = [
   'shaman', 'mage', 'warlock', 'monk', 'druid', 'demonhunter', 'evoker',
 ];
 
+function createBootstrapProfile(supabaseUser) {
+  const meta = supabaseUser.user_metadata || {};
+  return {
+    name: meta.name || meta.full_name || (supabaseUser.email ? supabaseUser.email.split('@')[0] : 'User'),
+    avatar_url: meta.avatar_url || null,
+    class_preferences: Array.isArray(meta.class_preferences) ? meta.class_preferences : [],
+    style_preferences: Array.isArray(meta.style_preferences) ? meta.style_preferences : [],
+  };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -87,13 +97,7 @@ export function AuthProvider({ children }) {
         // If no profile row exists, bootstrap one from metadata so subsequent
         // logins read consistently from the profiles table.
         if (!profile) {
-          const meta = rawUser.user_metadata || {};
-          const bootstrap = {
-            name: meta.name || meta.full_name || (rawUser.email ? rawUser.email.split('@')[0] : 'User'),
-            avatar_url: meta.avatar_url || null,
-            class_preferences: Array.isArray(meta.class_preferences) ? meta.class_preferences : [],
-            style_preferences: Array.isArray(meta.style_preferences) ? meta.style_preferences : [],
-          };
+          const bootstrap = createBootstrapProfile(rawUser);
           try {
             await upsertProfile(rawUser.id, bootstrap);
             if (!cancelled) setUser(buildUser(rawUser, bootstrap));
@@ -110,13 +114,7 @@ export function AuthProvider({ children }) {
         if (cancelled) return;
         // PGRST116 = no rows → try bootstrap
         if (err?.code === 'PGRST116') {
-          const meta = rawUser.user_metadata || {};
-          const bootstrap = {
-            name: meta.name || meta.full_name || (rawUser.email ? rawUser.email.split('@')[0] : 'User'),
-            avatar_url: meta.avatar_url || null,
-            class_preferences: Array.isArray(meta.class_preferences) ? meta.class_preferences : [],
-            style_preferences: Array.isArray(meta.style_preferences) ? meta.style_preferences : [],
-          };
+          const bootstrap = createBootstrapProfile(rawUser);
           try {
             await upsertProfile(rawUser.id, bootstrap);
             if (!cancelled) setUser(buildUser(rawUser, bootstrap));
@@ -184,9 +182,6 @@ export function AuthProvider({ children }) {
       style_preferences: updates.stylePreferences,
     });
 
-    // Keep user_metadata in sync for Google OAuth avatar fallback.
-    // This fires USER_UPDATED → onAuthStateChange → setRawUser → would
-    // retrigger profile useEffect and overwrite our optimistic state with
     // a stale re-read. Mark the next cycle to be skipped.
     skipNextRefetchRef.current = true;
     try {
@@ -205,11 +200,29 @@ export function AuthProvider({ children }) {
       throw err;
     }
 
-    setUser(prev => ({ ...prev, ...updates, preferences: [...(updates.classPreferences || []), ...(updates.stylePreferences || [])] }));
+    const classPreferences = Array.isArray(updates.classPreferences) ? updates.classPreferences : [];
+    const stylePreferences = Array.isArray(updates.stylePreferences) ? updates.stylePreferences : [];
+    setUser(prev => ({
+      ...prev,
+      ...updates,
+      classPreferences,
+      stylePreferences,
+      preferences: [...classPreferences, ...stylePreferences],
+    }));
   };
 
+  const authContextValue = useMemo(() => ({
+    user,
+    loading,
+    signOut,
+    updateProfile,
+    passwordRecovery,
+    setNewPassword,
+    dismissPasswordRecovery,
+  }), [user, loading, passwordRecovery]);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, updateProfile, passwordRecovery, setNewPassword, dismissPasswordRecovery }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );

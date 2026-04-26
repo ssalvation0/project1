@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { getFavorites, addFavorite, removeFavorite } from '../services/db';
 import { useAuth } from './AuthContext';
 
@@ -14,10 +14,19 @@ function setLocalFavorites(ids) {
   localStorage.setItem(LS_KEY, JSON.stringify(ids));
 }
 
+function toStringIds(ids) {
+  return ids.map(String);
+}
+
 export function FavoritesProvider({ children }) {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState(getLocalFavorites);
   const [synced, setSynced] = useState(false);
+  const favoritesRef = React.useRef(favorites);
+
+  useEffect(() => {
+    favoritesRef.current = favorites;
+  }, [favorites]);
 
   // When user logs in — load from DB, merge with any localStorage items
   useEffect(() => {
@@ -54,7 +63,7 @@ export function FavoritesProvider({ children }) {
 
   const toggleFavorite = useCallback(async (transmogId) => {
     const id = String(transmogId);
-    const isCurrentlyFav = favorites.includes(id);
+    const isCurrentlyFav = favoritesRef.current.includes(id);
 
     // Optimistic update
     setFavorites(prev => {
@@ -75,7 +84,7 @@ export function FavoritesProvider({ children }) {
         // Refetch from server instead of blind rollback — safer for rapid toggles
         try {
           const fresh = await getFavorites(user.id);
-          const freshIds = fresh.map(String);
+          const freshIds = toStringIds(fresh);
           setLocalFavorites(freshIds);
           setFavorites(freshIds);
         } catch {
@@ -83,12 +92,19 @@ export function FavoritesProvider({ children }) {
         }
       }
     }
-  }, [favorites, user]);
+  }, [user]);
 
   const isFavorite = useCallback((transmogId) => favorites.includes(String(transmogId)), [favorites]);
 
+  const favoritesContextValue = useMemo(() => ({
+    favorites,
+    isFavorite,
+    toggleFavorite,
+    synced,
+  }), [favorites, isFavorite, toggleFavorite, synced]);
+
   return (
-    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite, synced }}>
+    <FavoritesContext.Provider value={favoritesContextValue}>
       {children}
     </FavoritesContext.Provider>
   );

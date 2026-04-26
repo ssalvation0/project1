@@ -14,6 +14,45 @@ import './styles/tooltip.css';
 import backgroundImage from './images/background.jpg';
 import ToastProvider from './components/ToastProvider';
 
+const LOADING_FALLBACK_STYLE = {
+  padding: '140px 20px',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gap: '30px',
+  maxWidth: '1400px',
+  margin: '0 auto'
+};
+
+const LOADING_CARD_STYLE = {
+  background: 'rgba(20, 15, 10, 0.6)',
+  borderRadius: '16px',
+  overflow: 'hidden',
+  height: '350px'
+};
+
+const LOADING_IMAGE_STYLE = {
+  width: '100%',
+  height: '200px',
+  background: 'linear-gradient(90deg, rgba(30,30,30,0.8) 0%, rgba(50,50,50,0.8) 50%, rgba(30,30,30,0.8) 100%)',
+  backgroundSize: '200% 100%',
+  animation: 'shimmer 1.5s infinite'
+};
+
+const LOADING_TITLE_STYLE = {
+  height: '20px',
+  background: 'rgba(229,211,179,0.2)',
+  borderRadius: '4px',
+  marginBottom: '12px',
+  width: '70%'
+};
+
+const LOADING_BADGE_STYLE = {
+  height: '18px',
+  width: '60px',
+  background: 'rgba(229,211,179,0.15)',
+  borderRadius: '3px'
+};
+
 // Lazy load pages for code splitting
 const Home = React.lazy(() => import('./pages/Home'));
 const Catalog = React.lazy(() => import('./pages/Catalog'));
@@ -36,39 +75,15 @@ function ScrollToTop() {
 
 // Loading fallback component - uses skeleton cards for better UX
 const LoadingFallback = React.memo(() => (
-  <div style={{
-    padding: '140px 20px',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '30px',
-    maxWidth: '1400px',
-    margin: '0 auto'
-  }}>
+  <div style={LOADING_FALLBACK_STYLE}>
     {[...Array(6)].map((_, i) => (
-      <div key={i} className="skeleton-card" style={{
-        background: 'rgba(20, 15, 10, 0.6)',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        height: '350px'
-      }}>
-        <div style={{
-          width: '100%',
-          height: '200px',
-          background: 'linear-gradient(90deg, rgba(30,30,30,0.8) 0%, rgba(50,50,50,0.8) 50%, rgba(30,30,30,0.8) 100%)',
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 1.5s infinite'
-        }} />
+      <div key={i} className="skeleton-card" style={LOADING_CARD_STYLE}>
+        <div style={LOADING_IMAGE_STYLE} />
         <div style={{ padding: '16px' }}>
-          <div style={{
-            height: '20px',
-            background: 'rgba(229,211,179,0.2)',
-            borderRadius: '4px',
-            marginBottom: '12px',
-            width: '70%'
-          }} />
+          <div style={LOADING_TITLE_STYLE} />
           <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ height: '18px', width: '60px', background: 'rgba(229,211,179,0.15)', borderRadius: '3px' }} />
-            <div style={{ height: '18px', width: '60px', background: 'rgba(229,211,179,0.15)', borderRadius: '3px' }} />
+            <div style={LOADING_BADGE_STYLE} />
+            <div style={LOADING_BADGE_STYLE} />
           </div>
         </div>
       </div>

@@ -3,6 +3,8 @@ import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './AddToCollectionModal.css';
 
+const toSetIdsArray = (value) => (Array.isArray(value) ? value : []);
+
 function AddToCollectionModal({ setId, setName, onClose }) {
   const { user } = useAuth();
   const [collections, setCollections] = useState([]);
@@ -14,7 +16,15 @@ function AddToCollectionModal({ setId, setName, onClose }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setCollections([]);
+      setSaved({});
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
     let cancelled = false;
     supabase
       .from('collections')
@@ -32,7 +42,7 @@ function AddToCollectionModal({ setId, setName, onClose }) {
         setCollections(data || []);
         const alreadyIn = {};
         (data || []).forEach(c => {
-          if ((c.set_ids || []).includes(setId)) alreadyIn[c.id] = true;
+          if (toSetIdsArray(c.set_ids).includes(setId)) alreadyIn[c.id] = true;
         });
         setSaved(alreadyIn);
         setLoading(false);
@@ -49,13 +59,15 @@ function AddToCollectionModal({ setId, setName, onClose }) {
   }, [onClose]);
 
   const toggleCollection = async (col) => {
-    if (!user?.id) return;
+    if (!user?.id || saving !== null) return;
     setSaving(col.id);
     setError('');
-    const isIn = saved[col.id];
+
+    const currentSetIds = toSetIdsArray(col.set_ids);
+    const isIn = currentSetIds.includes(setId);
     const newIds = isIn
-      ? col.set_ids.filter(id => id !== setId)
-      : [...(col.set_ids || []), setId];
+      ? currentSetIds.filter(id => id !== setId)
+      : [...new Set([...currentSetIds, setId])];
 
     // Scope by user_id in addition to id — RLS will enforce it server-side but
     // the extra predicate makes the intent explicit and surfaces mistakes loudly.
@@ -79,13 +91,14 @@ function AddToCollectionModal({ setId, setName, onClose }) {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newName.trim() || !user?.id) return;
+    const trimmedName = newName.trim();
+    if (!trimmedName || !user?.id || saving !== null) return;
     setSaving('new');
     setError('');
     // maybeSingle() so an RLS rejection surfaces as error instead of a throw.
     const { data, error: insertErr } = await supabase
       .from('collections')
-      .insert({ user_id: user.id, name: newName.trim(), set_ids: [setId] })
+      .insert({ user_id: user.id, name: trimmedName, set_ids: [setId] })
       .select()
       .maybeSingle();
 

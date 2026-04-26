@@ -151,7 +151,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
@@ -239,7 +239,7 @@
   border: 2px solid rgba(229, 211, 179, 0.4);
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   aspect-ratio: 4 / 5;
   background-color: rgba(20, 25, 35, 0.95);
   border-radius: 12px;
@@ -323,7 +323,7 @@
       transparent 100%);
   backdrop-filter: blur(8px);
   border-top: 1px solid rgba(229, 211, 179, 0.15);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .catalog-item-info h3 {
@@ -334,7 +334,7 @@
   margin: 0 0 8px 0;
   letter-spacing: 0.05em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 .catalog-item:hover .catalog-item-info {
@@ -369,7 +369,7 @@
   letter-spacing: 0.5px;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 
@@ -384,7 +384,7 @@
   color: #e5d3b3;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 
@@ -417,7 +417,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   font-size: 1.2rem;
   z-index: 3;
   touch-action: manipulation;
@@ -449,7 +449,7 @@
 .class-badge:hover {
   opacity: 0.8;
   transform: scale(1.05);
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .catalog-loading {
@@ -506,7 +506,7 @@
   font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
 .catalog-error button:hover {
@@ -687,7 +687,7 @@
   font-size: 1rem;
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .clear-search-btn:hover {

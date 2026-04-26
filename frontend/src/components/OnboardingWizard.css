@@ -6,6 +6,7 @@
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     z-index: 2000;
     display: flex;
@@ -45,7 +46,7 @@
     justify-content: center;
     border-radius: 8px;
     z-index: 10;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .wizard-close:hover {
@@ -102,7 +103,7 @@
     border-radius: 12px;
     color: rgba(242, 230, 201, 0.5);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     font-family: 'Raleway', sans-serif;
     box-sizing: border-box;
 }

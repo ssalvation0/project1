@@ -11,45 +11,51 @@ const TelegramIcon = () => (
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="footer-inner">
-        <div className="footer-col footer-col--brand">
-          <span className="footer-brand">TransmogVault</span>
-          <p className="footer-tagline">
+      <div className="footer__inner">
+        <div className="footer__brand">
+          <span className="footer__brand-name">TransmogVault</span>
+          <p className="footer__brand-text">
             A fan-made catalog for World of Warcraft transmog collectors.
           </p>
         </div>
 
-        <div className="footer-col">
-          <h4 className="footer-heading">Explore</h4>
-          <Link to="/catalog" className="footer-link">Catalog</Link>
-          <Link to="/collections" className="footer-link">Collections</Link>
-          <Link to="/favorites" className="footer-link">Favorites</Link>
+        <div className="footer__section">
+          <h4 className="footer__title">Explore</h4>
+          <nav className="footer__nav" aria-label="Explore footer links">
+            <Link to="/catalog" className="footer__link">Catalog</Link>
+            <Link to="/collections" className="footer__link">Collections</Link>
+            <Link to="/favorites" className="footer__link">Favorites</Link>
+          </nav>
         </div>
 
-        <div className="footer-col">
-          <h4 className="footer-heading">Support</h4>
-          <a href="https://t.me/ssalvation" target="_blank" rel="noopener noreferrer" className="footer-link">
-            <TelegramIcon /> @ssalvation
-          </a>
-          <a href="https://t.me/Wellasosb" target="_blank" rel="noopener noreferrer" className="footer-link">
-            <TelegramIcon /> @Wellasosb
-          </a>
+        <div className="footer__section">
+          <h4 className="footer__title">Support</h4>
+          <nav className="footer__nav" aria-label="Support footer links">
+            <a href="https://t.me/ssalvation" target="_blank" rel="noopener noreferrer" className="footer__link">
+              <TelegramIcon /> <span>@ssalvation</span>
+            </a>
+            <a href="https://t.me/Wellasosb" target="_blank" rel="noopener noreferrer" className="footer__link">
+              <TelegramIcon /> <span>@Wellasosb</span>
+            </a>
+          </nav>
         </div>
 
-        <div className="footer-col">
-          <h4 className="footer-heading">Data</h4>
-          <a href="https://www.wowhead.com/" target="_blank" rel="noopener noreferrer" className="footer-link">Wowhead</a>
-          <a href="https://develop.battle.net/documentation" target="_blank" rel="noopener noreferrer" className="footer-link">Blizzard API</a>
+        <div className="footer__section">
+          <h4 className="footer__title">Data</h4>
+          <nav className="footer__nav" aria-label="Data source footer links">
+            <a href="https://www.wowhead.com/" target="_blank" rel="noopener noreferrer" className="footer__link">Wowhead</a>
+            <a href="https://develop.battle.net/documentation" target="_blank" rel="noopener noreferrer" className="footer__link">Blizzard API</a>
+          </nav>
         </div>
       </div>
 
-      <div className="footer-legal">
-        <p>
+      <div className="footer__legal">
+        <p className="footer__legal-text">
           World of Warcraft and Blizzard Entertainment are trademarks or registered
           trademarks of Blizzard Entertainment, Inc. TransmogVault is a fan project
           and is not affiliated with or endorsed by Blizzard Entertainment.
         </p>
-        <p className="footer-copy">© {new Date().getFullYear()} TransmogVault</p>
+        <p className="footer__copy">© {new Date().getFullYear()} TransmogVault</p>
       </div>
     </footer>
   );

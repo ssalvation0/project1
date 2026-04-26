@@ -4,6 +4,7 @@
     border-radius: 16px;
     overflow: hidden;
     height: 100%;
+    -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
 }
 

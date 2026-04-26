@@ -25,6 +25,7 @@
   color: #e5d3b3;
   border-radius: 10px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   animation: toastIn 0.3s ease-out both;
 }
