@@ -11,14 +11,19 @@ function getClient() {
   return genAI;
 }
 
-async function generateSetGuide(set) {
-  const client = getClient();
-  const model = client.getGenerativeModel({ model: 'gemini-2.5-pro' });
+// Detect Gemini quota / rate-limit failures so we can fall back to Flash on
+// the same prompt. Error shape varies (sometimes a string, sometimes a struct
+// in `error.errorDetails`), so match on the message substring.
+function isQuotaError(err) {
+  const msg = (err && (err.message || err.toString())) || '';
+  return /quota|RESOURCE_EXHAUSTED|429|Too Many Requests/i.test(msg);
+}
 
+function buildPrompt(set) {
   const itemList = (set.items || []).map(i => i.name).filter(Boolean).join(', ') || 'Unknown';
   const classes = (set.classes || ['All']).join(', ');
 
-  const prompt = `You are writing a detailed, accurate World of Warcraft transmog farming guide for TransmogVault. The guide must be self-contained — players should not need to visit Wowhead or any other site after reading it. Be specific: name exact bosses, exact currencies, exact lockout types, exact token-sharing classes. No intro sentence, no outro, no hype words (stunning, iconic, etc.). Start directly with the first section header.
+  return `You are writing a detailed, accurate World of Warcraft transmog farming guide for TransmogVault. The guide must be self-contained — players should not need to visit Wowhead or any other site after reading it. Be specific: name exact bosses, exact currencies, exact lockout types, exact token-sharing classes. No intro sentence, no outro, no hype words (stunning, iconic, etc.). Start directly with the first section header.
 
 Set: "${set.name}"
 Expansion: ${set.expansion}
@@ -36,9 +41,29 @@ Lockout type: weekly raid lockout / daily dungeon reset / no lockout (be specifi
 
 ### Farming Tips
 Practical advice to speed up or simplify the farm. Examples: which difficulty to run for fastest clears, whether to use a boost or group for hard encounters, whether the Wardrobe auto-collects tokens, specific skip routes or shortcuts inside the instance, whether bonus rolls or Great Vault can supplement drops, whether pieces are BoE and available on the Auction House, any known bugs or quirks with this particular farm. 3-5 sentences.`;
+}
 
+async function callModel(modelName, prompt) {
+  const client = getClient();
+  const model = client.getGenerativeModel({ model: modelName });
   const result = await model.generateContent(prompt);
   return result.response.text();
+}
+
+async function generateSetGuide(set) {
+  const prompt = buildPrompt(set);
+
+  // Primary: gemini-2.5-pro (highest quality). On a quota / rate-limit error
+  // (e.g. when the daily Pro free-tier ceiling is hit), fall back to
+  // gemini-2.5-flash, which has a much higher free-tier RPD limit and still
+  // produces acceptable guides. Other errors propagate untouched.
+  try {
+    return await callModel('gemini-2.5-pro', prompt);
+  } catch (err) {
+    if (!isQuotaError(err)) throw err;
+    console.warn(`[gemini] Pro quota exceeded → retrying on Flash for "${set.name}"`);
+    return await callModel('gemini-2.5-flash', prompt);
+  }
 }
 
 module.exports = { generateSetGuide };

@@ -88,16 +88,27 @@ function Settings() {
     try {
       const ext = avatarFile.name.split('.').pop()?.toLowerCase() || 'jpg';
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      // Pass contentType only if the browser actually gave us one — some
+      // MIME-less files (rare, HEIC/drag-from-iPhone) otherwise send
+      // `contentType: ""` which Supabase Storage rejects with 400.
+      const uploadOpts = { upsert: true };
+      if (avatarFile.type) uploadOpts.contentType = avatarFile.type;
       const { error: uploadError } = await supabase.storage
         .from(AVATAR_BUCKET)
-        .upload(path, avatarFile, { upsert: true, contentType: avatarFile.type });
-      if (uploadError) throw new Error('Avatar upload failed.');
+        .upload(path, avatarFile, uploadOpts);
+      if (uploadError) {
+        // Surface the real cause (RLS? bucket missing? file-size cap?) — the
+        // swallowed generic message made this bug uninvestigable.
+        console.error('[avatar] upload failed', uploadError);
+        throw new Error(uploadError.message || 'Avatar upload failed.');
+      }
       const { data: publicData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
       await updateProfile({ ...currentProfileData(), avatarUrl: publicData?.publicUrl || null });
       setAvatarFile(null);
       setFeedback('avatar', 'success', 'Avatar updated!');
       setExpanded(null);
     } catch (err) {
+      console.error('[avatar] save failed', err);
       setFeedback('avatar', 'error', err.message);
     } finally {
       setRowSaving(null);

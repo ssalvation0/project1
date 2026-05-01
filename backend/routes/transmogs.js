@@ -312,6 +312,13 @@ async function saveGuidesCache() {
 
 // Initialize
 loadCache().then(() => {
+  // SKIP_HYDRATE=true — start instantly using only the on-disk cache. Used in
+  // dev preview when Wowhead scraping would otherwise burn 30+ s and risk
+  // crashing the server on a transient network failure.
+  if (process.env.SKIP_HYDRATE === 'true') {
+    console.log('⏭  SKIP_HYDRATE=true — serving from cache only, no Wowhead refresh');
+    return;
+  }
   hydrateCache();
 });
 loadGuidesCache();
