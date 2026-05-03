@@ -5,3 +5,8 @@ build/
 npm-debug.log
 .DS_Store
 *.log
+
+# Claude Code (local-only)
+.claude/
+CLAUDE.md
+.anthropic/
