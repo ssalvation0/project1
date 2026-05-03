@@ -5,6 +5,7 @@ const path = require('path');
 const blizzardService = require('../utils/blizzardService');
 const { generateSetGuide } = require('../utils/geminiService');
 const { fetchAllTransmogSets, fetchOneItem } = require('../utils/wowheadService');
+const { expectedArmorType } = require('../utils/setClassify');
 
 const CACHE_FILE = path.join(__dirname, '../data/blizzard_transmogs_cache.json');
 const GUIDES_FILE = path.join(__dirname, '../data/guides_cache.json');
@@ -331,46 +332,58 @@ function getSetPreviewUrl(setId) {
 
 // --- Routes ---
 
+// Chronological order for expansions — used both in /filters response and in
+// the catalog sort comparator. Update whenever Blizzard ships a new expansion.
+const EXPANSION_ORDER = [
+  'All',
+  'Classic',
+  'Burning Crusade',
+  'Wrath of the Lich King',
+  'Cataclysm',
+  'Mists of Pandaria',
+  'Warlords of Draenor',
+  'Legion',
+  'Battle for Azeroth',
+  'Shadowlands',
+  'Dragonflight',
+  'The War Within',
+  'Midnight',
+];
+
 router.get('/filters', (req, res) => {
   // Extract unique values from cache
   const classes = new Set(['All']);
   const expansions = new Set(['All']);
   const qualities = new Set(['All']);
+  const armors = new Set();
+  const sources = new Set();
 
   cachedSets.forEach(set => {
     if (set.classes) set.classes.forEach(c => classes.add(c));
     if (set.expansion) expansions.add(set.expansion);
     if (set.quality) qualities.add(set.quality);
+    if (Array.isArray(set.armorTypes)) set.armorTypes.forEach(a => armors.add(a));
+    if (set.source) sources.add(set.source);
   });
-
-  // Chronological order for expansions
-  const expansionOrder = [
-    'All',
-    'Classic',
-    'Burning Crusade',
-    'Wrath of the Lich King',
-    'Cataclysm',
-    'Mists of Pandaria',
-    'Warlords of Draenor',
-    'Legion',
-    'Battle for Azeroth',
-    'Shadowlands',
-    'Dragonflight',
-    'The War Within',
-    'Midnight'
-  ];
 
   const sortedExpansions = Array.from(expansions).sort((a, b) => {
-    const indexA = expansionOrder.indexOf(a);
-    const indexB = expansionOrder.indexOf(b);
-    // If not found in order list, put at the end
+    const indexA = EXPANSION_ORDER.indexOf(a);
+    const indexB = EXPANSION_ORDER.indexOf(b);
     return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
   });
+
+  // Stable, predictable order for armors and sources (UI uses chip pills)
+  const armorOrder = ['Cloth', 'Leather', 'Mail', 'Plate'];
+  const sortedArmors = Array.from(armors).sort(
+    (a, b) => armorOrder.indexOf(a) - armorOrder.indexOf(b)
+  );
 
   res.json({
     classes: Array.from(classes).sort(),
     expansions: sortedExpansions,
-    qualities: Array.from(qualities).sort()
+    qualities: Array.from(qualities).sort(),
+    armors: sortedArmors,
+    sources: Array.from(sources).sort(),
   });
 });
 
@@ -395,6 +408,22 @@ router.get('/batch', async (req, res) => {
   res.json(enriched);
 });
 
+// Comma-separated multi-value: "Cloth,Plate" → ['Cloth','Plate']; ignore "all"
+function parseMulti(raw) {
+  if (!raw || raw === 'all') return null;
+  const list = String(raw).split(',').map(v => v.trim()).filter(Boolean);
+  return list.length > 0 ? list : null;
+}
+
+const SORT_COMPARATORS = {
+  'name-asc':       (a, b) => a.name.localeCompare(b.name),
+  'name-desc':      (a, b) => b.name.localeCompare(a.name),
+  'expansion-asc':  (a, b) => (EXPANSION_ORDER.indexOf(a.expansion) || 0) - (EXPANSION_ORDER.indexOf(b.expansion) || 0),
+  'expansion-desc': (a, b) => (EXPANSION_ORDER.indexOf(b.expansion) || 0) - (EXPANSION_ORDER.indexOf(a.expansion) || 0),
+  'id-asc':         (a, b) => a.id - b.id,
+  'id-desc':        (a, b) => b.id - a.id,
+};
+
 router.get('/', async (req, res) => {
   const {
     page = 0,
@@ -404,42 +433,68 @@ router.get('/', async (req, res) => {
     expansion,
     quality,
     armor,
-    source
+    source,
+    sort = 'name-asc',
+    favorites,
   } = req.query;
 
   let results = cachedSets;
 
-  // Filtering
+  // ── Search ────────────────────────────────────────────────────────────
   if (search) {
     const q = search.toLowerCase();
     results = results.filter(s => s.name.toLowerCase().includes(q));
   }
 
-  if (classFilter && classFilter !== 'all') {
+  // ── Multi-select filters (comma-separated) ────────────────────────────
+  const classList     = parseMulti(classFilter);
+  const expansionList = parseMulti(expansion);
+  const qualityList   = parseMulti(quality);
+  const armorList     = parseMulti(armor);
+  const sourceList    = parseMulti(source);
+  const favoriteIds   = parseMulti(favorites)?.map(Number).filter(Number.isFinite);
+
+  if (classList) {
+    const lower = classList.map(c => c.toLowerCase());
     results = results.filter(s =>
       s.classes.includes('All') ||
-      s.classes.some(c => c.toLowerCase() === classFilter.toLowerCase())
+      s.classes.some(c => lower.includes(c.toLowerCase()))
     );
   }
 
-  if (expansion && expansion !== 'all') {
-    results = results.filter(s => s.expansion === expansion);
+  if (expansionList) {
+    results = results.filter(s => expansionList.includes(s.expansion));
   }
 
-  if (quality && quality !== 'all') {
-    results = results.filter(s => s.quality === quality);
+  if (qualityList) {
+    results = results.filter(s => qualityList.includes(s.quality));
   }
 
-  if (armor && armor !== 'all') {
-    results = results.filter(s => s.armorType === armor);
+  if (armorList) {
+    // armorTypes is empty array for "All" sets — these we INCLUDE because the
+    // appearance can be worn by any class. Otherwise need at least one match.
+    results = results.filter(s => {
+      if (!Array.isArray(s.armorTypes) || s.armorTypes.length === 0) return true;
+      return s.armorTypes.some(t => armorList.includes(t));
+    });
   }
 
-  if (source && source !== 'all') {
-    results = results.filter(s => s.source === source);
+  if (sourceList) {
+    results = results.filter(s => s.source && sourceList.includes(s.source));
   }
 
-  const pageNum = parseInt(page);
-  const limitNum = parseInt(limit);
+  if (favoriteIds && favoriteIds.length > 0) {
+    const favSet = new Set(favoriteIds);
+    results = results.filter(s => favSet.has(s.id));
+  }
+
+  // ── Sort BEFORE pagination so the order is global, not page-local ─────
+  const cmp = SORT_COMPARATORS[sort] || SORT_COMPARATORS['name-asc'];
+  results = [...results].sort(cmp);
+
+  // ── Paginate ──────────────────────────────────────────────────────────
+  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10);
   const start = pageNum * limitNum;
   const paginated = results.slice(start, start + limitNum);
 
@@ -449,15 +504,16 @@ router.get('/', async (req, res) => {
     previewUrl: getSetPreviewUrl(set.id),
   }));
 
-  // Cache for 5 minutes (list changes slowly)
+  // Cache for 5 minutes (list changes slowly). Note: cache key includes the
+  // full URL incl. query params, so different filter combos cache separately.
   res.setHeader('Cache-Control', 'public, max-age=300');
   res.json({
     transmogs: enriched,
     pagination: {
       currentPage: pageNum,
       totalItems: results.length,
-      totalPages: Math.ceil(results.length / limitNum)
-    }
+      totalPages: Math.ceil(results.length / limitNum),
+    },
   });
 });
 
@@ -465,9 +521,11 @@ router.get('/:id', async (req, res) => {
   const set = cachedSets.find(s => s.id == req.params.id);
   if (!set) return res.status(404).json({ error: 'Set not found' });
 
-  // Lazy-load names + icons for all items via Wowhead item tooltip (fast, no Blizzard rate limit)
-  const itemsWithIcons = await Promise.all((set.items || []).map(async item => {
-    if (item.name && item.iconUrl) return item;
+  // Lazy-load names + icons + armorType for every item from Wowhead. We pull
+  // armorType so we can drop garbage that Wowhead's set tooltip occasionally
+  // includes — gems, daggers, necklaces, etc. don't belong in a transmog set
+  // and pollute the page (see set 1316 for a representative example).
+  const enrichedItems = await Promise.all((set.items || []).map(async item => {
     const tooltipItem = await fetchOneItem(item.id);
     return {
       id: item.id,
@@ -475,16 +533,34 @@ router.get('/:id', async (req, res) => {
       iconUrl: tooltipItem?.icon
         ? `https://wow.zamimg.com/images/wow/icons/large/${tooltipItem.icon}.jpg`
         : null,
+      armorType: tooltipItem?.armorType || null,
     };
   }));
+
+  // Coherence pass.
+  //
+  // Stage 1 — drop non-armor items (gems, weapons, jewelry). Wowhead's set
+  // tooltip occasionally lists those by mistake (see set 1316).
+  //
+  // Stage 2 — if the set name implies a specific armor type (e.g. "Battleplate"
+  // → Plate), drop items that don't match. This catches sets where Wowhead's
+  // pieces list is contaminated with armor of the wrong class — leaves us with
+  // only the right items, or with zero (which we surface via dataIncomplete).
+  const armorOnly = enrichedItems.filter(i => i.armorType);
+  const expected = expectedArmorType(set);
+  const items = expected
+    ? armorOnly.filter(i => i.armorType === expected)
+    : armorOnly;
+  const dataIncomplete = enrichedItems.length > 0 && items.length === 0;
 
   // Cache for 24 hours (details are static)
   res.setHeader('Cache-Control', 'public, max-age=86400');
   res.json({
     ...set,
-    items: itemsWithIcons,
+    items,
+    dataIncomplete,
     previewUrl: getSetPreviewUrl(set.id),
-    wowheadLink: `https://www.wowhead.com/transmog-set=${set.id}`
+    wowheadLink: `https://www.wowhead.com/transmog-set=${set.id}`,
   });
 });
 

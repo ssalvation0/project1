@@ -10,22 +10,29 @@ import '../styles/Catalog.css';
 
 const API_URL = '/api/transmogs';
 
-const MOCK_FILTER_OPTIONS = {
-  armor: ['Cloth', 'Leather', 'Mail', 'Plate', 'Cosmetic'],
-  source: ['Raid', 'PvP', 'Dungeon', 'Quest', 'Crafted', 'Trading Post', 'Store'],
-};
+// Backend now returns the full live list of armors and sources from /filters
+// — no more hardcoded mock options that drift away from real data.
 
-async function fetchTransmogsRequest({ page, filter, expansion, quality, armor, source, search }) {
+// Multi-select filters (armor, source) serialize as a comma-separated string
+// in the URL query and accept arrays in state. Empty array == "all".
+const joinMulti = (arr) => (arr && arr.length > 0 ? arr.join(',') : 'all');
+const splitMulti = (raw) => (raw && raw !== 'all' ? raw.split(',').filter(Boolean) : []);
+
+async function fetchTransmogsRequest({ page, filter, expansion, quality, armor, source, search, sort, favoriteIds }) {
   const params = new URLSearchParams({
     page,
     limit: 20,
     class: filter,
     expansion,
     quality,
-    armor,
-    source,
-    search
+    armor: joinMulti(armor),
+    source: joinMulti(source),
+    sort,
+    search,
   });
+  if (favoriteIds && favoriteIds.length > 0) {
+    params.set('favorites', favoriteIds.join(','));
+  }
 
   const res = await fetch(`${API_URL}?${params.toString()}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -56,13 +63,6 @@ function useDebounce(value, delay) {
 // Memoized TransmogCard wrapper
 const MemoizedTransmogCard = React.memo(TransmogCard);
 
-// Expansion order for sorting
-const EXPANSION_ORDER = [
-  'Classic', 'Burning Crusade', 'Wrath of the Lich King', 'Cataclysm',
-  'Mists of Pandaria', 'Warlords of Draenor', 'Legion', 'Battle for Azeroth',
-  'Shadowlands', 'Dragonflight', 'The War Within'
-];
-
 function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -71,9 +71,9 @@ function Catalog() {
   const [expansionFilter, setExpansionFilter] = useState(searchParams.get('expansion') || 'all');
   const [qualityFilter, setQualityFilter] = useState(searchParams.get('quality') || 'all');
 
-  // New Filters
-  const [armorFilter, setArmorFilter] = useState(searchParams.get('armor') || 'all');
-  const [sourceFilter, setSourceFilter] = useState(searchParams.get('source') || 'all');
+  // Multi-select filters: arrays of strings (e.g. ['Cloth','Plate'])
+  const [armorFilter, setArmorFilter] = useState(splitMulti(searchParams.get('armor')));
+  const [sourceFilter, setSourceFilter] = useState(splitMulti(searchParams.get('source')));
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '0', 10));
@@ -92,9 +92,21 @@ function Catalog() {
     staleTime: 5 * 60 * 1000
   });
 
-  // Fetch transmogs - uses debounced search
+  // Sort and favorites are now applied on the BACKEND (so they work across
+  // the full result set, not just the current page). Multi-select arrays are
+  // included in the queryKey via JSON.stringify for stable cache keys.
+  // Sorted favoriteIds keep the same key when the order changes.
+  const stableFavorites = useMemo(
+    () => (showFavoritesOnly ? [...favorites].map(String).sort() : null),
+    [showFavoritesOnly, favorites]
+  );
+
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['transmogs', currentPage, filter, expansionFilter, qualityFilter, armorFilter, sourceFilter, debouncedSearch],
+    queryKey: [
+      'transmogs', currentPage, filter, expansionFilter, qualityFilter,
+      JSON.stringify(armorFilter), JSON.stringify(sourceFilter),
+      debouncedSearch, sortBy, JSON.stringify(stableFavorites),
+    ],
     queryFn: () => fetchTransmogsRequest({
       page: currentPage,
       filter,
@@ -102,10 +114,12 @@ function Catalog() {
       quality: qualityFilter,
       armor: armorFilter,
       source: sourceFilter,
-      search: debouncedSearch
+      search: debouncedSearch,
+      sort: sortBy,
+      favoriteIds: stableFavorites,
     }),
     keepPreviousData: true,
-    staleTime: 30000
+    staleTime: 30000,
   });
 
   // Update URL when state changes
@@ -115,8 +129,8 @@ function Catalog() {
     if (expansionFilter !== 'all') params.set('expansion', expansionFilter);
     if (qualityFilter !== 'all') params.set('quality', qualityFilter);
 
-    if (armorFilter !== 'all') params.set('armor', armorFilter);
-    if (sourceFilter !== 'all') params.set('source', sourceFilter);
+    if (armorFilter.length > 0) params.set('armor', armorFilter.join(','));
+    if (sourceFilter.length > 0) params.set('source', sourceFilter.join(','));
 
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (currentPage > 0) params.set('page', currentPage.toString());
@@ -155,18 +169,23 @@ function Catalog() {
     if (type === 'expansion') setExpansionFilter(value);
     if (type === 'quality') setQualityFilter(value);
 
-    if (type === 'armor') setArmorFilter(value);
-    if (type === 'source') setSourceFilter(value);
-
     if (type === 'sort') setSortBy(value);
+  }, []);
+
+  // Toggle a value in/out of a multi-select chip filter (armor, source).
+  // Clicking an already-selected chip removes it; clicking a fresh chip adds.
+  const toggleMultiFilter = useCallback((type, value) => {
+    setCurrentPage(0);
+    const setter = type === 'armor' ? setArmorFilter : setSourceFilter;
+    setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }, []);
 
   const resetFilters = useCallback(() => {
     setFilter('all');
     setExpansionFilter('all');
     setQualityFilter('all');
-    setArmorFilter('all');
-    setSourceFilter('all');
+    setArmorFilter([]);
+    setSourceFilter([]);
     setSearchQuery('');
     setSortBy('name-asc');
     setCurrentPage(0);
@@ -190,41 +209,12 @@ function Catalog() {
   // Memoize favorites Set for O(1) lookup (IDs stored as strings in context)
   const favoritesSet = useMemo(() => new Set(favorites.map(String)), [favorites]);
 
-  // Filter and sort transmogs
-  const processedTransmogs = useMemo(() => {
-    let result = data?.transmogs || [];
-
-    // Filter by favorites if enabled
-    if (showFavoritesOnly) {
-      result = result.filter(t => favoritesSet.has(String(t.id)));
-    }
-
-    // Sort
-    result = [...result].sort((a, b) => {
-      switch (sortBy) {
-        case 'name-asc':
-          return a.name.localeCompare(b.name);
-        case 'name-desc':
-          return b.name.localeCompare(a.name);
-        case 'expansion-asc':
-          return EXPANSION_ORDER.indexOf(a.expansion) - EXPANSION_ORDER.indexOf(b.expansion);
-        case 'expansion-desc':
-          return EXPANSION_ORDER.indexOf(b.expansion) - EXPANSION_ORDER.indexOf(a.expansion);
-        case 'id-asc':
-          return a.id - b.id;
-        case 'id-desc':
-          return b.id - a.id;
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [data?.transmogs, showFavoritesOnly, favoritesSet, sortBy]);
-
-  const transmogs = processedTransmogs;
+  // Sorting and favorites filtering both happen on the BACKEND now, so the
+  // page-local `data.transmogs` is already correct — no client-side
+  // post-processing needed.
+  const transmogs = data?.transmogs || [];
   const totalPages = data?.pagination?.totalPages || 0;
-  const totalItems = showFavoritesOnly ? processedTransmogs.length : (data?.pagination?.totalItems || 0);
+  const totalItems = data?.pagination?.totalItems || 0;
 
   // Memoize pagination handlers
   const goToPrevPage = useCallback(() => {
@@ -257,7 +247,7 @@ function Catalog() {
       <div className="catalog-header">
         <div className="catalog-title-row">
           <h1>Transmog Catalog</h1>
-          {(filter !== 'all' || expansionFilter !== 'all' || qualityFilter !== 'all' || armorFilter !== 'all' || sourceFilter !== 'all' || searchQuery) && (
+          {(filter !== 'all' || expansionFilter !== 'all' || qualityFilter !== 'all' || armorFilter.length > 0 || sourceFilter.length > 0 || searchQuery) && (
             <button className="reset-filters-btn" onClick={resetFilters}>
               Reset Filters
             </button>
@@ -302,34 +292,41 @@ function Catalog() {
             </select>
           </div>
 
-          {/* Armor Filter */}
-          <div className="filter-group">
+          {/* Armor Filter — multi-select chips. Clicking adds/removes; clicking
+              an already-selected chip removes it. Empty selection = all. */}
+          <div className="filter-group filter-group--chips">
             <span className="filter-label">Armor:</span>
-            <select
-              value={armorFilter}
-              onChange={(e) => handleFilterChange('armor', e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Types</option>
-              {MOCK_FILTER_OPTIONS.armor.map(a => (
-                <option key={a} value={a}>{a}</option>
+            <div className="filter-chip-row">
+              {(filterOptions?.armors || []).map(a => (
+                <button
+                  key={a}
+                  type="button"
+                  className={`filter-chip-toggle ${armorFilter.includes(a) ? 'active' : ''}`}
+                  onClick={() => toggleMultiFilter('armor', a)}
+                >
+                  {a}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
-          {/* Source Filter */}
-          <div className="filter-group">
+          {/* Source Filter — multi-select chips. Source list comes from
+              /filters endpoint (only sources actually present in the data,
+              no hardcoded mock options that drift away from reality). */}
+          <div className="filter-group filter-group--chips">
             <span className="filter-label">Source:</span>
-            <select
-              value={sourceFilter}
-              onChange={(e) => handleFilterChange('source', e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Sources</option>
-              {MOCK_FILTER_OPTIONS.source.map(s => (
-                <option key={s} value={s}>{s}</option>
+            <div className="filter-chip-row">
+              {(filterOptions?.sources || []).map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`filter-chip-toggle ${sourceFilter.includes(s) ? 'active' : ''}`}
+                  onClick={() => toggleMultiFilter('source', s)}
+                >
+                  {s}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Expansion Filter */}
@@ -382,12 +379,20 @@ function Catalog() {
           </div>
         </div>
 
-        {/* Active filter chips + result count */}
+        {/* Active filter chips + result count.
+            Multi-select chips render one chip per selected value so users can
+            remove individual selections (not "clear all of one type"). */}
         {(() => {
           const active = [
             filter !== 'all' && { key: 'class', label: `Class: ${filter}`, clear: () => handleFilterChange('class', 'all') },
-            armorFilter !== 'all' && { key: 'armor', label: `Armor: ${armorFilter}`, clear: () => handleFilterChange('armor', 'all') },
-            sourceFilter !== 'all' && { key: 'source', label: `Source: ${sourceFilter}`, clear: () => handleFilterChange('source', 'all') },
+            ...armorFilter.map(a => ({
+              key: `armor-${a}`, label: `Armor: ${a}`,
+              clear: () => toggleMultiFilter('armor', a),
+            })),
+            ...sourceFilter.map(s => ({
+              key: `source-${s}`, label: `Source: ${s}`,
+              clear: () => toggleMultiFilter('source', s),
+            })),
             expansionFilter !== 'all' && { key: 'expansion', label: `Expansion: ${expansionFilter}`, clear: () => handleFilterChange('expansion', 'all') },
             qualityFilter !== 'all' && { key: 'quality', label: `Quality: ${qualityFilter}`, clear: () => handleFilterChange('quality', 'all') },
             showFavoritesOnly && { key: 'fav', label: 'Favorites only', clear: () => toggleFavoritesOnly() },

@@ -397,9 +397,14 @@ function TransmogDetail() {
               const namedItems = (transmog.items || []).filter(i => i.name && !i.name.startsWith('Item '));
               const hasRealItems = namedItems.length > 0;
               if (!hasRealItems) {
+                // dataIncomplete=true means our coherence check rejected
+                // Wowhead's items list because it had non-armor garbage or
+                // mismatched armor types — so we acknowledge the gap directly.
                 return (
                   <div className="items-wowhead-redirect">
-                    <p>View the full piece list on Wowhead:</p>
+                    <p>{transmog.dataIncomplete
+                      ? 'Piece list for this set is incomplete. View it directly on Wowhead:'
+                      : 'View the full piece list on Wowhead:'}</p>
                     <a
                       href={`https://www.wowhead.com/transmog-set=${transmog.id}`}
                       target="_blank"

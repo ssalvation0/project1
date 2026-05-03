@@ -138,6 +138,47 @@
   padding: 12px;
 }
 
+/* Multi-select chip toggles for armor & source filters.
+   Click adds, click again removes. Active state mirrors filter-select hover.
+   Each chip group spans the full grid width on its own row so chips can
+   wrap freely instead of getting squashed into a single 170px grid cell. */
+.filter-group--chips {
+  grid-column: 1 / -1;
+}
+
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.filter-chip-toggle {
+  height: 36px;
+  padding: 0 14px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+  background: rgba(20, 15, 10, 0.55);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filter-chip-toggle:hover {
+  border-color: var(--color-border-hover);
+  background: rgba(30, 22, 14, 0.7);
+}
+
+.filter-chip-toggle.active {
+  background: rgba(229, 211, 179, 0.18);
+  border-color: #e5d3b3;
+  color: #f3e3c2;
+}
+
 .sort-order-btn {
   padding: 10px 16px;
   min-width: 50px;
