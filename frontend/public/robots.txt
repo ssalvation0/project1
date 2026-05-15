@@ -1,3 +1,12 @@
 # https://www.robotstxt.org/robotstxt.html
+#
+# Allow all crawlers everywhere except authenticated/account pages, and
+# point them at the sitemap for faster indexing.
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /profile
+Disallow: /settings
+Disallow: /favorites
+
+Sitemap: https://transmogvault.vercel.app/sitemap.xml

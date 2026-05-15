@@ -1,9 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initSentry } from './services/sentry';
+
+// Wire up Sentry before React mounts so initial render errors are captured.
+// No-op when REACT_APP_SENTRY_DSN isn't set (local dev / first deploy).
+initSentry();
 
 const queryClient = new QueryClient();
 

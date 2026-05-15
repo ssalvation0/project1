@@ -1,5 +1,12 @@
 import React from 'react';
+import './ErrorBoundary.css';
 
+/**
+ * Top-level error boundary. Catches React render errors below it and shows
+ * a "something went wrong" panel with a reload button instead of a blank
+ * page. Sentry (when configured) still receives the error via the global
+ * window error handler — this is purely the user-visible fallback.
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -14,42 +21,22 @@ class ErrorBoundary extends React.Component {
     console.error('ErrorBoundary caught:', error, info);
   }
 
+  handleReload = () => {
+    this.setState({ hasError: false });
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          minHeight: '60vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px 20px',
-          textAlign: 'center',
-        }}>
-          <h2 style={{
-            fontFamily: "'Cinzel', serif",
-            color: '#f2e6c9',
-            fontSize: '1.5rem',
-            marginBottom: '12px',
-          }}>Something went wrong</h2>
-          <p style={{
-            fontFamily: "'Raleway', sans-serif",
-            color: 'rgba(229,211,179,0.6)',
-            marginBottom: '24px',
-          }}>An unexpected error occurred. Please try refreshing the page.</p>
-          <button
-            onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}
-            style={{
-              padding: '10px 24px',
-              borderRadius: '10px',
-              border: '1px solid rgba(200,160,40,0.4)',
-              background: 'rgba(86,68,34,0.85)',
-              color: '#fff1c7',
-              fontFamily: "'Cinzel', serif",
-              fontSize: '0.95rem',
-              cursor: 'pointer',
-            }}
-          >Reload Page</button>
+        <div className="error-boundary">
+          <h2 className="error-boundary__heading">Something went wrong</h2>
+          <p className="error-boundary__text">
+            An unexpected error occurred. Please try refreshing the page.
+          </p>
+          <button className="error-boundary__btn" onClick={this.handleReload}>
+            Reload Page
+          </button>
         </div>
       );
     }

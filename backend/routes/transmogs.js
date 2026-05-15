@@ -540,7 +540,9 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const set = cachedSets.find(s => s.id == req.params.id);
+  const setId = parseInt(req.params.id, 10);
+  if (Number.isNaN(setId)) return res.status(400).json({ error: 'Invalid set ID' });
+  const set = cachedSets.find(s => s.id === setId);
   if (!set) return res.status(404).json({ error: 'Set not found' });
 
   // Lazy-load names + icons + armorType for every item from Wowhead. We pull

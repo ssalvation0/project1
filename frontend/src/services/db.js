@@ -42,8 +42,13 @@ export async function getProfile(userId) {
 }
 
 export async function upsertProfile(userId, updates) {
+  // Strip any `id` injected by the caller. Without this, JS object spread
+  // (`{ id: userId, ...updates }`) lets a malicious or buggy updates
+  // payload override the id and target another user's profile row. RLS
+  // already blocks this server-side, but defense in depth is cheap.
+  const { id: _ignored, ...safe } = updates || {};
   const { error } = await supabase
     .from('profiles')
-    .upsert({ id: userId, ...updates, updated_at: new Date().toISOString() });
+    .upsert({ ...safe, id: userId, updated_at: new Date().toISOString() });
   if (error) throw error;
 }

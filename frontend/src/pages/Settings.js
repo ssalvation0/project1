@@ -7,6 +7,13 @@ import '../styles/Settings.css';
 
 const AVATAR_BUCKET = 'avatars';
 
+// Allowed avatar formats — chosen to exclude SVG (script-execution surface
+// when viewed at its own URL) and any non-image type. The MIME check happens
+// on the client; mirror it on the Supabase bucket settings as defense in
+// depth (Storage → bucket → Allowed MIME types).
+const ALLOWED_AVATAR_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const ALLOWED_AVATAR_EXTS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+
 const STYLE_PREFERENCE_OPTIONS = [
   { id: 'plate',   label: 'Plate',     icon: <Shield size={14} /> },
   { id: 'mail',    label: 'Mail',      icon: <LinkIcon size={14} /> },
@@ -84,9 +91,20 @@ function Settings() {
 
   const handleSaveAvatar = async () => {
     if (!avatarFile) return;
+    // Reject anything that isn't a supported raster format. SVG is excluded
+    // because it can carry inline <script> that executes when the URL is
+    // opened directly (not via <img>, but a malicious profile link could
+    // route the victim there).
+    if (!ALLOWED_AVATAR_MIMES.has(avatarFile.type)) {
+      setFeedback('avatar', 'error', 'Only JPG, PNG, or WEBP allowed.');
+      return;
+    }
     setRowSaving('avatar');
     try {
-      const ext = avatarFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      // Whitelist the extension too — a user-controlled filename could
+      // otherwise land arbitrary text in the storage path.
+      const rawExt = avatarFile.name.split('.').pop()?.toLowerCase() || '';
+      const ext = ALLOWED_AVATAR_EXTS.has(rawExt) ? rawExt : 'jpg';
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
       // Pass contentType only if the browser actually gave us one — some
       // MIME-less files (rare, HEIC/drag-from-iPhone) otherwise send
@@ -148,7 +166,11 @@ function Settings() {
   };
 
   const handleSavePassword = async () => {
-    if (newPassword.length < 6) { setFeedback('password', 'error', 'Min 6 characters.'); return; }
+    if (newPassword.length < 8) { setFeedback('password', 'error', 'Minimum 8 characters.'); return; }
+    if (/^(\d+|[A-Za-z]+)$/.test(newPassword)) {
+      setFeedback('password', 'error', 'Use letters AND numbers (or symbols).');
+      return;
+    }
     if (newPassword !== confirmPassword) { setFeedback('password', 'error', 'Passwords do not match.'); return; }
     setRowSaving('password');
     try {
@@ -208,7 +230,12 @@ function Settings() {
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setFeedback('avatar', 'error', 'Not an image.'); return; }
+    // Fail fast at file-picker time so users get a clear error before
+    // pressing Save. handleSaveAvatar enforces the same rule again.
+    if (!ALLOWED_AVATAR_MIMES.has(file.type)) {
+      setFeedback('avatar', 'error', 'Only JPG, PNG, or WEBP allowed.');
+      return;
+    }
     if (file.size > 3 * 1024 * 1024) { setFeedback('avatar', 'error', 'Max 3MB.'); return; }
     setRowError(prev => ({ ...prev, avatar: '' }));
     setAvatarFile(file);

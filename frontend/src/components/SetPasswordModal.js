@@ -16,8 +16,12 @@ function SetPasswordModal() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    if (/^(\d+|[A-Za-z]+)$/.test(password)) {
+      setError('Use letters AND numbers (or symbols)');
       return;
     }
 
@@ -67,7 +71,7 @@ function SetPasswordModal() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="New password"
               required
-              minLength={6}
+              minLength={8}
               autoComplete="new-password"
             />
           </div>
@@ -79,7 +83,7 @@ function SetPasswordModal() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
               required
-              minLength={6}
+              minLength={8}
               autoComplete="new-password"
             />
           </div>

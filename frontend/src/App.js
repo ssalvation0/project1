@@ -62,6 +62,9 @@ const Settings = React.lazy(() => import('./pages/Settings'))
 const Favorites = React.lazy(() => import('./pages/Favorites'))
 const Collections = React.lazy(() => import('./pages/Collections'));
 const CollectionDetail = React.lazy(() => import('./pages/CollectionDetail'));
+const Privacy = React.lazy(() => import('./pages/Privacy'));
+const Terms = React.lazy(() => import('./pages/Terms'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Scrolls to top on every route change. React Router v6 doesn't do this by default;
 // without it, navigating from Catalog (scrolled down) to TransmogDetail lands mid-page.
@@ -180,6 +183,10 @@ function App() {
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/collections" element={<Collections />} />
               <Route path="/collections/:id" element={<CollectionDetail />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              {/* Catch-all — must stay last; any URL not matched above lands here. */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </React.Suspense>
           </ErrorBoundary>

@@ -1,0 +1,95 @@
+/* Shared layout for legal pages (Privacy, Terms).
+   Plain readable prose on a dark, slightly translucent panel so the colorful
+   site background never washes the text out. */
+.legal-page {
+  padding: 60px 24px 100px;
+  display: flex;
+  justify-content: center;
+  text-align: left;
+}
+
+.legal-content {
+  max-width: 760px;
+  width: 100%;
+  padding: 44px 48px;
+  font-family: var(--font-body, sans-serif);
+  color: rgba(229, 211, 179, 0.92);
+  line-height: 1.7;
+  /* Dark, mildly translucent panel — matches the rest of the app's card
+     surfaces and keeps the background tint visible at the edges without
+     bleeding into the text body. */
+  background: rgba(20, 15, 10, 0.78);
+  border: 1px solid var(--color-border, rgba(229, 211, 179, 0.18));
+  border-radius: var(--radius-md, 12px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 600px) {
+  .legal-page { padding: 32px 16px 80px; }
+  .legal-content { padding: 28px 22px; }
+}
+
+.legal-content h1 {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: clamp(28px, 4vw, 40px);
+  margin: 0 0 8px;
+  color: #f3e3c2;
+}
+
+.legal-content h2 {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 1.2rem;
+  margin: 36px 0 12px;
+  color: #f3e3c2;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.legal-meta {
+  font-size: 0.85rem;
+  color: rgba(229, 211, 179, 0.5);
+  margin: 0 0 28px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.legal-content p {
+  margin: 0 0 14px;
+}
+
+.legal-content ul {
+  padding-left: 22px;
+  margin: 0 0 14px;
+}
+
+.legal-content li {
+  margin-bottom: 8px;
+}
+
+.legal-content a {
+  color: #e5d3b3;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(229, 211, 179, 0.4);
+  transition: text-decoration-color 150ms;
+}
+
+.legal-content a:hover {
+  text-decoration-color: #e5d3b3;
+}
+
+.legal-content code {
+  font-family: 'SF Mono', Menlo, monospace;
+  background: rgba(20, 15, 10, 0.6);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #e5d3b3;
+}
+
+.legal-content strong {
+  color: #f3e3c2;
+  font-weight: 600;
+}

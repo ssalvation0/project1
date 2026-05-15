@@ -47,6 +47,14 @@ const Footer = () => {
             <a href="https://develop.battle.net/documentation" target="_blank" rel="noopener noreferrer" className="footer__link">Blizzard API</a>
           </nav>
         </div>
+
+        <div className="footer__section">
+          <h4 className="footer__title">Legal</h4>
+          <nav className="footer__nav" aria-label="Legal footer links">
+            <Link to="/privacy" className="footer__link">Privacy</Link>
+            <Link to="/terms" className="footer__link">Terms of Use</Link>
+          </nav>
+        </div>
       </div>
 
       <div className="footer__legal">

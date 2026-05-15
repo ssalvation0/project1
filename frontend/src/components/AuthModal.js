@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AuthModal.css';
-import Stepper, { Step } from './Stepper.jsx';
+import Stepper, { Step } from './Stepper';
 import { supabase } from '../services/supabase';
 import { upsertProfile } from '../services/db';
 
@@ -113,6 +113,19 @@ function AuthModal({ isOpen, onClose }) {
         if (!isLogin && currentStep < 3) {
             setCurrentStep(currentStep + 1);
             return;
+        }
+
+        // Password policy — applied to signup only (login validates against
+        // the stored hash). Keep in sync with Settings + SetPasswordModal.
+        if (!isLogin) {
+            if (password.length < 8) {
+                setError('Password must be at least 8 characters.');
+                return;
+            }
+            if (/^(\d+|[A-Za-z]+)$/.test(password)) {
+                setError('Use letters AND numbers (or symbols) in your password.');
+                return;
+            }
         }
 
         setLoading(true);

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ToastProvider';
 import TransmogCard from '../components/TransmogCard';
 import { PencilSimple, Trash } from '@phosphor-icons/react';
 import './CollectionDetail.css';
@@ -33,6 +34,7 @@ function CollectionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -65,7 +67,7 @@ function CollectionDetail() {
       .from('collections').delete().eq('id', id).eq('user_id', user.id);
     if (delErr) {
       console.error('[collection] delete failed', delErr);
-      alert('Failed to delete. Please try again.');
+      showToast('Failed to delete. Please try again.', { type: 'error' });
       setDeleting(false);
       return;
     }
