@@ -171,6 +171,11 @@
   max-width: 720px;
 }
 
+/* Vertical breathing room when the legal block has multiple paragraphs */
+.footer__legal-text + .footer__legal-text {
+  margin-top: 8px;
+}
+
 .footer__copy {
   display: block;
   width: 100%;

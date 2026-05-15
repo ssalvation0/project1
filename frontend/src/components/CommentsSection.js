@@ -20,25 +20,55 @@ function CommentsSection({ setId }) {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
 
-  // Guard with a cancel flag so switching sets quickly can't have the old
-  // response overwrite comments on the new page.
+  // Two-step fetch: comments first, then profiles for the unique user IDs.
+  //
+  // Why split: PostgREST's relational shorthand (`profiles(name, avatar_url)`)
+  // depends on a foreign-key constraint from comments.user_id to profiles.id.
+  // If the FK is missing (as it currently is), the API returns 400 — and we
+  // get neither the comments nor the profiles. Manually joining decouples
+  // the data fetch from the schema layout and keeps comments visible even
+  // when the profile lookup fails.
+  //
+  // Profiles are mapped into a per-comment `profile` field that mirrors what
+  // the old implicit join produced, so downstream JSX doesn't need to change.
   const loadComments = useCallback(async ({ signal } = {}) => {
     setLoading(true);
-    const { data, error: loadErr } = await supabase
+    const { data: rows, error: loadErr } = await supabase
       .from('comments')
-      .select(`
-        id, content, created_at, user_id,
-        profiles(name, avatar_url)
-      `)
+      .select('id, content, created_at, user_id')
       .eq('set_id', setId)
       .order('created_at', { ascending: false });
 
     if (signal?.aborted) return;
     if (loadErr) {
-      console.error('[comments] load failed', loadErr);
+      console.error('[comments] load failed:', loadErr?.message || loadErr, '| code:', loadErr?.code, '| hint:', loadErr?.hint);
       setError('Failed to load comments');
+      setLoading(false);
+      return;
     }
-    setComments(data || []);
+
+    // Resolve profiles for the unique authors in a single follow-up query.
+    const userIds = Array.from(new Set((rows || []).map(r => r.user_id).filter(Boolean)));
+    let profilesById = {};
+    if (userIds.length > 0) {
+      const { data: profiles, error: profErr } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', userIds);
+      if (signal?.aborted) return;
+      if (profErr) {
+        // Non-fatal — comments still render with anonymous placeholders.
+        console.warn('[comments] profiles lookup failed:', profErr?.message || profErr);
+      } else {
+        for (const p of profiles || []) profilesById[p.id] = p;
+      }
+    }
+
+    const enriched = (rows || []).map(r => ({
+      ...r,
+      profiles: profilesById[r.user_id] || null,
+    }));
+    setComments(enriched);
     setLoading(false);
   }, [setId]);
 

@@ -365,19 +365,22 @@ function TransmogDetail() {
             {guideLoading ? (
               <div className="guide-loading">
                 <div className="guide-loading-spinner"></div>
-                <span>{guideLoadingTooLong ? 'Still generating... this can take up to a minute.' : 'Generating guide with AI...'}</span>
+                <span>{guideLoadingTooLong ? 'Still loading...' : 'Loading guide...'}</span>
               </div>
             ) : guideData?.guide ? (
               <div className="guide-content" data-nowh="true">
                 <ReactMarkdown>{guideData.guide}</ReactMarkdown>
               </div>
             ) : (
+              // Defensive fallback. With templates_cache covering every set this
+              // branch should be unreachable — kept as a safety net for sets
+              // that somehow miss both AI and template entries.
               <div className="guide-unavailable">
                 <BookOpenText size={28} weight="light" />
-                <h4>Guide coming soon</h4>
+                <h4>Guide unavailable</h4>
                 <p>
-                  Farming guides are AI-generated in batches. This one isn't ready yet —
-                  check back in a few days, or request priority generation.
+                  We couldn't load a guide for this set right now. Try refreshing,
+                  or ping the maintainers if the problem persists.
                 </p>
                 <a
                   href="https://t.me/ssalvation"
@@ -385,7 +388,7 @@ function TransmogDetail() {
                   rel="noopener noreferrer"
                   className="td-btn td-btn--ghost"
                 >
-                  Request via Telegram
+                  Contact via Telegram
                 </a>
               </div>
             )}

@@ -20,25 +20,6 @@ const adjust = (value, fromMin, fromMax, toMin, toMax) =>
   round(toMin + ((toMax - toMin) * (value - fromMin)) / (fromMax - fromMin));
 const easeInOutCubic = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
-function isLocalImage(url) {
-  if (!url) return false;
-  try {
-    // Treat relative paths as local
-    const isAbsolute = /^(https?:)?\/\//.test(url);
-    if (!isAbsolute) return true;
-    const u = new URL(url, window.location.origin);
-    return u.origin === window.location.origin;
-  } catch {
-    return false;
-  }
-}
-
-function toFormat(url, ext) {
-  if (!url) return url;
-  return url.replace(/\.(png|jpe?g|svg)$/i, `.${ext}`);
-}
-
-
 const ProfileCardComponent = ({
   avatarUrl,
   iconUrl,

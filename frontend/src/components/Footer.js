@@ -51,9 +51,15 @@ const Footer = () => {
 
       <div className="footer__legal">
         <p className="footer__legal-text">
-          World of Warcraft and Blizzard Entertainment are trademarks or registered
-          trademarks of Blizzard Entertainment, Inc. TransmogVault is a fan project
-          and is not affiliated with or endorsed by Blizzard Entertainment.
+          World of Warcraft, Battle.net and Blizzard Entertainment are trademarks
+          or registered trademarks of Blizzard Entertainment, Inc. in the U.S.
+          and/or other countries.
+        </p>
+        <p className="footer__legal-text">
+          TransmogVault is a fan-made, non-commercial project. It is not affiliated
+          with, endorsed by, or sponsored by Blizzard Entertainment. All transmog
+          set names, item images, and game artwork referenced on this site are the
+          property of their respective owners.
         </p>
         <p className="footer__copy">© {new Date().getFullYear()} TransmogVault</p>
       </div>

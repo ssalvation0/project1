@@ -1,21 +1,14 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import TransmogCard from './TransmogCard';
 import { useFavorites } from '../contexts/FavoritesContext';
 import './FeaturedSection.css';
 
-const FeaturedSection = ({ title, tagline, items = [], className = '', viewAllLink, onViewAll }) => {
+const FeaturedSection = ({ title, tagline, items = [], className = '' }) => {
     const { isFavorite, toggleFavorite } = useFavorites();
     const scrollContainerRef = useRef(null);
-    const navigate = useNavigate();
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
     const touchStartX = useRef(0);
-
-    const handleViewAll = () => {
-        if (onViewAll) onViewAll();
-        else if (viewAllLink) navigate(viewAllLink);
-    };
 
     const updateScrollState = useCallback(() => {
         const el = scrollContainerRef.current;

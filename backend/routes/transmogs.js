@@ -7,11 +7,17 @@ const { generateSetGuide } = require('../utils/geminiService');
 const { fetchAllTransmogSets, fetchOneItem } = require('../utils/wowheadService');
 const { expectedArmorType } = require('../utils/setClassify');
 
-const CACHE_FILE = path.join(__dirname, '../data/blizzard_transmogs_cache.json');
-const GUIDES_FILE = path.join(__dirname, '../data/guides_cache.json');
+const CACHE_FILE     = path.join(__dirname, '../data/blizzard_transmogs_cache.json');
+const GUIDES_FILE    = path.join(__dirname, '../data/guides_cache.json');
+const TEMPLATES_FILE = path.join(__dirname, '../data/templates_cache.json');
 
-// In-memory guide cache: { [setId]: { content, generatedAt } }
+// In-memory guide caches: { [setId]: { content, generatedAt } }
+//   - guidesCache     → AI-generated guides (when available)
+//   - templatesCache  → deterministic fallback assembled from metadata
+//     (see scripts/generateTemplateGuides.js). Always present for every set,
+//     used when no AI guide exists OR when AI guide is suspect.
 let guidesCache = {};
+let templatesCache = {};
 
 // In-memory storage
 let cachedSets = [];
@@ -303,6 +309,21 @@ async function loadGuidesCache() {
   }
 }
 
+// Load template fallback guides — assembled deterministically by
+// scripts/generateTemplateGuides.js, so this should always exist for every
+// cached set. Missing file is non-fatal; the /guide endpoint just won't have
+// a fallback for AI-less sets.
+async function loadTemplatesCache() {
+  try {
+    const data = await fs.readFile(TEMPLATES_FILE, 'utf-8');
+    templatesCache = JSON.parse(data);
+    console.log(`📑 Loaded ${Object.keys(templatesCache).length} template guides from cache`);
+  } catch {
+    templatesCache = {};
+    console.log('📑 No templates_cache.json — run `node scripts/generateTemplateGuides.js` to create it');
+  }
+}
+
 async function saveGuidesCache() {
   try {
     await fs.writeFile(GUIDES_FILE, JSON.stringify(guidesCache, null, 2));
@@ -323,6 +344,7 @@ loadCache().then(() => {
   hydrateCache();
 });
 loadGuidesCache();
+loadTemplatesCache();
 
 // Generate Wowhead model viewer preview URL for a transmog set
 function getSetPreviewUrl(setId) {
@@ -564,15 +586,26 @@ router.get('/:id', async (req, res) => {
   });
 });
 
-// Guide endpoint — cache-only. All guides are pre-generated via
-// `npm run guides`. On-the-fly generation is intentionally disabled so
-// clients never see minute-long hangs waiting for Gemini.
+// Guide endpoint — cache-only.
+//
+// Order of preference:
+//   1. AI-generated guide if present (more detailed prose)
+//   2. Template guide assembled from structured metadata (deterministic
+//      fallback so the user never sees "Guide coming soon")
+//   3. 404 only if neither cache has anything for this set — shouldn't
+//      happen post-generateTemplateGuides for any cached set
+//
+// `source` is reported so the UI can label the block (e.g. show a small
+// "Auto-generated overview" badge for templates, full text for AI guides).
 router.get('/:id/guide', (req, res) => {
   const setId = parseInt(req.params.id);
   if (isNaN(setId)) return res.status(400).json({ error: 'Invalid set ID' });
 
   if (guidesCache[setId]) {
-    return res.json({ guide: guidesCache[setId].content, cached: true });
+    return res.json({ guide: guidesCache[setId].content, source: 'ai', cached: true });
+  }
+  if (templatesCache[setId]) {
+    return res.json({ guide: templatesCache[setId].content, source: 'template', cached: true });
   }
 
   return res.status(404).json({ error: 'Guide not available' });

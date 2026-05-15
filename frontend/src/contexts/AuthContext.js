@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { getProfile, upsertProfile } from '../services/db';
@@ -211,7 +211,11 @@ export function AuthProvider({ children }) {
     }));
   };
 
-  const authContextValue = useMemo(() => ({
+  // No useMemo here — the function members (signOut, updateProfile, etc.)
+  // are recreated each render, so a memoized object would have an unstable
+  // identity anyway. Consumers should select individual pieces of the value
+  // rather than relying on the wrapper's referential stability.
+  const authContextValue = {
     user,
     loading,
     signOut,
@@ -219,7 +223,7 @@ export function AuthProvider({ children }) {
     passwordRecovery,
     setNewPassword,
     dismissPasswordRecovery,
-  }), [user, loading, passwordRecovery]);
+  };
 
   return (
     <AuthContext.Provider value={authContextValue}>
