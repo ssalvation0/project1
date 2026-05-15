@@ -12,3 +12,6 @@ npm-debug.log
 .claude/
 CLAUDE.md
 .anthropic/
+
+# Local-only deploy notes
+DEPLOY.md
