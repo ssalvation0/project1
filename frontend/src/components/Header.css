@@ -339,6 +339,27 @@ body {
     padding: 9px 12px;
     border-radius: 9px;
   }
+
+  /* Logged-in profile button must stay round on mobile too. Without this
+     override the min-width:94px from .login-btn above stretches the avatar
+     into an ellipse. */
+  .login-btn--profile {
+    min-width: 0;
+    width: 40px;
+    padding: 0;
+    border-radius: 50%;
+  }
+}
+
+/* Hide the longer label by default — show full text on screens that have
+   the room (handled by the media query below). Compact "Login" label is the
+   default; CSS-only swap so there's no JS layout thrash. */
+.login-btn__label--mobile { display: inline; }
+.login-btn__label--desktop { display: none; }
+
+@media (min-width: 640px) {
+  .login-btn__label--mobile { display: none; }
+  .login-btn__label--desktop { display: inline; }
 }
 
 @media (max-width: 480px) {
@@ -352,9 +373,31 @@ body {
   }
 
   .login-btn {
-    min-width: 94px;
+    min-width: 70px;
     font-size: 0.91rem;
     padding: 9px 12px;
     border-radius: 9px;
+  }
+
+  .login-btn--profile {
+    min-width: 0;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  /* Search shrinks aggressively at this size — keep it usable but compact.
+     Place the icon a bit closer and let placeholder ellipsis-truncate. */
+  .global-search-form {
+    margin: 0 8px;
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .global-search-input {
+    padding: 0 10px 0 32px;
+    background-position: 8px center;
+    font-size: 0.85rem;
   }
 }

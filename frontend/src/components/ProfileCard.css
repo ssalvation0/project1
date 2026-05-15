@@ -343,12 +343,15 @@
 }
 
 @media (max-width: 480px) {
+  /* On a 375px viewport in a 2-column grid each cell is ~155px wide. With
+     aspect-ratio 0.7, height = width / 0.7 ≈ 220px. Set height a notch
+     smaller so the card fits inside the cell and doesn't overflow. */
   .pc-card-wrapper {
-    max-width: 180px;
+    max-width: 100%;
   }
 
   .pc-card {
-    height: 280px;
+    height: 210px;
   }
 
   .pc-details h3 {

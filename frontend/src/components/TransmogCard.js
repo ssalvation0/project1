@@ -20,7 +20,14 @@ const getQualityColor = (quality) => {
 
 const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
-    const [imageError, setImageError] = useState(false);
+    // Cascade through preview → icon → placeholder. Wowhead's model-viewer
+    // thumbnails 404 for some set IDs (older or recently-added sets that
+    // haven't been rendered yet). When that happens we fall back to the
+    // set's item-icon image, and only show the generic sword placeholder
+    // if both fail. Previously a single 404 jumped straight to the sword,
+    // which looked broken next to working cards.
+    const sources = [transmog.previewUrl, transmog.iconUrl].filter(Boolean);
+    const [sourceIndex, setSourceIndex] = useState(0);
     // Only show source/type when the backend actually provides them.
     // Previously we faked "Raid"/"Plate" via a seeded RNG, which labelled
     // cloth PvP sets as "Plate Raid" and confused users.
@@ -37,12 +44,13 @@ const TransmogCard = ({ transmog, isFavorite, onToggleFavorite }) => {
     }, [onToggleFavorite, transmog.id]);
 
     const handleImageError = useCallback(() => {
-        setImageError(true);
+        // Try the next fallback source (preview → icon). When we've exhausted
+        // them, the placeholder kicks in via `showPlaceholder` below.
+        setSourceIndex(i => i + 1);
     }, []);
 
-    // Memoize computed values - prefer previewUrl (full set render) over iconUrl (item icon)
-    const imageUrl = transmog.previewUrl || transmog.iconUrl;
-    const showPlaceholder = !imageUrl || imageError;
+    const imageUrl = sources[sourceIndex];
+    const showPlaceholder = !imageUrl;
     const qualityColor = useMemo(() => getQualityColor(transmog.quality), [transmog.quality]);
 
     // Memoize style object

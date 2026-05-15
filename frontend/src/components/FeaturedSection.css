@@ -135,3 +135,65 @@
         align-self: flex-end;
     }
 }
+
+@media (max-width: 480px) {
+    /* On a 375px viewport the 280px cards left almost no peek of the next
+       card — the right edge of one card was clipped hard against the
+       container edge. Narrower cards + smaller gap gives ~90px peek so
+       swipeability is visually obvious without rough cropping. */
+    .featured-section {
+        padding: 32px 16px;
+    }
+
+    .featured-scroll-container {
+        gap: 12px;
+        /* Extra right padding lets the trailing card breathe past the
+           container edge instead of getting sliced. */
+        padding: 10px 16px 30px 4px;
+    }
+
+    .featured-item-wrapper {
+        min-width: 220px;
+        max-width: 220px;
+    }
+
+    /* Force the vertical card layout inside this carousel — the global
+       TransmogCard <600px rule switches the card to a horizontal "row" tile
+       optimized for Catalog's list view. In a 220px-wide carousel cell that
+       horizontal layout crams the title and badges into ~120px and clips
+       them. Restore the desktop column layout for these tiles only. */
+    .featured-item-wrapper .transmog-card {
+        flex-direction: column;
+        height: auto;
+    }
+    .featured-item-wrapper .transmog-card-image-container {
+        width: 100%;
+        min-width: 0;
+        /* Use aspect-ratio (not padding-top) — the global mobile rule zeroed
+           padding-top, and the image inside is sized by height:100% which
+           needs a real container height to anchor to. aspect-ratio gives
+           the container a real intrinsic height the img can fill. */
+        aspect-ratio: 3 / 4;
+        height: auto;
+        padding-top: 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px 12px 0 0;
+    }
+    .featured-item-wrapper .transmog-card-image,
+    .featured-item-wrapper .transmog-card-placeholder {
+        border-radius: 12px 12px 0 0;
+    }
+    .featured-item-wrapper .transmog-card-content {
+        padding: 12px 14px 14px;
+    }
+    .featured-item-wrapper .transmog-name {
+        font-size: 0.92rem;
+        line-height: 1.25;
+    }
+    .featured-item-wrapper .class-badge,
+    .featured-item-wrapper .expansion-badge {
+        font-size: 0.62rem;
+        padding: 2px 7px;
+    }
+}

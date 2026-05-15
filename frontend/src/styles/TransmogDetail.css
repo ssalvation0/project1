@@ -743,17 +743,26 @@
 @media (max-width: 860px) {
   .detail-top-section {
     grid-template-columns: 1fr;
+    /* Reset the desktop min/max height so the grid can grow with content
+       (image stacks above info instead of side-by-side in fixed track). */
+    min-height: 0;
+    max-height: none;
   }
 
   .detail-image-wrapper {
-    max-height: 380px;
-    aspect-ratio: 13/22;
-    margin: 0 auto;
+    /* `aspect-ratio + max-width` alone collapses to 0×0 inside grid because
+       browsers need an explicit width (or height) to anchor the ratio.
+       Setting width:100% + max-width gives the wrapper room to size up. */
+    width: 100%;
     max-width: 220px;
+    aspect-ratio: 13/22;
+    max-height: 380px;
+    margin: 0 auto;
   }
 
   .detail-info-wrapper {
     padding: 24px 24px 28px;
+    height: auto;
   }
 
   .detail-title {
@@ -770,6 +779,23 @@
   .detail-items-section,
   .similar-sets-section {
     padding: 24px 16px;
+  }
+
+  /* Section headers (Set Guide / Set Components / Similar Sets) wrap with
+     the icon floating on the left and text spanning the rest. Without
+     min-width:0 + flex-wrap, the icon "block-floats" relative to wrapped
+     lines and the second line of text dives back under it. */
+  .guide-section h3,
+  .detail-items-section h3,
+  .similar-sets-section h3 {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+  .guide-section h3 > svg,
+  .detail-items-section h3 > svg,
+  .similar-sets-section h3 > svg {
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   .detail-info-wrapper {

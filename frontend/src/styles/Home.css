@@ -556,8 +556,12 @@
     font-size: 2rem;
   }
 
+  /* Keep two columns on phone — single-column layout would mean scrolling
+     through 14 class cards individually, which the user flagged as tedious.
+     Two narrow tiles fit nicely on a 375px viewport. */
   .cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 
@@ -668,8 +672,12 @@
     font-size: 2rem;
   }
 
+  /* Keep two columns on phone — single-column layout would mean scrolling
+     through 14 class cards individually, which the user flagged as tedious.
+     Two narrow tiles fit nicely on a 375px viewport. */
   .cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 
@@ -780,7 +788,16 @@
 
 @media (max-width: 600px) {
   .hero-subtitle { margin: 14px auto 24px; padding: 0 12px; }
-  .hero-stats { gap: 20px 32px; margin-top: 32px; }
+  /* Force a 3-column grid so the three stat tiles sit perfectly aligned on
+     phone. The earlier flex+wrap layout produced uneven 2+1 wrapping when
+     the items had slightly different widths (e.g. "3,800+" vs "21"). */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 8px;
+    margin-top: 32px;
+    padding: 0 12px;
+  }
   .hero-stats strong { font-size: 1.2rem; }
   .hero-stats span { font-size: 0.7rem; letter-spacing: 0.14em; }
 }

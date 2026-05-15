@@ -9,9 +9,22 @@ function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  // Swap the search placeholder length based on viewport width so the long
+  // hint doesn't get clipped on phones. We listen to a `matchMedia` query
+  // instead of resize because it fires only when crossing the breakpoint.
+  const [isCompactSearch, setIsCompactSearch] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
+  );
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const onChange = (e) => setIsCompactSearch(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   const initials = user?.name
     ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -79,7 +92,10 @@ function Header() {
             <input
               type="text"
               className="global-search-input"
-              placeholder="Search class, armor type, color..."
+              // Long placeholder helps discover the kind of queries the site
+              // accepts on desktop. On phone (<= 640px) we don't have room
+              // for it — `useResponsivePlaceholder` swaps to the short version.
+              placeholder={isCompactSearch ? 'Search…' : 'Search class, armor type, color…'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search transmogs"
@@ -100,7 +116,14 @@ function Header() {
                   <span className="login-btn-initials">{initials}</span>
                 )
               ) : (
-                'Sign up / Login'
+                // Two labels — full on desktop, compact on mobile. CSS toggles
+                // visibility via `.login-btn__label--mobile-only` so we avoid
+                // text wrapping into two lines on narrow screens. aria-label
+                // (set above) still announces "Sign up or login" to AT users.
+                <>
+                  <span className="login-btn__label login-btn__label--desktop">Sign up / Login</span>
+                  <span className="login-btn__label login-btn__label--mobile">Login</span>
+                </>
               )}
             </button>
 

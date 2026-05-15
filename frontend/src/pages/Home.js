@@ -301,7 +301,7 @@ function Home() {
           </h1>
           <p className="hero-subtitle">
             Browse 3,800+ sets across every expansion. Save collections,
-            rate your favorites, and get AI-generated farming guides for each set.
+            rate your favorites, and find farming sources for every set.
           </p>
           <div className="hero-buttons">
             <button className="hero-btn primary btn-ripple btn-ripple-dark" onClick={navigateToCatalog}>
@@ -314,7 +314,6 @@ function Home() {
           <ul className="hero-stats" aria-label="Site stats">
             <li><strong>3,800+</strong><span>Sets</span></li>
             <li><strong>21</strong><span>Expansions</span></li>
-            <li><strong>AI</strong><span>Farming guides</span></li>
             <li><strong>Free</strong><span>Forever</span></li>
           </ul>
         </div>
